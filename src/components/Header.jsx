@@ -23,15 +23,15 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
   }, []); // 빈 배열은 이 효과가 마운트 시 한 번 실행되고 언마운트 시 정리됨을 의미
 
   const handleLogoClick = () => {
-    if (isMobile) {
-      setIsMobileMenuOpen(!isMobileMenuOpen); // 모바일에서 로고 클릭 시 메뉴 가시성 토글
-    } else {
-      onNavigate('home'); // 데스크탑에서는 홈으로 이동
+    onNavigate('home', null); // 항상 홈 페이지로 이동하며 스크롤 타겟 초기화 (상단으로 이동)
+    if (isMobileMenuOpen) { // 모바일 메뉴가 열려있었다면 닫기
+      setIsMobileMenuOpen(false);
     }
   };
 
-  const handleMenuItemClick = (page) => {
-    onNavigate(page); // 선택한 페이지로 이동
+  // handleMenuItemClick 함수를 수정하여 sectionId를 선택적으로 받을 수 있도록 합니다.
+  const handleMenuItemClick = (page, sectionId = null) => {
+    onNavigate(page, sectionId); // 선택한 페이지와 sectionId로 이동 요청
     if (isMobile) {
       setIsMobileMenuOpen(false); // 모바일에서 메뉴 항목 선택 후 메뉴 닫기
     }
@@ -44,10 +44,12 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
         {/* isMobile이 true이고 isMobileMenuOpen도 true일 때 'main-nav-mobile-open' 클래스 추가 */}
         <nav className={`main-nav ${isMobile && isMobileMenuOpen ? 'main-nav-mobile-open' : ''}`}>
           <ul>
-            <li onClick={() => handleMenuItemClick('about')}>협회소개</li>
-            <li onClick={() => handleMenuItemClick('services')}>주요 서비스</li>
+            {/* '협회소개' 클릭 시 'about-intro-section'으로 스크롤 이동하도록 수정 */}
+            <li onClick={() => handleMenuItemClick('about', 'about-intro-section')}>협회소개</li>
+            <li onClick={() => handleMenuItemClick('services')}>주요 서비스</li> {/* 'services'로 페이지 이동 요청 */}
             <li onClick={() => handleMenuItemClick('project')}>프로젝트</li>
             <li onClick={() => handleMenuItemClick('employment')}>취업</li>
+            <li onClick={() => handleMenuItemClick('community')}>커뮤니티</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
             <li onClick={() => handleMenuItemClick('download')}>다운로드</li>
           </ul>
         </nav>

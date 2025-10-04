@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // assets 폴더의 이미지들을 임포트합니다. 실제 파일명과 경로에 맞게 수정해주세요.
 import heroBannerBg from '../assets/hero-banner-bg.jpg';
 import iconLegal from '../assets/icon-legal.png';
@@ -7,7 +7,7 @@ import iconTech from '../assets/icon-tech.png';
 import iconEthics from '../assets/icon-ethics.png';
 import aiDevChallengeBg from '../assets/ai dev challenge.png'; // 새로운 배경 이미지 임포트
 
-function HomePage({ onSignupClick }) {
+function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNavigate }) { // onNavigate prop 추가
   const [openQuestionId, setOpenQuestionId] = useState(null); // FAQ를 위한 상태 관리
 
   const faqData = [
@@ -32,6 +32,20 @@ function HomePage({ onSignupClick }) {
     setOpenQuestionId(openQuestionId === id ? null : id); // 현재 열린 질문과 같으면 닫고, 아니면 해당 질문을 엽니다.
   };
 
+  // scrollToSectionId prop이 변경될 때 해당 섹션으로 스크롤하는 useEffect
+  useEffect(() => {
+    if (scrollToSectionId) {
+      const element = document.getElementById(scrollToSectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        // 스크롤이 완료되면 부모 컴포넌트에 알림
+        if (onScrollComplete) {
+          onScrollComplete();
+        }
+      }
+    }
+  }, [scrollToSectionId, onScrollComplete]); // 의존성 배열에 onScrollComplete 추가
+
   return (
     <> {/* React Fragment를 사용하여 여러 최상위 요소를 반환 */}
       {/* 상단 배너/슬라이더 - 이제 home-page-container 밖으로 이동하여 전체 너비를 차지 */}
@@ -50,11 +64,11 @@ function HomePage({ onSignupClick }) {
         <section className="section-intro">
           <h3>AIDEV는 누구인가?</h3>
           <p>한국 인공지능 개발자 협회(AIDEV)는 AI 개발자들의 전문성 강화와 공정한 생태계 조성을 위해 다양한 활동을 펼치고 있습니다. 우리는 법률 지원, 사업/경력 기회 제공, 기술 역량 강화, AI 윤리 및 신뢰 구축을 통해 AI 산업 발전에 기여합니다.</p>
-          <button className="detail-button" onClick={() => console.log('협회 소개 페이지로 이동')}>자세히 보기</button>
+          <button className="detail-button" onClick={() => onNavigate('about')}>자세히 보기</button> {/* 'about' 페이지로 이동하도록 수정 */}
         </section>
 
-        {/* 주요 서비스 소개 */}
-        <section className="section-services">
+        {/* 주요 서비스 소개 - id 추가 */}
+        <section className="section-services" id="services-section"> {/* ID 추가 */}
           <h3>주요 서비스</h3>
           <div className="service-cards">
             <div className="service-card">

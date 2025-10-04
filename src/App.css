@@ -279,7 +279,7 @@
 }
 
 .home-page-container section {
-  padding: 4rem 0;
+  padding: 2rem 0; /* 4rem 0 에서 1/2로 줄임 */
   border-bottom: 1px solid #eeeeee;
 }
 
@@ -481,6 +481,124 @@
   line-height: 1.4;
 }
 
+/* AboutPage Styles */
+.about-page-container {
+  /* home-page-container와 동일한 스타일을 적용하여 일관성을 유지 */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.about-page-container section {
+  padding: 2rem 0; /* 4rem 0 에서 1/2로 줄임 */
+  border-bottom: 1px solid #eeeeee;
+}
+
+.about-page-container section:last-child {
+  border-bottom: none;
+}
+
+/* 협회소개 상세페이지의 첫 번째 섹션 (section-about-problems) 상단 패딩 조정 */
+.about-page-container .section-about-problems {
+  padding-top: 1rem; /* 기존 2rem에서 1/2로 줄임 */
+}
+
+/* "대한민국 AI 개발자 및 산업은 다음과 같은 복합적인 문제에 직면해 있습니다." 텍스트 스타일 */
+.about-problems-intro-text {
+  font-size: 1.2em; /* 한 단계 크게 */
+  font-weight: bold; /* bold 체로 변경 */
+  margin-bottom: 1rem; /* 아래쪽 마진 조정 */
+}
+
+.about-page-container h3 {
+  font-size: 2.2em;
+  color: #333333;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.about-page-container h4 {
+  font-size: 1.8em;
+  color: #333333;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.about-page-container p,
+.about-page-container ul {
+  font-size: 1.1em;
+  line-height: 1.6;
+  color: #555555;
+  margin-bottom: 1rem;
+  max-width: 800px; /* 텍스트 너비 제한 */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left; /* 텍스트 좌측 정렬 */
+}
+
+.about-page-container ul {
+  list-style-type: disc; /* 기본 디스크 목록 */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px; /* 목록 들여쓰기 */
+}
+
+.about-page-container ul ul { /* 중첩된 목록 들여쓰기 */
+  list-style-type: circle;
+  padding-left: 20px;
+}
+
+.about-page-container li {
+  margin-bottom: 0.5rem;
+}
+
+/* New AboutPage Banner Styles */
+.about-page-banner {
+  position: relative;
+  width: 100%;
+  min-height: 250px; /* 배너 높이 조정 */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+.about-page-banner .banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 오버레이 색상 */
+  z-index: 1;
+}
+
+.about-page-banner .banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+.about-page-banner .banner-content h2 {
+  font-size: 3.5em; /* 크기 조정 */
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.about-page-banner .banner-content p {
+  font-size: 1.3em; /* 크기 조정 */
+  margin-bottom: 0;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -566,12 +684,12 @@
   }
 
   .home-page-container section {
-    padding: 2rem 1rem; /* 모바일에서 섹션 내부 패딩 조정 */
+    padding: 1rem 1rem; /* 모바일에서 섹션 내부 패딩 조정 (2rem 1rem 에서 1/2로 줄임) */
   }
 
   /* .section-intro padding for mobile */
   .section-intro {
-    padding: 1.2rem 1rem; /* 60% of 2rem (top/bottom) */
+    padding: 0.6rem 1rem; /* 1.2rem 1rem 에서 1/2로 줄임 */
   }
 
   .service-cards {
@@ -599,6 +717,47 @@
   .footer-info p {
     font-size: 0.9em;
     text-align: left; /* 모바일에서도 좌측 정렬 유지 */
+  }
+
+  /* Responsive adjustments for AboutPage */
+  .about-page-container {
+    padding: 0 1rem;
+  }
+  .about-page-container section {
+    padding: 1rem 1rem; /* 2rem 1rem 에서 1/2로 줄임 */
+  }
+  /* 협회소개 상세페이지의 첫 번째 섹션 (section-about-problems) 상단 패딩 조정 - 모바일 */
+  .about-page-container .section-about-problems {
+    padding-top: 0.5rem; /* 기존 1rem에서 1/2로 줄임 */
+  }
+  .about-problems-intro-text {
+    font-size: 1.1em; /* 모바일에서 크기 조정 */
+  }
+  .about-page-container h3 {
+    font-size: 2em;
+  }
+  .about-page-container h4 {
+    font-size: 1.6em;
+  }
+  .about-page-container p,
+  .about-page-container ul {
+    font-size: 1em;
+    padding-left: 15px; /* 모바일에서 목록 들여쓰기 조정 */
+  }
+
+  /* Responsive adjustments for AboutPage Banner */
+  .about-page-banner {
+    min-height: 150px;
+    padding: 2rem 1rem;
+  }
+  .about-page-banner .banner-content h2 {
+    font-size: 2.5em;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .about-page-banner .banner-content p {
+    font-size: 1.1em;
   }
 }
 
@@ -634,12 +793,12 @@
     padding: 0 0.5rem; /* 더 작은 모바일에서 home-page-container의 수평 패딩 조정 */
   }
   .home-page-container section {
-    padding: 1.5rem 0.5rem; /* 더 작은 모바일에서 섹션 내부 패딩 조정 */
+    padding: 0.75rem 0.5rem; /* 더 작은 모바일에서 섹션 내부 패딩 조정 (1.5rem 0.5rem 에서 1/2로 줄임) */
   }
 
   /* .section-intro padding for smaller mobile */
   .section-intro {
-    padding: 0.9rem 0.5rem; /* 60% of 1.5rem (top/bottom) */
+    padding: 0.45rem 0.5rem; /* 0.9rem 0.5rem 에서 1/2로 줄임 */
   }
 
   /* Challenge banner responsive */
@@ -658,5 +817,46 @@
   .footer-info p {
     font-size: 0.85em;
     text-align: left; /* 모바일에서도 좌측 정렬 유지 */
+  }
+
+  /* Responsive adjustments for AboutPage */
+  .about-page-container {
+    padding: 0 0.5rem;
+  }
+  .about-page-container section {
+    padding: 0.75rem 0.5rem; /* 더 작은 모바일에서 섹션 내부 패딩 조정 (1.5rem 0.5rem 에서 1/2로 줄임) */
+  }
+  /* 협회소개 상세페이지의 첫 번째 섹션 (section-about-problems) 상단 패딩 조정 - 더 작은 모바일 */
+  .about-page-container .section-about-problems {
+    padding-top: 0.375rem; /* 기존 0.75rem에서 1/2로 줄임 */
+  }
+  .about-problems-intro-text {
+    font-size: 1em; /* 더 작은 모바일에서 크기 조정 */
+  }
+  .about-page-container h3 {
+    font-size: 1.8em;
+  }
+  .about-page-container h4 {
+    font-size: 1.4em;
+  }
+  .about-page-container p,
+  .about-page-container ul {
+    font-size: 0.95em;
+    padding-left: 10px; /* 더 작은 모바일에서 목록 들여쓰기 조정 */
+  }
+
+  /* Responsive adjustments for AboutPage Banner */
+  .about-page-banner {
+    min-height: 100px;
+    padding: 1.5rem 1rem;
+  }
+  .about-page-banner .banner-content h2 {
+    font-size: 2em;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .about-page-banner .banner-content p {
+    font-size: 0.9em;
   }
 }
