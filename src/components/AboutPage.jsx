@@ -31,8 +31,9 @@ function AboutPage({ scrollToSectionId, onScrollComplete }) { // scrollToSection
 
       {/* 첫 번째 콘텐츠 컨테이너 */}
       <div className="about-page-container content-area-container">
+        <br />
+        <strong>대한민국 AI 개발자 및 산업은 다음과 같은 복합적인 문제에 직면해 있습니다.</strong>
         <section className="section-about-problems">
-          <p className="about-problems-intro-text">대한민국 AI 개발자 및 산업은 다음과 같은 복합적인 문제에 직면해 있습니다.</p>
           <ul>
             <li><strong>개발자 권익 보호의 사각지대:</strong> 기존의 노동법 체계는 프리랜서, 계약직, 스타트업 소속이 많은 AI 개발자들의 다양한 고용 형태를 포괄하지 못하고 있습니다. 이로 인해 불공정한 계약, 부당한 처우, 임금 체불 등의 문제에 효과적으로 대응하기 어렵습니다.</li>
             <li><strong>만연한 불공정 계약 및 법적 분쟁:</strong> SW 산업의 고질적인 다단계 하도급 구조는 개발자들에게 부당한 계약 조건과 책임을 전가하는 문제를 낳고 있습니다. 특히 무형의 결과물을 다루는 SW 개발의 특성상 요구사항 변경, 품질 검수, 하자 보수 과정에서 법적 분쟁이 끊이지 않으며, 개인이나 소규모 기업은 비용 부담으로 인해 적절한 법적 대응을 포기하는 경우가 많습니다.</li>
