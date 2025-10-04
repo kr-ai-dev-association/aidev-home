@@ -1,0 +1,79 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* 밝은 테마로 기본 설정 */
+  color-scheme: light; /* light 테마만 명시 */
+  color: #213547; /* 어두운 글자색 */
+  background-color: #ffffff; /* 밝은 배경색 */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* html, body, #root가 전체 뷰포트를 차지하도록 설정 */
+html, body, #root {
+  height: 100%; /* 뷰포트 높이 100% */
+  width: 100%;  /* 뷰포트 너비 100% */
+  margin: 0;    /* 기본 마진 제거 */
+  padding: 0;   /* 기본 패딩 제거 */
+}
+
+a {
+  font-weight: 500;
+  color: #007BFF; /* 포인트 색상 변경 */
+  text-decoration: inherit;
+}
+a:hover {
+  color: #0056B3; /* 호버 색상 변경 */
+}
+
+body {
+  /* display: flex; /* .app-container가 flexbox를 사용하여 레이아웃을 관리하므로, body의 flex 속성은 제거 */ */
+  min-width: 320px;
+  /* place-items: center; /* App.css의 .app-container가 중앙 정렬을 담당하므로, 여기서는 제거 */ */
+  /* min-height: 100vh; 는 위에서 height: 100%로 대체되었습니다. */
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid #ccc; /* 밝은 테마에 맞게 테두리색 변경 */
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f9f9f9; /* 밝은 테마에 맞게 버튼 배경색 변경 */
+  color: #213547; /* 밝은 테마에 맞게 버튼 글자색 변경 */
+  cursor: pointer;
+  transition: border-color 0.25s, background-color 0.25s;
+}
+button:hover {
+  border-color: #007BFF; /* 포인트 색상 변경 */
+  background-color: #e0e0e0; /* 호버 시 배경색 변경 */
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* prefers-color-scheme: light 미디어 쿼리는 이제 기본 설정이 light이므로 제거하거나 재조정 */
+/* @media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+} */
