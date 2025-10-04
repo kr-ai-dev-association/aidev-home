@@ -40,7 +40,11 @@ function DownloadPage({ scrollToSectionId, onScrollComplete }) {
           <img src={ideImage} alt="IDE Interface" className="ide-inline-image" /> {/* 클래스 변경 */}
 
           <h4>🤖 AI 기반 코드 어시스턴스: 지능적인 개발 동반자</h4>
-          <p>이 어시스턴스의 핵심은 바로 강력한 AI 엔진에 있습니다.</p>
+          {/* 지원 모델 계열 추가 */}
+          <ul>
+            <li><strong>지원 모델 계열:</strong></li>
+            Google Gemini, Gemma, CodeLlama, qwen 2.5 coder, DeepSeek R1 등 다양한 최신 AI 모델 지원
+          </ul>
           <ul>
             <li><strong>멀티모델 AI 지원:</strong> 단순히 하나의 AI에 의존하는 시대는 지났습니다. Google의 최첨단 LLM인 Gemini 2.5 Pro Flash는 지능적인 코드 생성과 분석의 정점을 보여주며, Ollama 통합을 통해 로컬 환경에서도 강력한 AI 처리가 가능합니다. 여기에 Gemma3:27b (128K 토큰), DeepSeek R1:70B (200K 토큰), 그리고 코드 생성에 최적화된 <strong>CodeLlama 7B (8K 토큰)</strong>까지, 개발 목적에 맞춰 최적의 모델을 선택할 수 있는 유연성을 제공합니다. 특히 DeepSeek R1:70B는 한국어에 최적화되어 국내 개발자들에게 희소식이 될 것입니다.</li>
             <li><strong>동적 모델 선택:</strong> 클라우드 기반 모델과 로컬 Ollama 서버 간의 전환이 설정에서 자유롭게 이루어져, 인터넷 연결 여부와 관계없이 최고의 AI 지원을 받을 수 있습니다.</li>
@@ -51,7 +55,6 @@ function DownloadPage({ scrollToSectionId, onScrollComplete }) {
           </ul>
 
           <h4>📁 고급 파일 관리: 프로젝트를 내 손안에</h4>
-          <p>프로젝트 관리의 복잡성을 해소하고 개발 흐름을 끊김 없이 이어갈 수 있도록 강력한 파일 관리 기능이 탑재되었습니다.</p>
           <ul>
             <li><strong>스마트 파일 선택:</strong> @ 버튼 하나로 특정 파일을 선택해 AI에 맥락으로 제공할 수 있습니다.</li>
             <li><strong>CODE 탭의 전체 파일 작업:</strong> 'CODE' 탭에서는 맥락 인식 코드 생성 및 수정을 위해 프로젝트의 전체 파일을 AI가 이해하고 작업할 수 있습니다.</li>
@@ -64,12 +67,34 @@ function DownloadPage({ scrollToSectionId, onScrollComplete }) {
           </ul>
 
           <h4>🖼️ 시각적 코드 분석: 이제 AI가 스크린샷도 이해한다!</h4>
-          <p>코드 디버깅과 분석의 새로운 지평이 열렸습니다.</p>
           <ul>
             <li><strong>이미지 지원:</strong> 코드 분석 및 디버깅을 위해 이미지를 업로드할 수 있습니다. 더 이상 복잡한 에러 메시지를 일일이 설명할 필요가 없습니다.</li>
             <li><strong>드래그&amp;드롭 인터페이스:</strong> 클립보드 붙여넣기 또는 드래그&amp;드롭으로 이미지를 손쉽게 첨부할 수 있습니다.</li>
             <li><strong>시각적 맥락:</strong> AI가 스크린샷, 다이어그램, 그리고 심지어 코드 이미지를 분석하여 문제의 원인을 파악하고 해결책을 제시합니다.</li>
           </ul>
+        </section>
+
+        {/* 새로운 섹션: 다운로드 버튼 및 GitHub 링크 */}
+        <section className="section-download-actions">
+          <h3>AIDEV-IDE 지금 바로 다운로드 및 자세히 보기</h3>
+          <div className="download-button-group">
+            <a
+              href="https://github.com/kr-ai-dev-association/aidev-ide/blob/main/release/codepilot-3.0.0.vsix"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="download-action-button download-button"
+            >
+              AIDEV-IDE 다운로드
+            </a>
+            <a
+              href="https://github.com/kr-ai-dev-association/aidev-ide/blob/main/README.ko.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="download-action-button github-link-button"
+            >
+              GitHub에서 자세히 보기
+            </a>
+          </div>
         </section>
       </div>
     </>

@@ -551,6 +551,8 @@
 
 .about-page-container li {
   margin-bottom: 0.5rem;
+  margin-left: 10px; /* ul의 padding-left와 동일하게 li도 들여쓰기 */
+  max-width: calc(800px - 10px); /* li 내용이 ul 너비를 넘지 않도록 조정 */
 }
 
 /* New AboutPage Banner Styles */
@@ -657,6 +659,81 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
 }
 
+/* DownloadPage ul/li specific styles for consistent indentation */
+.download-page-container ul {
+  list-style-type: disc;
+  margin-left: auto; /* 중앙 정렬 유지 */
+  margin-right: auto; /* 중앙 정렬 유지 */
+  padding-left: 3px; /* 10px -> 3px (1/3 수준) */
+  max-width: 800px; /* 텍스트 너비 제한 */
+}
+
+.download-page-container ul ul {
+  list-style-type: circle;
+  padding-left: 3px; /* 중첩된 목록도 3px 들여쓰기 */
+}
+
+.download-page-container li {
+  margin-bottom: 0.5rem;
+  margin-left: 0; /* li 자체의 추가 들여쓰기 제거 */
+  /* li는 ul의 content box 내에서 100% 너비를 차지하므로 max-width 별도 설정 불필요 */
+}
+
+/* New styles for download buttons */
+.section-download-actions {
+  text-align: center;
+  padding: 4rem 0; /* 충분한 상하 패딩 */
+  border-top: 1px solid #eeeeee; /* 상단 구분선 */
+  margin-top: 2rem; /* 위쪽 여백 */
+}
+
+.section-download-actions h3 {
+  font-size: 2.2em;
+  color: #333333;
+  margin-bottom: 2rem;
+}
+
+.download-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem; /* 버튼 사이 간격 */
+  flex-wrap: wrap; /* 모바일에서 줄바꿈 */
+}
+
+.download-action-button {
+  padding: 1em 2em;
+  border-radius: 5px;
+  font-size: 1.2em;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-decoration: none; /* <a> 태그이므로 밑줄 제거 */
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  display: inline-flex; /* 텍스트와 아이콘이 있다면 정렬에 용이 */
+  align-items: center;
+  justify-content: center;
+  min-width: 200px; /* 최소 너비 설정 */
+}
+
+.download-button {
+  background-color: #28a745; /* 초록색 (성공/다운로드 느낌) */
+  color: white;
+}
+
+.download-button:hover {
+  background-color: #218838; /* 더 진한 초록색 */
+  transform: translateY(-2px);
+}
+
+.github-link-button {
+  background-color: #6a737d; /* GitHub 색상 (회색) */
+  color: white;
+}
+
+.github-link-button:hover {
+  background-color: #586069; /* 더 진한 회색 */
+  transform: translateY(-2px);
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -802,6 +879,10 @@
     font-size: 1em;
     padding-left: 10px; /* 모바일에서 목록 들여쓰기 조정 */
   }
+  .about-page-container li {
+    margin-left: 10px; /* 모바일에서도 li 들여쓰기 유지 */
+    max-width: calc(100% - 20px); /* 모바일에서 너비 조정 */
+  }
 
   /* Responsive adjustments for AboutPage Banner */
   .about-page-banner {
@@ -831,6 +912,34 @@
   }
   .download-page-banner .banner-content p {
     font-size: 1.1em; /* about-page-banner와 동일 */
+  }
+
+  /* Responsive adjustments for download buttons */
+  .section-download-actions {
+    padding: 2rem 1rem;
+    margin-top: 1rem;
+  }
+  .section-download-actions h3 {
+    font-size: 1.8em;
+    margin-bottom: 1.5rem;
+  }
+  .download-button-group {
+    flex-direction: column; /* 모바일에서는 세로로 쌓기 */
+    gap: 1rem;
+  }
+  .download-action-button {
+    width: 100%; /* 전체 너비 차지 */
+    min-width: unset; /* 최소 너비 제한 해제 */
+    font-size: 1.1em;
+    padding: 0.8em 1.5em;
+  }
+
+  /* Responsive adjustments for DownloadPage ul/li */
+  .download-page-container ul {
+    padding-left: 3px; /* 모바일에서도 동일하게 3px 적용 */
+  }
+  .download-page-container li {
+    margin-left: 0; /* 모바일에서도 li의 추가 들여쓰기 제거 */
   }
 }
 
@@ -917,6 +1026,10 @@
     font-size: 0.95em;
     padding-left: 5px; /* 더 작은 모바일에서 목록 들여쓰기 조정 */
   }
+  .about-page-container li {
+    margin-left: 5px; /* 더 작은 모바일에서도 li 들여쓰기 유지 */
+    max-width: calc(100% - 10px); /* 더 작은 모바일에서 너비 조정 */
+  }
 
   /* Responsive adjustments for AboutPage Banner */
   .about-page-banner {
@@ -946,5 +1059,27 @@
   }
   .download-page-banner .banner-content p {
     font-size: 0.9em; /* about-page-banner와 동일 */
+  }
+
+  /* Responsive adjustments for download buttons */
+  .section-download-actions {
+    padding: 1.5rem 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .section-download-actions h3 {
+    font-size: 1.5em;
+    margin-bottom: 1rem;
+  }
+  .download-action-button {
+    font-size: 1em;
+    padding: 0.7em 1.2em;
+  }
+
+  /* Responsive adjustments for DownloadPage ul/li */
+  .download-page-container ul {
+    padding-left: 2px; /* 더 작은 모바일에서 5px -> 2px */
+  }
+  .download-page-container li {
+    margin-left: 0; /* 더 작은 모바일에서도 li의 추가 들여쓰기 제거 */
   }
 }
