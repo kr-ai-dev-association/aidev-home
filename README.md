@@ -1,16 +1,122 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# AIDEV (한국인공지능개발자협회) 홈페이지
 
-Currently, two official plugins are available:
+이 프로젝트는 한국인공지능개발자협회(AIDEV)의 공식 웹사이트입니다. React 기반으로 구축되었으며, 협회의 소개, 주요 서비스, 최신 소식, 자주 묻는 질문 등의 정보를 제공하고, 회원 가입 및 로그인 기능을 포함합니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 주요 기능
 
-## React Compiler
+*   **협회 소개**: AIDEV의 비전, 목표, 활동에 대한 상세 정보 제공.
+*   **주요 서비스**: 법률 지원, 사업/경력 기회, 기술 역량 강화, AI 윤리 및 신뢰 구축 등 핵심 서비스 소개.
+*   **최신 소식 및 공지사항**: 협회의 최신 뉴스, 이벤트, 공지사항 업데이트.
+*   **자주 묻는 질문 (FAQ)**: 사용자들의 일반적인 질문에 대한 답변을 아코디언 형태로 제공.
+*   **회원 관리**:
+    *   **회원가입**: 사용자 계정 생성 기능.
+    *   **로그인/로그아웃**: 사용자 인증 및 세션 관리.
+    *   **마이페이지**: 로그인한 사용자를 위한 개인 정보 및 활동 관리 (기본 UI만 구현됨).
+*   **반응형 디자인**: 모바일, 태블릿, 데스크톱 등 다양한 화면 크기에서 최적화된 사용자 경험 제공. (모바일 환경에서 상단 메뉴는 로고 클릭 시 드롭다운으로 표시)
+*   **페이지 네비게이션**: 협회 소개, 주요 서비스, 프로젝트, 취업, 다운로드 등 다양한 페이지로 이동할 수 있는 메뉴.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 설치 및 실행 방법
 
-## Expanding the ESLint configuration
+이 프로젝트를 로컬 환경에서 설정하고 실행하려면 다음 단계를 따르세요.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 전제 조건
+
+*   Node.js (버전 18 이상 권장)
+*   npm (Node.js 설치 시 자동으로 포함됨)
+
+### 1. 저장소 클론 (Clone Repository)
+
+먼저, 프로젝트 저장소를 로컬 컴퓨터로 클론합니다.
+
+```bash
+git clone [프로젝트_저장소_URL]
+cd [프로젝트_폴더명]
+```
+
+### 2. 의존성 설치 (Install Dependencies)
+
+프로젝트 폴더로 이동한 후, 필요한 모든 Node.js 패키지를 설치합니다.
+
+```bash
+npm install
+```
+
+### 3. 개발 서버 실행 (Run Development Server)
+
+개발 모드로 애플리케이션을 실행합니다. 이 명령어는 개발 서버를 시작하고, 코드가 변경될 때마다 자동으로 새로고침합니다.
+
+```bash
+npm run dev
+```
+
+성공적으로 실행되면, 터미널에 표시된 `http://localhost:[포트번호]` (일반적으로 `http://localhost:5173`) 주소로 웹 브라우저를 통해 접속할 수 있습니다.
+
+### 4. 프로덕션 빌드 (Build for Production)
+
+배포를 위해 애플리케이션을 빌드하려면 다음 명령어를 사용합니다. 이 명령어는 최적화된 정적 파일을 `dist` 폴더에 생성합니다.
+
+```bash
+npm run build
+```
+
+### 5. 빌드된 애플리케이션 미리보기 (Preview Production Build)
+
+빌드된 프로덕션 버전을 로컬에서 미리 보려면 다음 명령어를 사용합니다.
+
+```bash
+npm run preview
+```
+
+## 프로젝트 구조
+
+```
+.
+├── public/
+│   └── vite.svg           # Vite 로고 (기본)
+├── src/
+│   ├── assets/            # 이미지 및 기타 미디어 파일
+│   │   ├── ai dev challenge.png
+│   │   ├── hero-banner-bg.jpg
+│   │   ├── icon-career.png
+│   │   ├── icon-ethics.png
+│   │   ├── icon-legal.png
+│   │   └── icon-tech.png
+│   ├── components/        # 재사용 가능한 React 컴포넌트
+│   │   ├── App.jsx        # 메인 애플리케이션 로직 및 라우팅
+│   │   ├── Footer.jsx     # 푸터 컴포넌트
+│   │   ├── Header.jsx     # 헤더 컴포넌트 (모바일 메뉴 포함)
+│   │   ├── HomePage.jsx   # 홈 페이지 컨텐츠 (FAQ 아코디언 포함)
+│   │   ├── LoginPage.jsx  # 로그인 페이지
+│   │   └── SignupPage.jsx # 회원가입 페이지
+│   ├── App.css            # 전역 및 컴포넌트별 CSS 스타일
+│   ├── index.css          # 기본 CSS 스타일 (전역)
+│   └── main.jsx           # React 애플리케이션 엔트리 포인트
+├── .eslintrc.cjs          # ESLint 설정 파일
+├── index.html             # HTML 템플릿
+├── package.json           # 프로젝트 메타데이터 및 의존성
+├── package-lock.json      # 정확한 의존성 버전 잠금
+└── vite.config.js         # Vite 설정 파일
+```
+
+## 사용 기술
+
+*   **React**: UI 구축을 위한 JavaScript 라이브러리.
+*   **Vite**: 빠르고 가벼운 개발 서버 및 번들러.
+*   **CSS**: 스타일링.
+
+## 기여 방법
+
+기여에 관심이 있다면, 다음 단계를 따르세요:
+
+1.  이 저장소를 포크(Fork)합니다.
+2.  새로운 브랜치를 생성합니다 (`git checkout -b feature/새로운-기능`).
+3.  변경 사항을 커밋합니다 (`git commit -am 'feat: 새로운 기능 추가'`).
+4.  브랜치를 푸시합니다 (`git push origin feature/새로운-기능`).
+5.  풀 리퀘스트(Pull Request)를 생성합니다.
+
+## 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요. (현재 `LICENSE` 파일은 없으므로 필요 시 추가할 수 있습니다.)
+
+---
