@@ -59,7 +59,7 @@ function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNaviga
       </section>
 
       {/* 협회 소개 요약 및 핵심 서비스는 첫 번째 home-page-container 안에 유지 */}
-      <div className="home-page-container">
+      <div className="home-page-container content-area-container">
         {/* 협회 소개 요약 */}
         <section className="section-intro">
           <h3>AIDEV는 누구인가?</h3>
@@ -108,7 +108,7 @@ function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNaviga
       </section>
 
       {/* 나머지 콘텐츠는 두 번째 home-page-container 안에 유지 */}
-      <div className="home-page-container">
+      <div className="home-page-container content-area-container">
         {/* 최신 소식/공지사항 */}
         <section className="section-news">
           <h3>최신 소식 및 공지사항</h3>

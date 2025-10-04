@@ -210,6 +210,19 @@
   color: #0056b3;
 }
 
+/* General reset for lists to remove browser default margins */
+ul, ol {
+  margin: 0;
+  /* Do NOT set padding:0 here, as we control it with more specific selectors */
+}
+
+/* Base container for consistent layout across pages */
+.content-area-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
 /* HomePage Styles */
 .hero-banner {
   position: relative;
@@ -272,12 +285,7 @@
   background-color: #e0a800;
 }
 
-.home-page-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
+/* .home-page-container now only contains home-specific section styling */
 .home-page-container section {
   padding: 2rem 0; /* 4rem 0 에서 1/2로 줄임 */
   border-bottom: 1px solid #eeeeee;
@@ -360,15 +368,55 @@
   margin-bottom: 1.5rem;
 }
 
-.section-news ul,
-.section-faq ul { /* .section-faq ul은 .faq-list와 함께 사용되므로 여기에 유지 */
-  list-style: none;
-  padding: 0;
-  max-width: 800px;
-  margin: 0 auto 2rem auto;
+/* --- Global List Styling within Content Areas (Unified) --- */
+/* This block applies to all ul/ol within .content-area-container (HomePage, AboutPage, DownloadPage) */
+.content-area-container ul,
+.content-area-container ol {
+  /* Remove auto margins and max-width that might center the list block itself */
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none; /* Allow list to take full width of its parent container */
+  
+  /* Desired list style and consistent left padding */
+  list-style-type: disc; /* Default for unordered lists */
+  padding-left: 1.5em; /* Consistent reduced left padding for all first-level lists */
+  text-align: left; /* Ensure list content aligns left, overriding any parent center alignment */
+  color: #555555; /* Re-apply text color */
+  line-height: 1.6; /* Re-apply line-height */
 }
 
-.section-news li { /* .section-faq li는 삭제하고 .faq-item으로 대체 */
+.content-area-container ol {
+  list-style-type: decimal; /* Default for ordered lists */
+}
+
+/* Nested lists get additional indentation and different bullet style */
+.content-area-container ul ul,
+.content-area-container ol ol,
+.content-area-container ul ol,
+.content-area-container ol ul {
+  padding-left: 1.5em; /* Additional indent for nested lists */
+  list-style-type: circle; /* For nested unordered lists */
+}
+
+/* Consistent styling for list items */
+.content-area-container li {
+  margin-bottom: 0.5rem; /* Spacing between list items */
+  margin-left: 0; /* Ensure no explicit margin-left on li itself */
+  max-width: none; /* Ensure li can take full width of its parent ul/ol */
+}
+
+/* --- HomePage specific list adjustments (Overrides for general rules) --- */
+/* News list: No bullets, no left padding, full width */
+.section-news ul {
+  list-style: none; /* Override general rule to remove bullets */
+  padding-left: 0; /* Override general rule to remove left padding */
+  margin-bottom: 2rem; /* Keep spacing after the news list block */
+  margin-left: 0; /* Ensure no auto margin from general rule */
+  margin-right: 0; /* Ensure no auto margin from general rule */
+}
+
+/* Re-apply style for news list items */
+.section-news li {
   background-color: #f9f9f9;
   padding: 1rem 1.5rem;
   margin-bottom: 1rem;
@@ -376,6 +424,15 @@
   color: #333333;
   font-size: 1.1em;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  text-align: left; /* Explicitly left align news items */
+}
+
+/* FAQ list: No bullets, no left padding, keep block centered */
+.faq-list { /* This targets .section-faq ul */
+  list-style: none; /* Override general rule to remove bullets */
+  padding-left: 0; /* Override general rule to remove left padding */
+  max-width: 800px; /* Keep centering the FAQ block */
+  margin: 0 auto 2rem auto; /* Keep centering the FAQ block */
 }
 
 /* FAQ Styles for animation */
@@ -482,13 +539,7 @@
 }
 
 /* AboutPage Styles */
-.about-page-container {
-  /* home-page-container와 동일한 스타일을 적용하여 일관성을 유지 */
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
+/* .about-page-container now applies .content-area-container for base layout */
 .about-page-container section {
   padding: 2rem 0; /* 4rem 0 에서 1/2로 줄임 */
   border-bottom: 1px solid #eeeeee;
@@ -525,34 +576,18 @@
   text-align: center;
 }
 
+/* --- AboutPage & DownloadPage specific paragraph styling (Keep centered text blocks) --- */
+/* Apply max-width and centering only to paragraphs that are meant to be text blocks */
 .about-page-container p,
-.about-page-container ul {
-  font-size: 1.1em;
-  line-height: 1.6;
-  color: #555555;
-  margin-bottom: 1rem;
-  max-width: 800px; /* 텍스트 너비 제한 */
+.download-page-container p {
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  text-align: left; /* 텍스트 좌측 정렬 */
-}
-
-.about-page-container ul {
-  list-style-type: disc; /* 기본 디스크 목록 */
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 10px; /* 기존 20px에서 10px로 줄임 */
-}
-
-.about-page-container ul ul { /* 중첩된 목록 들여쓰기 */
-  list-style-type: circle;
-  padding-left: 10px; /* 기존 20px에서 10px로 줄임 */
-}
-
-.about-page-container li {
-  margin-bottom: 0.5rem;
-  margin-left: 10px; /* ul의 padding-left와 동일하게 li도 들여쓰기 */
-  max-width: calc(800px - 10px); /* li 내용이 ul 너비를 넘지 않도록 조정 */
+  text-align: left;
+  font-size: 1.1em; /* Re-apply font-size */
+  line-height: 1.6; /* Re-apply line-height */
+  color: #555555; /* Re-apply text color */
+  margin-bottom: 1rem; /* Re-apply margin-bottom */
 }
 
 /* New AboutPage Banner Styles */
@@ -657,26 +692,6 @@
   margin: 2rem auto; /* 위아래 2rem, 좌우 자동 마진으로 중앙 정렬 */
   border-radius: 8px; /* 부드러운 모서리 */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-}
-
-/* DownloadPage ul/li specific styles for consistent indentation */
-.download-page-container ul {
-  list-style-type: disc;
-  margin-left: auto; /* 중앙 정렬 유지 */
-  margin-right: auto; /* 중앙 정렬 유지 */
-  padding-left: 3px; /* 10px -> 3px (1/3 수준) */
-  max-width: 800px; /* 텍스트 너비 제한 */
-}
-
-.download-page-container ul ul {
-  list-style-type: circle;
-  padding-left: 3px; /* 중첩된 목록도 3px 들여쓰기 */
-}
-
-.download-page-container li {
-  margin-bottom: 0.5rem;
-  margin-left: 0; /* li 자체의 추가 들여쓰기 제거 */
-  /* li는 ul의 content box 내에서 100% 너비를 차지하므로 max-width 별도 설정 불필요 */
 }
 
 /* New styles for download buttons */
@@ -814,8 +829,8 @@
     font-size: 1.2em;
   }
 
-  .home-page-container {
-    padding: 0 1rem; /* 모바일에서 home-page-container의 수평 패딩 조정 */
+  .content-area-container {
+    padding: 0 1rem; /* 모바일에서 content-area-container의 수평 패딩 조정 */
   }
 
   .home-page-container section {
@@ -855,9 +870,6 @@
   }
 
   /* Responsive adjustments for AboutPage */
-  .about-page-container {
-    padding: 0 1rem;
-  }
   .about-page-container section {
     padding: 1rem 1rem; /* 2rem 1rem 에서 1/2로 줄임 */
   }
@@ -874,15 +886,19 @@
   .about-page-container h4 {
     font-size: 1.6em;
   }
-  .about-page-container p,
-  .about-page-container ul {
-    font-size: 1em;
-    padding-left: 10px; /* 모바일에서 목록 들여쓰기 조정 */
+  /* .about-page-container p, .about-page-container ul will use general rules,
+     but p specific max-width/margin-auto is kept above. */
+  .content-area-container ul,
+  .content-area-container ol {
+    padding-left: 1em; /* Adjust for smaller screens */
   }
-  .about-page-container li {
-    margin-left: 10px; /* 모바일에서도 li 들여쓰기 유지 */
-    max-width: calc(100% - 20px); /* 모바일에서 너비 조정 */
+  .content-area-container ul ul,
+  .content-area-container ol ol,
+  .content-area-container ul ol,
+  .content-area-container ol ul {
+    padding-left: 1em; /* Adjust for smaller screens */
   }
+
 
   /* Responsive adjustments for AboutPage Banner */
   .about-page-banner {
@@ -933,14 +949,6 @@
     font-size: 1.1em;
     padding: 0.8em 1.5em;
   }
-
-  /* Responsive adjustments for DownloadPage ul/li */
-  .download-page-container ul {
-    padding-left: 3px; /* 모바일에서도 동일하게 3px 적용 */
-  }
-  .download-page-container li {
-    margin-left: 0; /* 모바일에서도 li의 추가 들여쓰기 제거 */
-  }
 }
 
 @media (max-width: 480px) {
@@ -971,8 +979,8 @@
     font-size: 1em;
   }
 
-  .home-page-container {
-    padding: 0 0.5rem; /* 더 작은 모바일에서 home-page-container의 수평 패딩 조정 */
+  .content-area-container {
+    padding: 0 0.5rem; /* 더 작은 모바일에서 content-area-container의 수평 패딩 조정 */
   }
   .home-page-container section {
     padding: 0.75rem 0.5rem; /* 더 작은 모바일에서 섹션 내부 패딩 조정 (1.5rem 0.5rem 에서 1/2로 줄임) */
@@ -1002,9 +1010,6 @@
   }
 
   /* Responsive adjustments for AboutPage */
-  .about-page-container {
-    padding: 0 0.5rem;
-  }
   .about-page-container section {
     padding: 0.75rem 0.5rem; /* 더 작은 모바일에서 섹션 내부 패딩 조정 (1.5rem 0.5rem 에서 1/2로 줄임) */
   }
@@ -1021,15 +1026,19 @@
   .about-page-container h4 {
     font-size: 1.4em;
   }
-  .about-page-container p,
-  .about-page-container ul {
-    font-size: 0.95em;
-    padding-left: 5px; /* 더 작은 모바일에서 목록 들여쓰기 조정 */
+  /* .about-page-container p, .about-page-container ul will use general rules,
+     but p specific max-width/margin-auto is kept above. */
+  .content-area-container ul,
+  .content-area-container ol {
+    padding-left: 0.75em; /* Adjust for smaller screens */
   }
-  .about-page-container li {
-    margin-left: 5px; /* 더 작은 모바일에서도 li 들여쓰기 유지 */
-    max-width: calc(100% - 10px); /* 더 작은 모바일에서 너비 조정 */
+  .content-area-container ul ul,
+  .content-area-container ol ol,
+  .content-area-container ul ol,
+  .content-area-container ol ul {
+    padding-left: 0.75em; /* Adjust for smaller screens */
   }
+
 
   /* Responsive adjustments for AboutPage Banner */
   .about-page-banner {
@@ -1073,13 +1082,5 @@
   .download-action-button {
     font-size: 1em;
     padding: 0.7em 1.2em;
-  }
-
-  /* Responsive adjustments for DownloadPage ul/li */
-  .download-page-container ul {
-    padding-left: 2px; /* 더 작은 모바일에서 5px -> 2px */
-  }
-  .download-page-container li {
-    margin-left: 0; /* 더 작은 모바일에서도 li의 추가 들여쓰기 제거 */
   }
 }

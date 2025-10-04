@@ -30,7 +30,7 @@ function DownloadPage({ scrollToSectionId, onScrollComplete }) {
       </section>
 
       {/* 첫 번째 콘텐츠 컨테이너 */}
-      <div className="download-page-container home-page-container">
+      <div className="download-page-container content-area-container">
         {/* section-ide-image 섹션 제거 */}
 
         <section className="section-ide-description">
@@ -42,10 +42,16 @@ function DownloadPage({ scrollToSectionId, onScrollComplete }) {
           <h4>🤖 AI 기반 코드 어시스턴스: 지능적인 개발 동반자</h4>
           {/* 지원 모델 계열 추가 */}
           <ul>
-            <li><strong>지원 모델 계열:</strong></li>
-            Google Gemini, Gemma, CodeLlama, qwen 2.5 coder, DeepSeek R1 등 다양한 최신 AI 모델 지원
-          </ul>
-          <ul>
+            <li>
+              <strong>지원 모델 계열:</strong>
+              <ul>
+                <li>Google Gemini</li>
+                <li>Gemma</li>
+                <li>CodeLlama</li>
+                <li>qwen 2.5 coder</li>
+                <li>DeepSeek R1 등 다양한 최신 AI 모델 지원</li>
+              </ul>
+            </li>
             <li><strong>멀티모델 AI 지원:</strong> 단순히 하나의 AI에 의존하는 시대는 지났습니다. Google의 최첨단 LLM인 Gemini 2.5 Pro Flash는 지능적인 코드 생성과 분석의 정점을 보여주며, Ollama 통합을 통해 로컬 환경에서도 강력한 AI 처리가 가능합니다. 여기에 Gemma3:27b (128K 토큰), DeepSeek R1:70B (200K 토큰), 그리고 코드 생성에 최적화된 <strong>CodeLlama 7B (8K 토큰)</strong>까지, 개발 목적에 맞춰 최적의 모델을 선택할 수 있는 유연성을 제공합니다. 특히 DeepSeek R1:70B는 한국어에 최적화되어 국내 개발자들에게 희소식이 될 것입니다.</li>
             <li><strong>동적 모델 선택:</strong> 클라우드 기반 모델과 로컬 Ollama 서버 간의 전환이 설정에서 자유롭게 이루어져, 인터넷 연결 여부와 관계없이 최고의 AI 지원을 받을 수 있습니다.</li>
             <li><strong>듀얼 모드 인터페이스:</strong> 개발자의 다양한 니즈를 충족시키기 위해 'CODE' 탭과 'ASK' 탭으로 나뉘어 있습니다. 'CODE' 탭은 코드 생성, 수정, 프로젝트 작업에 특화되어 있으며, 'ASK' 탭은 일반 Q&A 및 실시간 정보 질의에 최적화되어 있습니다.</li>

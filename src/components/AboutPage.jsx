@@ -30,7 +30,7 @@ function AboutPage({ scrollToSectionId, onScrollComplete }) { // scrollToSection
       </section>
 
       {/* 첫 번째 콘텐츠 컨테이너 */}
-      <div className="about-page-container home-page-container">
+      <div className="about-page-container content-area-container">
         <section className="section-about-problems">
           <p className="about-problems-intro-text">대한민국 AI 개발자 및 산업은 다음과 같은 복합적인 문제에 직면해 있습니다.</p>
           <ul>
@@ -52,7 +52,7 @@ function AboutPage({ scrollToSectionId, onScrollComplete }) { // scrollToSection
       </section>
 
       {/* 두 번째 콘텐츠 컨테이너 */}
-      <div className="about-page-container home-page-container">
+      <div className="about-page-container content-area-container">
         <section className="section-about-solutions">
           <ul>
             <li><strong>권익 보호 및 법률 지원:</strong> 협회 내 전문 법무팀을 통해 불공정 계약 검토, 법률 상담, 분쟁 조정 및 소송 지원 등 무료 법무 서비스를 제공하여 개발자들이 안정적인 환경에서 업무에 집중할 수 있도록 돕습니다.</li>
