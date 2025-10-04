@@ -5,6 +5,7 @@ import Header from './components/Header'; // Header 컴포넌트 임포트
 import HomePage from './components/HomePage'; // HomePage 컴포넌트 임포트
 import Footer from './components/Footer'; // Footer 컴포넌트 임포트
 import AboutPage from './components/AboutPage'; // AboutPage 컴포넌트 임포트
+import DownloadPage from './components/DownloadPage'; // DownloadPage 컴포넌트 임포트
 import './App.css';
 
 function App() {
@@ -20,6 +21,10 @@ function App() {
     } else if (page === 'about' && sectionId) { // 'about' 페이지로 이동하면서 특정 섹션으로 스크롤할 경우
       setCurrentPage('about');
       setScrollToSection(sectionId);
+    } else if (page === 'download' && sectionId) { // 'download' 페이지로 이동하면서 특정 섹션으로 스크롤할 경우
+      setCurrentPage('download');
+      setScrollToSection(sectionId);
+      console.log(`Navigating to DownloadPage with sectionId: ${sectionId}`); // 다운로드 페이지 이동 확인을 위한 로그 추가
     }
     else {
       setCurrentPage(page);
@@ -64,6 +69,14 @@ function App() {
         <AboutPage
           scrollToSectionId={scrollToSection} // AboutPage에 스크롤 타겟 전달
           onScrollComplete={handleScrollComplete} // AboutPage에 스크롤 완료 콜백 전달
+        />
+      );
+      break;
+    case 'download': // 'download' 페이지 케이스 추가
+      content = (
+        <DownloadPage
+          scrollToSectionId={scrollToSection} // DownloadPage에 스크롤 타겟 전달
+          onScrollComplete={handleScrollComplete} // DownloadPage에 스크롤 완료 콜백 전달
         />
       );
       break;

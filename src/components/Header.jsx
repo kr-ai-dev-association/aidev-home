@@ -50,7 +50,7 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
             <li onClick={() => handleMenuItemClick('project')}>프로젝트</li>
             <li onClick={() => handleMenuItemClick('employment')}>취업</li>
             <li onClick={() => handleMenuItemClick('community')}>커뮤니티</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
-            <li onClick={() => handleMenuItemClick('download')}>다운로드</li>
+            <li onClick={() => handleMenuItemClick('download', 'download-intro-section')}>다운로드</li> {/* '다운로드' 메뉴 아이템 추가 및 스크롤 타겟 설정 */}
           </ul>
         </nav>
       </div>
