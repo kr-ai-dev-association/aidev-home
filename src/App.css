@@ -541,12 +541,12 @@
   list-style-type: disc; /* 기본 디스크 목록 */
   margin-left: auto;
   margin-right: auto;
-  padding-left: 20px; /* 목록 들여쓰기 */
+  padding-left: 10px; /* 기존 20px에서 10px로 줄임 */
 }
 
 .about-page-container ul ul { /* 중첩된 목록 들여쓰기 */
   list-style-type: circle;
-  padding-left: 20px;
+  padding-left: 10px; /* 기존 20px에서 10px로 줄임 */
 }
 
 .about-page-container li {
@@ -599,6 +599,64 @@
   font-size: 1.3em; /* 크기 조정 */
   margin-bottom: 0;
 }
+
+/* New DownloadPage Banner Styles - about-page-banner와 유사하게 조정 */
+.download-page-banner {
+  position: relative;
+  width: 100%;
+  min-height: 250px; /* about-page-banner와 동일 */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 4rem 2rem; /* about-page-banner와 동일 */
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+.download-page-banner .banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* about-page-banner와 동일 */
+  z-index: 1;
+}
+
+.download-page-banner .banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+.download-page-banner .banner-content h2 {
+  font-size: 3.5em; /* about-page-banner와 동일 */
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.download-page-banner .banner-content p {
+  font-size: 1.3em; /* about-page-banner와 동일 */
+  margin-bottom: 0;
+}
+
+/* Inline image style for DownloadPage */
+.section-ide-description .ide-inline-image {
+  max-width: 100%;
+  height: auto;
+  display: block; /* 블록 요소로 만들어 위아래 여백을 가짐 */
+  margin: 2rem auto; /* 위아래 2rem, 좌우 자동 마진으로 중앙 정렬 */
+  border-radius: 8px; /* 부드러운 모서리 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -742,7 +800,7 @@
   .about-page-container p,
   .about-page-container ul {
     font-size: 1em;
-    padding-left: 15px; /* 모바일에서 목록 들여쓰기 조정 */
+    padding-left: 10px; /* 모바일에서 목록 들여쓰기 조정 */
   }
 
   /* Responsive adjustments for AboutPage Banner */
@@ -758,6 +816,21 @@
   }
   .about-page-banner .banner-content p {
     font-size: 1.1em;
+  }
+
+  /* Responsive adjustments for DownloadPage Banner */
+  .download-page-banner {
+    min-height: 150px; /* about-page-banner와 동일 */
+    padding: 2rem 1rem; /* about-page-banner와 동일 */
+  }
+  .download-page-banner .banner-content h2 {
+    font-size: 2.5em; /* about-page-banner와 동일 */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .download-page-banner .banner-content p {
+    font-size: 1.1em; /* about-page-banner와 동일 */
   }
 }
 
@@ -842,7 +915,7 @@
   .about-page-container p,
   .about-page-container ul {
     font-size: 0.95em;
-    padding-left: 10px; /* 더 작은 모바일에서 목록 들여쓰기 조정 */
+    padding-left: 5px; /* 더 작은 모바일에서 목록 들여쓰기 조정 */
   }
 
   /* Responsive adjustments for AboutPage Banner */
@@ -858,5 +931,20 @@
   }
   .about-page-banner .banner-content p {
     font-size: 0.9em;
+  }
+
+  /* Responsive adjustments for DownloadPage Banner */
+  .download-page-banner {
+    min-height: 100px; /* about-page-banner와 동일 */
+    padding: 1.5rem 1rem; /* about-page-banner와 동일 */
+  }
+  .download-page-banner .banner-content h2 {
+    font-size: 2em; /* about-page-banner와 동일 */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .download-page-banner .banner-content p {
+    font-size: 0.9em; /* about-page-banner와 동일 */
   }
 }

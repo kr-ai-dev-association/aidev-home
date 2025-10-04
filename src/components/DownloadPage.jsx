@@ -31,13 +31,13 @@ function DownloadPage({ scrollToSectionId, onScrollComplete }) {
 
       {/* 첫 번째 콘텐츠 컨테이너 */}
       <div className="download-page-container home-page-container">
-        <section className="section-ide-image">
-          <img src={ideImage} alt="IDE Interface" className="ide-full-image" />
-        </section>
+        {/* section-ide-image 섹션 제거 */}
 
         <section className="section-ide-description">
           <h3>코딩의 미래를 엿보다: AI 기반 개발의 혁신, Gemini 2.5 Pro Flash와 Ollama의 만남!</h3>
           <p>기술의 발전은 멈추지 않으며, 특히 소프트웨어 개발 분야는 AI의 등장으로 전에 없던 혁신을 맞이하고 있습니다. 오늘 우리는 이 모든 것을 한데 묶어 개발자에게 궁극의 생산성과 효율성을 선사할 새로운 AI 기반 코드 어시스턴스를 소개합니다. 이름하여, Gemini 2.5 Pro Flash와 Ollama 통합 코드 어시스턴스!</p>
+          {/* 요청된 위치에 이미지 삽입 */}
+          <img src={ideImage} alt="IDE Interface" className="ide-inline-image" /> {/* 클래스 변경 */}
 
           <h4>🤖 AI 기반 코드 어시스턴스: 지능적인 개발 동반자</h4>
           <p>이 어시스턴스의 핵심은 바로 강력한 AI 엔진에 있습니다.</p>
