@@ -19,13 +19,6 @@
   gap: 1rem;
 }
 
-/* .footer-logo { */
-/*   width: 80px; /* 로고 크기 조정 */ */
-/*   height: auto; */
-/*   margin-bottom: 1rem; /* 로고 아래 여백 */ */
-/*   /* filter: brightness(0) invert(1); /* 어두운 배경에 맞게 로고 색상 반전 (흰색으로) */ */
-/*   /* 로고가 제대로 표시되지 않는 경우, 위 필터 속성을 주석 처리하여 원래 로고 색상으로 표시되는지 확인합니다. */ */
-/* } */
 /* footer-logo 관련 스타일 삭제 */
 
 .footer-info p {
@@ -447,6 +440,7 @@
   color: #555555;
   line-height: 1.5;
   font-weight: bold; /* A 부분을 bold 체로 적용 */
+  text-align: left; /* 답변 내용 좌측 정렬 */
 }
 
 .section-news, .section-faq, .section-join-us {
@@ -497,33 +491,58 @@
   }
 
   .header-left {
-    flex-direction: column;
+    flex-direction: column; /* 로고와 네비게이션을 세로로 정렬 */
     align-items: flex-start;
-    margin-bottom: 1rem;
+    margin-bottom: 0; /* 드롭다운 메뉴를 위한 여백 제거 */
+    width: 100%; /* 전체 너비 차지 */
   }
 
   .logo {
     margin-right: 0;
     margin-bottom: 0.5rem;
+    width: 100%; /* 로고가 필요하면 전체 너비 차지 */
+    text-align: left; /* 로고 좌측 정렬 */
+  }
+
+  .main-nav {
+    width: 100%; /* 드롭다운 메뉴가 전체 너비 차지하도록 보장 */
+    max-height: 0; /* 초기에는 높이 없이 숨김 */
+    overflow: hidden;
+    transition: max-height 0.5s ease-out, opacity 0.5s ease-out; /* 애니메이션 효과 */
+    opacity: 0; /* 초기에는 투명하게 숨김 */
+    background-color: #f8f8f8; /* 드롭다운 메뉴 배경색 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* 은은한 그림자 효과 */
+    border-radius: 0 0 8px 8px; /* 하단 모서리 둥글게 */
+  }
+
+  .main-nav-mobile-open {
+    max-height: 300px; /* 모든 메뉴 항목이 펼쳐질 수 있도록 충분한 높이 설정 */
+    opacity: 1;
+    padding-bottom: 1rem; /* 메뉴 열릴 때 하단 패딩 추가 */
+    padding-top: 0.5rem; /* 메뉴 열릴 때 상단 패딩 추가 */
   }
 
   .main-nav ul {
-    flex-direction: column;
+    flex-direction: column; /* 메뉴 항목을 세로로 쌓기 */
     gap: 0.5rem;
+    padding: 0 1rem; /* 드롭다운 메뉴 내부 항목 패딩 */
+    margin: 0;
   }
 
   .main-nav li {
     font-size: 1.1em; /* 모바일에서는 원래 크기 유지 또는 약간 작게 조정 */
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee; /* 메뉴 항목 구분선 */
+  }
+  .main-nav li:last-child {
+    border-bottom: none; /* 마지막 항목은 구분선 없음 */
   }
 
   .header-right {
     width: 100%;
     justify-content: flex-start;
-  }
-
-  .utility-menu {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    margin-top: 1rem; /* 메인 네비게이션과 분리 */
+    /* 유틸리티 메뉴는 메인 네비게이션 아래에 계속 표시됨 */
   }
 
   .hero-banner {
@@ -577,9 +596,6 @@
     gap: 0.5rem;
     align-items: flex-start; /* 모바일에서도 좌측 정렬 유지 */
   }
-  /* .footer-logo { */
-  /*   margin-bottom: 0.5rem; */
-  /* } */
   .footer-info p {
     font-size: 0.9em;
     text-align: left; /* 모바일에서도 좌측 정렬 유지 */
