@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 // assets 폴더의 이미지들을 임포트합니다. 실제 파일명과 경로에 맞게 수정해주세요.
 import heroBannerBg from '../assets/hero-banner-bg.jpg';
 import iconLegal from '../assets/icon-legal.png';
@@ -8,6 +8,35 @@ import iconEthics from '../assets/icon-ethics.png';
 import aiDevChallengeBg from '../assets/ai dev challenge.png'; // 새로운 배경 이미지 임포트
 
 function HomePage({ onSignupClick }) {
+  const [openQuestionId, setOpenQuestionId] = useState(null); // FAQ를 위한 상태 관리
+
+  const faqData = [
+    {
+      id: 1,
+      question: 'Q: 법률 지원 서비스는 진짜 무료인가요?',
+      answer: 'A: 네. 모든 회원은 AIDEV 의 인공지능 법률 서비스를 무료로 이용하실 수 있습니다.',
+    },
+    {
+      id: 2,
+      question: 'Q: 고객과의 분쟁 조정 요청 시 어떤 지원을 해 주는 건가요?',
+      answer: 'A: 전담 법무팀이 구성되어 직접 회원님과 같이 고객과 대응하게 됩니다.',
+    },
+    {
+      id: 3,
+      question: 'Q: 그러면 회비는 얼마고 어떻게 내면 되나요?',
+      answer: 'A: 회비는 2만원이고 년 1회 아무때나 납부하시면 됩니다.',
+    },
+    {
+      id: 4,
+      question: 'Q: 무료 회원은 어떤 서비스를 받을 수 있나요?',
+      answer: 'A: 무료 회원은 전화 상담, AI 에이전트를 사용한 법률 상담, 취업 상담, 인공지능 기술 교육 및 지원 상담 등을 이용하실 수 있습니다.',
+    },
+  ];
+
+  const toggleQuestion = (id) => {
+    setOpenQuestionId(openQuestionId === id ? null : id); // 현재 열린 질문과 같으면 닫고, 아니면 해당 질문을 엽니다.
+  };
+
   return (
     <> {/* React Fragment를 사용하여 여러 최상위 요소를 반환 */}
       {/* 상단 배너/슬라이더 - 이제 home-page-container 밖으로 이동하여 전체 너비를 차지 */}
@@ -85,9 +114,25 @@ function HomePage({ onSignupClick }) {
         {/* 자주 묻는 질문 (FAQ) 일부 */}
         <section className="section-faq">
           <h3>자주 묻는 질문</h3>
-          <ul>
-            <li>Q: AIDEV 회원 가입은 어떻게 하나요?</li>
-            <li>Q: 법률 지원 서비스는 무료인가요?</li>
+          <ul className="faq-list"> {/* FAQ 리스트를 위한 클래스 추가 */}
+            {faqData.map((item) => (
+              <li key={item.id} className="faq-item">
+                <button
+                  className="faq-question"
+                  onClick={() => toggleQuestion(item.id)}
+                  aria-expanded={openQuestionId === item.id}
+                >
+                  {item.question}
+                  <span className="toggle-icon">{openQuestionId === item.id ? '▲' : '▼'}</span> {/* 아이콘 추가 */}
+                </button>
+                <div
+                  className={`faq-answer ${openQuestionId === item.id ? 'faq-answer-visible' : 'faq-answer-hidden'}`}
+                  aria-hidden={openQuestionId !== item.id}
+                >
+                  <p>{item.answer}</p>
+                </div>
+              </li>
+            ))}
           </ul>
           <button className="detail-button">더 보기</button>
         </section>

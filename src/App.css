@@ -368,15 +368,14 @@
 }
 
 .section-news ul,
-.section-faq ul {
+.section-faq ul { /* .section-faq ul은 .faq-list와 함께 사용되므로 여기에 유지 */
   list-style: none;
   padding: 0;
   max-width: 800px;
   margin: 0 auto 2rem auto;
 }
 
-.section-news li,
-.section-faq li {
+.section-news li { /* .section-faq li는 삭제하고 .faq-item으로 대체 */
   background-color: #f9f9f9;
   padding: 1rem 1.5rem;
   margin-bottom: 1rem;
@@ -386,12 +385,72 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
-.section-news, .section-faq, .section-join-us {
-  text-align: center;
+/* FAQ Styles for animation */
+.faq-item {
+  background-color: #f9f9f9;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden; /* max-height가 0일 때 내용을 숨기기 위해 중요 */
 }
 
-.section-join-us h3 {
-  margin-bottom: 2.5rem;
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background-color: #f9f9f9; /* 아이템 배경색과 동일 */
+  border: none;
+  text-align: left;
+  font-size: 1.1em;
+  font-weight: 600; /* 질문을 굵게 */
+  color: #333333;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.faq-question:hover {
+  background-color: #f0f0f0;
+}
+
+.faq-question .toggle-icon {
+  font-size: 0.9em;
+  margin-left: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.faq-question[aria-expanded="true"] .toggle-icon {
+  transform: rotate(180deg); /* 열릴 때 아이콘 회전 */
+}
+
+.faq-answer {
+  max-height: 0; /* 기본적으로 숨김 */
+  opacity: 0; /* 기본적으로 투명 */
+  overflow: hidden;
+  transition: max-height 0.5s ease-out, opacity 0.5s ease-out; /* 애니메이션 속성 */
+  background-color: #ffffff; /* 답변의 배경색 (질문과 다르게) */
+  padding: 0 1.5rem; /* 가로 패딩 유지 */
+  box-sizing: border-box;
+}
+
+.faq-answer-visible {
+  max-height: 200px; /* 답변 내용에 따라 충분히 큰 값으로 설정 */
+  opacity: 1;
+  padding-top: 1rem; /* 답변이 보일 때 상단 패딩 */
+  padding-bottom: 1rem; /* 답변이 보일 때 하단 패딩 */
+}
+
+.faq-answer p {
+  margin: 0; /* 단락 기본 마진 제거 */
+  font-size: 1em;
+  color: #555555;
+  line-height: 1.5;
+  font-weight: bold; /* A 부분을 bold 체로 적용 */
+}
+
+.section-news, .section-faq, .section-join-us {
+  text-align: center;
 }
 
 /* Challenge Banner Styles */
