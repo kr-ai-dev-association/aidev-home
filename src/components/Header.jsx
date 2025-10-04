@@ -7,11 +7,11 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
         <h1 className="logo" onClick={() => onNavigate('home')}>AIDEV</h1>
         <nav className="main-nav">
           <ul>
-            <li onClick={() => onNavigate('about')}>협회 소개</li>
+            <li onClick={() => onNavigate('about')}>협회소개</li>
             <li onClick={() => onNavigate('services')}>주요 서비스</li>
-            <li onClick={() => onNavigate('career')}>사업/경력</li>
-            {isLoggedIn && <li onClick={() => onNavigate('community')}>커뮤니티</li>}
-            <li onClick={() => onNavigate('support')}>고객지원</li>
+            <li onClick={() => onNavigate('project')}>프로젝트</li>
+            <li onClick={() => onNavigate('employment')}>취업</li>
+            <li onClick={() => onNavigate('download')}>다운로드</li>
           </ul>
         </nav>
       </div>

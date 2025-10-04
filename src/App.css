@@ -77,7 +77,8 @@
 }
 
 .main-nav li {
-  font-size: 1.1em;
+  font-size: 1.1em; /* 메뉴 항목 폰트 크기 */
+  font-weight: bold; /* bold 체 적용 */
   color: #333333;
   cursor: pointer;
   transition: color 0.2s ease-in-out;

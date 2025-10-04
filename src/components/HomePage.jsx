@@ -14,7 +14,7 @@ function HomePage({ onSignupClick }) {
       <section className="hero-banner" style={{ backgroundImage: `url(${heroBannerBg})` }}>
         <div className="banner-overlay"></div> {/* 배경 이미지 위에 텍스트 가독성을 위한 오버레이 추가 */}
         <div className="banner-content">
-          <h2>AI 개발자의 권익 보호와 산업의 미래를 열다</h2>
+          <h2>20만 AI 관련 종사자들의 자부심을 만들어 갑니다.</h2>
           <p>AIDEV는 AI 개발자들의 성장과 권리 보호를 위한 한국 대표 협회입니다.</p>
           <button className="cta-button" onClick={onSignupClick}>지금 가입하기</button>
         </div>
