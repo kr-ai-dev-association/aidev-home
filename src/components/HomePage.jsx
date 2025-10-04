@@ -23,11 +23,6 @@ function HomePage({ onSignupClick }) {
     },
     {
       id: 3,
-      question: 'Q: 그러면 회비는 얼마고 어떻게 내면 되나요?',
-      answer: 'A: 회비는 2만원이고 년 1회 아무때나 납부하시면 됩니다.',
-    },
-    {
-      id: 4,
       question: 'Q: 무료 회원은 어떤 서비스를 받을 수 있나요?',
       answer: 'A: 무료 회원은 전화 상담, AI 에이전트를 사용한 법률 상담, 취업 상담, 인공지능 기술 교육 및 지원 상담 등을 이용하실 수 있습니다.',
     },
@@ -58,32 +53,32 @@ function HomePage({ onSignupClick }) {
           <button className="detail-button" onClick={() => console.log('협회 소개 페이지로 이동')}>자세히 보기</button>
         </section>
 
-        {/* 핵심 서비스 소개 */}
+        {/* 주요 서비스 소개 */}
         <section className="section-services">
-          <h3>핵심 서비스</h3>
+          <h3>주요 서비스</h3>
           <div className="service-cards">
             <div className="service-card">
               <img src={iconLegal} alt="법률 지원 아이콘" className="service-icon" />
               <h4>법률 지원</h4>
-              <p>"불공정한 계약, 법적 분쟁 걱정 끝!"</p>
+              <p>"불공정한 계약, <br/>법적 분쟁 걱정 끝!"</p>
               <button className="detail-button">자세히 보기</button>
             </div>
             <div className="service-card">
               <img src={iconCareer} alt="사업/경력 기회 아이콘" className="service-icon" />
               <h4>사업/경력 기회</h4>
-              <p>"투명한 프로젝트 중개, 역경매 플랫폼"</p>
+              <p>"투명한 프로젝트 중개, <br/>역경매 플랫폼"</p>
               <button className="detail-button">자세히 보기</button>
             </div>
             <div className="service-card">
               <img src={iconTech} alt="기술 역량 강화 아이콘" className="service-icon" />
               <h4>기술 역량 강화</h4>
-              <p>"최신 기술 교육, 개발 인프라 지원"</p>
+              <p>"최신 기술 교육, <br/>개발 인프라 지원"</p>
               <button className="detail-button">자세히 보기</button>
             </div>
             <div className="service-card">
               <img src={iconEthics} alt="AI 윤리 및 신뢰 아이콘" className="service-icon" />
               <h4>AI 윤리 및 신뢰</h4>
-              <p>"AI 윤리 표준 선도, 검증 서비스"</p>
+              <p>"AI 윤리 표준 선도, <br/>검증 서비스"</p>
               <button className="detail-button">자세히 보기</button>
             </div>
           </div>
