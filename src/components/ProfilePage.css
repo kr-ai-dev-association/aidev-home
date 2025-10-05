@@ -216,11 +216,6 @@
 }
 
 .link-icon {
-  /* 기존 텍스트 아이콘 스타일 제거 */
-  /* font-size: 1.5em; */
-  /* color: #666; */
-  /* text-decoration: none; */
-  /* transition: color 0.2s ease-in-out; */
   display: inline-flex; /* 이미지를 중앙 정렬하기 위해 */
   align-items: center;
   justify-content: center;
@@ -229,7 +224,6 @@
 }
 
 .link-icon:hover {
-  /* color: #007bff; */
   transform: translateY(-2px); /* 호버 시 약간 위로 이동 */
 }
 
@@ -396,6 +390,38 @@
   margin-top: 1rem;
 }
 
+/* New styles for project links */
+.project-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.project-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; /* 아이콘 크기 */
+  height: 36px; /* 아이콘 크기 */
+  border-radius: 50%; /* 원형 배경 */
+  background-color: #f0f0f0; /* 배경색 */
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.project-link-icon:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.project-link-icon img {
+  width: 24px; /* 이미지 자체의 크기 */
+  height: 24px; /* 이미지 자체의 크기 */
+  object-fit: contain;
+  display: block; /* 이미지 정렬 개선 */
+  margin: auto; /* 이미지 정렬 개선 */
+}
+
+
 .more-options-button {
   background: none;
   border: none;
@@ -468,6 +494,9 @@
   .more-options-button {
     top: 0.5rem;
     right: 0.5rem;
+  }
+  .project-links {
+    justify-content: center; /* 모바일에서 중앙 정렬 */
   }
 }
 
