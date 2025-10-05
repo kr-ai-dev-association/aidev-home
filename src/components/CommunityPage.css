@@ -15,14 +15,12 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
 .community-tabs {
   display: flex;
   gap: 1rem;
+  margin-bottom: 1.5rem;
   border-bottom: 1px solid #eee;
   padding-bottom: 0.5rem;
 }
@@ -62,7 +60,6 @@
   display: flex;
   gap: 1rem;
   align-items: center;
-  flex-wrap: wrap; /* 모바일 대응 */
 }
 
 .community-search-bar .search-input {
@@ -71,7 +68,6 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1em;
-  min-width: 150px; /* 최소 너비 설정 */
 }
 
 .community-search-bar .search-button {
@@ -83,11 +79,6 @@
   font-size: 1em;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px; /* 검색 버튼 너비 고정 */
-  height: 44px; /* 검색 버튼 높이 고정 (input과 맞추기 위해) */
 }
 
 .community-search-bar .search-button:hover {
@@ -104,255 +95,180 @@
 .community-topics-list {
   flex: 1; /* 남은 공간 모두 차지 */
   min-width: 0; /* flex 아이템의 최소 너비 설정 */
-  display: flex;
-  flex-direction: column;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  overflow: hidden; /* border-radius 적용을 위해 */
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
 }
 
-.topic-header {
-  display: grid;
-  grid-template-columns: 50px 3fr 70px 70px 1.5fr; /* 아이콘, 제목, Voices, Posts, Last Post */
-  padding: 1rem 1.5rem;
-  background-color: #f8f8f8;
+.community-topics-list .topic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.8rem;
+  margin-bottom: 1rem;
   border-bottom: 1px solid #eee;
   font-weight: 600;
   color: #555;
+  font-size: 0.95em;
+}
+
+.community-topics-list .topic-header .header-item {
+  flex: 1;
   text-align: left;
 }
 
-.topic-header .header-item {
-  display: flex;
-  align-items: center;
+.community-topics-list .topic-header .header-item.topic-col {
+  flex: 4; /* 주제 컬럼 너비 조정 */
+  padding-left: 2.5rem; /* 아이콘 공간 고려 */
 }
 
-.topic-header .header-item.topic-col {
-  padding-left: 1rem; /* 아이콘과 텍스트 간격 */
+.community-topics-list .topic-header .header-item.voices-col {
+  flex: 0.8;
+  text-align: center;
+}
+
+.community-topics-list .topic-header .header-item.posts-col {
+  flex: 0.8;
+  text-align: center;
+}
+
+.community-topics-list .topic-header .header-item.last-updated-col {
+  flex: 1.5; /* 최근 업데이트 컬럼 너비 조정 */
+  text-align: right;
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
+  text-overflow: ellipsis; /* 넘치는 내용에 ... 표시 */
 }
 
 .topic-card {
-  display: grid;
-  grid-template-columns: 50px 3fr 70px 70px 1.5fr; /* topic-header와 동일 */
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  display: flex;
   align-items: center;
-  text-align: left;
+  padding: 1rem 0;
+  border-bottom: 1px dashed #eee;
+  cursor: pointer;
   transition: background-color 0.2s ease-in-out;
-}
-
-.topic-card:last-child {
-  border-bottom: none;
 }
 
 .topic-card:hover {
   background-color: #f9f9f9;
 }
 
+.topic-card:last-child {
+  border-bottom: none;
+}
+
 .topic-icon-col {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2em;
+  flex-shrink: 0;
+  width: 2.5rem; /* 아이콘을 위한 고정 너비 */
+  text-align: center;
   color: #6c5ce7;
+  font-size: 1.3em;
 }
 
 .topic-details-col {
-  padding-left: 1rem;
+  flex: 4; /* 주제 컬럼 너비 조정 */
+  text-align: left;
+  padding-right: 1rem;
 }
 
 .topic-title {
   font-size: 1.1em;
-  font-weight: bold;
+  font-weight: 600;
   color: #333;
   margin: 0 0 0.3rem 0;
-  line-height: 1.4;
 }
 
 .topic-pagination {
-  display: flex;
-  gap: 0.3rem;
-  font-size: 0.8em;
-  color: #888;
-  margin-bottom: 0.3rem;
+  display: inline-block;
+  margin-left: 0.5rem;
 }
 
 .topic-pagination .page-number {
-  background-color: #eee;
-  padding: 0.1em 0.5em;
+  background-color: #f0f2f5;
   border-radius: 3px;
+  padding: 0.2em 0.5em;
+  font-size: 0.8em;
+  color: #666;
+  margin-left: 0.3rem;
 }
 
 .topic-meta {
-  font-size: 0.9em;
+  font-size: 0.85em;
   color: #888;
   margin: 0;
 }
 
-.topic-author {
+.topic-author, .topic-category {
+  font-weight: 500;
   color: #6c5ce7;
-  font-weight: 600;
 }
 
-.topic-category {
-  color: #6c5ce7;
-  font-weight: 600;
-}
-
-.voices-col, .posts-col {
-  font-size: 1em;
-  color: #333;
+.voices-col {
+  flex: 0.8;
   text-align: center;
+  font-size: 1em;
+  color: #555;
 }
 
-.last-post-col {
+.posts-col {
+  flex: 0.8;
+  text-align: center;
+  font-size: 1em;
+  color: #555;
+}
+
+.last-updated-col {
+  flex: 1.5; /* 최근 업데이트 컬럼 너비 조정 */
+  text-align: right;
   font-size: 0.9em;
   color: #666;
-  text-align: right;
-  line-height: 1.3;
 }
 
-.last-post-author {
-  font-weight: 600;
+.last-updated-col .last-updated-time {
+  margin-bottom: 0.2em;
+  font-weight: 500;
   color: #333;
-  margin: 0;
 }
 
-.last-post-time {
-  color: #888;
-  margin: 0;
+.last-updated-col .last-updated-author {
+  color: #6c5ce7;
 }
 
 .community-pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 1.5rem;
   gap: 0.5rem;
-  border-top: 1px solid #eee;
-  background-color: #ffffff;
+  margin-top: 2rem;
 }
 
-.pagination-button, .pagination-arrow {
+.community-pagination .pagination-button,
+.community-pagination .pagination-arrow {
   background-color: #f0f2f5;
-  color: #555;
   border: 1px solid #ddd;
-  padding: 0.6em 1em;
   border-radius: 5px;
+  padding: 0.5em 1em;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
-.pagination-button:hover, .pagination-arrow:hover {
-  background-color: #e0e2e5;
-  color: #333;
-}
-
-.pagination-button.active {
+.community-pagination .pagination-button.active {
   background-color: #6c5ce7;
   color: white;
   border-color: #6c5ce7;
 }
 
-.pagination-button.active:hover {
-  background-color: #5a4acb;
-  border-color: #5a4acb;
-}
-
-.pagination-arrow {
-  padding: 0.6em 0.8em;
-}
-
-.pagination-arrow:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.community-pagination .pagination-button:hover:not(.active),
+.community-pagination .pagination-arrow:hover {
+  background-color: #e0e2e5;
+  border-color: #ccc;
 }
 
 .pagination-ellipsis {
-  padding: 0.6em 0.2em;
+  padding: 0.5em 0.5em;
   color: #888;
-  font-size: 1.1em;
-}
-
-.community-sidebar {
-  flex: 0 0 300px; /* 고정 너비 사이드바 */
-  position: sticky; /* 스크롤 시 고정 */
-  top: 80px; /* 헤더 높이만큼 아래로 */
-  align-self: flex-start; /* 사이드바만 상단에 고정 */
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-}
-
-.recent-topics-section h3 {
-  font-size: 1.4em;
-  color: #333;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
-
-.recent-topics-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.recent-topics-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95em;
-  color: #555;
-  cursor: pointer;
-  transition: color 0.2s ease-in-out;
-}
-
-.recent-topics-list li:hover {
-  color: #6c5ce7;
-}
-
-.recent-topics-list li:last-child {
-  border-bottom: none;
-}
-
-.topic-bullet {
-  color: #6c5ce7;
-  font-size: 1.1em;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.sidebar-footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #eee;
-}
-
-.sidebar-footer nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: center;
-}
-
-.sidebar-footer nav li {
-  font-size: 0.9em;
-  color: #888;
-  cursor: pointer;
-  transition: color 0.2s ease-in-out;
-}
-
-.sidebar-footer nav li:hover {
-  color: #6c5ce7;
 }
 
 /* Responsive adjustments */
@@ -362,23 +278,12 @@
     align-items: center;
   }
 
-  .community-sidebar {
-    width: 100%;
-    max-width: 600px;
-    position: static;
-    margin-bottom: 2rem;
-  }
-
   .community-topics-list {
     width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .community-page-container {
-    padding-top: 1.5rem;
-    padding-bottom: 3rem;
-  }
   .community-header {
     padding: 1rem 1.5rem;
     margin-bottom: 1.5rem;
@@ -391,81 +296,75 @@
     flex-direction: column;
     gap: 0.8rem;
   }
-  .community-search-bar .search-input {
-    width: 100%;
-    min-width: unset;
-  }
+  .community-search-bar .search-input,
   .community-search-bar .search-button {
     width: 100%;
-    height: auto; /* 높이 자동 조절 */
-    padding: 0.8em 1.2em; /* 패딩 유지 */
   }
 
-  .topic-header, .topic-card {
-    grid-template-columns: 50px 1fr 50px; /* 아이콘, 제목+메타, Voices/Posts/Last Post */
-    gap: 0.5rem;
-    padding: 1rem;
+  .community-topics-list {
+    padding: 1rem 1.5rem;
   }
-  .topic-header .topic-col {
-    grid-column: 2 / 3; /* 제목이 2번째 컬럼 차지 */
-  }
-  .topic-header .voices-col { grid-column: 3 / 4; }
-  .topic-header .posts-col { display: none; } /* Posts 숨김 */
-  .topic-header .last-post-col { display: none; } /* Last Post 숨김 */
 
+  .community-topics-list .topic-header {
+    font-size: 0.85em;
+  }
+
+  .community-topics-list .topic-header .header-item.topic-col {
+    flex: 3; /* 모바일에서 주제 컬럼 너비 조정 */
+    padding-left: 2rem;
+  }
+
+  .community-topics-list .topic-header .header-item.voices-col,
+  .community-topics-list .topic-header .header-item.posts-col {
+    flex: 0.8;
+  }
+
+  .community-topics-list .topic-header .header-item.last-updated-col {
+    flex: 1.5; /* 모바일에서 최근 업데이트 컬럼 너비 조정 유지 */
+  }
+
+  .topic-card {
+    padding: 0.8rem 0;
+  }
   .topic-icon-col {
-    grid-column: 1 / 2;
-    grid-row: 1 / span 2; /* 아이콘이 두 줄 차지 */
+    width: 2rem;
+    font-size: 1.1em;
   }
   .topic-details-col {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-    padding-left: 0;
+    flex: 3; /* 모바일에서 주제 컬럼 너비 조정 */
+    padding-right: 0.5rem;
   }
   .topic-title {
     font-size: 1em;
   }
-  .topic-pagination {
-    display: none; /* 모바일에서 페이지네이션 숨김 */
-  }
   .topic-meta {
-    font-size: 0.85em;
+    font-size: 0.8em;
   }
-  .voices-col {
-    grid-column: 3 / 4;
-    grid-row: 1 / 2;
+  .voices-col, .posts-col {
     font-size: 0.9em;
-    text-align: center;
   }
-  .posts-col, .last-post-col {
-    display: none; /* Posts, Last Post 숨김 */
+  .last-updated-col {
+    font-size: 0.8em;
+  }
+  .last-updated-col .last-updated-time,
+  .last-updated-col .last-updated-author {
+    white-space: nowrap; /* 줄바꿈 방지 */
+    overflow: hidden; /* 넘치는 내용 숨김 */
+    text-overflow: ellipsis; /* 넘치는 내용에 ... 표시 */
   }
 
   .community-pagination {
-    padding: 1rem;
+    margin-top: 1.5rem;
     gap: 0.3rem;
   }
-  .pagination-button, .pagination-arrow {
-    padding: 0.5em 0.8em;
+  .community-pagination .pagination-button,
+  .community-pagination .pagination-arrow {
+    padding: 0.4em 0.8em;
     font-size: 0.9em;
-  }
-
-  .community-sidebar {
-    padding: 1rem;
-  }
-  .recent-topics-section h3 {
-    text-align: center;
-  }
-  .sidebar-footer nav ul {
-    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .community-page-container {
-    padding-top: 1rem;
-    padding-bottom: 2rem;
-  }
   .community-header {
     padding: 0.8rem 1rem;
     margin-bottom: 1rem;
@@ -480,46 +379,62 @@
     padding: 0.7em 1em;
   }
 
-  .topic-header, .topic-card {
-    grid-template-columns: 40px 1fr 40px; /* 더 작은 아이콘과 Voices 컬럼 */
-    padding: 0.8rem;
+  .community-topics-list {
+    padding: 0.8rem 1rem;
   }
-  .topic-icon-col {
-    font-size: 1em;
-  }
-  .topic-title {
-    font-size: 0.95em;
-  }
-  .topic-meta {
+
+  .community-topics-list .topic-header {
     font-size: 0.8em;
   }
-  .voices-col {
-    font-size: 0.85em;
+
+  .community-topics-list .topic-header .header-item.topic-col {
+    flex: 2.5; /* 더 작은 모바일에서 주제 컬럼 너비 조정 */
+    padding-left: 1.5rem;
+  }
+
+  .community-topics-list .topic-header .header-item.voices-col,
+  .community-topics-list .topic-header .header-item.posts-col {
+    flex: 0.7;
+  }
+
+  .community-topics-list .topic-header .header-item.last-updated-col {
+    flex: 1.5; /* 더 작은 모바일에서 최근 업데이트 컬럼 너비 조정 유지 */
+  }
+
+  .topic-card {
+    padding: 0.6rem 0;
+  }
+  .topic-icon-col {
+    width: 1.5rem;
+    font-size: 1em;
+  }
+  .topic-details-col {
+    flex: 2.5; /* 더 작은 모바일에서 주제 컬럼 너비 조정 */
+    padding-right: 0.3rem;
+  }
+  .topic-title {
+    font-size: 0.9em;
+  }
+  .topic-meta {
+    font-size: 0.75em;
+  }
+  .voices-col, .posts-col {
+    font-size: 0.8em;
+  }
+  .last-updated-col {
+    font-size: 0.75em;
   }
 
   .community-pagination {
-    padding: 0.8rem;
+    margin-top: 1rem;
+    gap: 0.2rem;
   }
-  .pagination-button, .pagination-arrow {
-    padding: 0.4em 0.6em;
+  .community-pagination .pagination-button,
+  .community-pagination .pagination-arrow {
+    padding: 0.3em 0.6em;
     font-size: 0.8em;
   }
   .pagination-ellipsis {
-    font-size: 0.9em;
-  }
-
-  .community-sidebar {
-    padding: 0.8rem;
-  }
-  .recent-topics-section h3 {
-    font-size: 1.2em;
-    margin-bottom: 1rem;
-  }
-  .recent-topics-list li {
-    font-size: 0.85em;
-    padding: 0.6rem 0;
-  }
-  .sidebar-footer nav li {
-    font-size: 0.8em;
+    padding: 0.3em 0.3em;
   }
 }

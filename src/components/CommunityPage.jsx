@@ -11,10 +11,9 @@ const topicsData = [
     pages: [1, 2, 4, 5],
     startedBy: '세피로스',
     category: '벌집 테마',
-    voices: 2,
     posts: 63,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '1주 5일 전', // 삭제
+    lastUpdated: '1주 5일 전', // ADDED: 최근 업데이트 날짜
+    lastUpdatedBy: '앨리스', // ADDED: 최근 업데이트 작성자
   },
   {
     id: 2,
@@ -22,10 +21,9 @@ const topicsData = [
     pages: [1, 2],
     startedBy: '앨리스',
     category: '백패커스 클럽',
-    voices: 1,
     posts: 24,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '2주 3일 전', // 삭제
+    lastUpdated: '2주 3일 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 3,
@@ -33,10 +31,9 @@ const topicsData = [
     pages: [1, 2],
     startedBy: '앨리스',
     category: '백패커스 클럽',
-    voices: 1,
     posts: 19,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '1개월 2주 전', // 삭제
+    lastUpdated: '1개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 4,
@@ -44,10 +41,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '일반 토론',
-    voices: 1,
     posts: 1,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '5개월 3주 전', // 삭제
+    lastUpdated: '5개월 3주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 5,
@@ -55,10 +51,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '일반 토론',
-    voices: 1,
     posts: 1,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '5개월 3주 전', // 삭제
+    lastUpdated: '5개월 3주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 6,
@@ -66,10 +61,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '프로그래밍',
-    voices: 1,
     posts: 17,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '6개월 2주 전', // 삭제
+    lastUpdated: '6개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 7,
@@ -77,10 +71,9 @@ const topicsData = [
     pages: [1, 2],
     startedBy: '세피로스',
     category: '프로그래밍',
-    voices: 2,
     posts: 17,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '6개월 2주 전', // 삭제
+    lastUpdated: '6개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 8,
@@ -88,10 +81,9 @@ const topicsData = [
     pages: [1, 2],
     startedBy: '앨리스',
     category: '백패커스 클럽',
-    voices: 1,
     posts: 2,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '6개월 2주 전', // 삭제
+    lastUpdated: '6개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 9,
@@ -99,10 +91,9 @@ const topicsData = [
     pages: [1],
     startedBy: '앨리스',
     category: '벌집 테마',
-    voices: 1,
     posts: 10,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '6개월 4주 전', // 삭제
+    lastUpdated: '6개월 4주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 10,
@@ -110,10 +101,9 @@ const topicsData = [
     pages: [1, 2],
     startedBy: '세피로스',
     category: '일반 토론',
-    voices: 2,
     posts: 28,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '7개월 2주 전', // 삭제
+    lastUpdated: '7개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 11,
@@ -121,10 +111,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '백패커스 클럽',
-    voices: 1,
     posts: 1,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '8개월 전', // 삭제
+    lastUpdated: '8개월 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 12,
@@ -132,10 +121,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '벌집 테마',
-    voices: 1,
     posts: 4,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '9개월 2주 전', // 삭제
+    lastUpdated: '9개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 13,
@@ -143,10 +131,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '백패커스 클럽',
-    voices: 1,
     posts: 2,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '9개월 2주 전', // 삭제
+    lastUpdated: '9개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 14,
@@ -154,10 +141,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '기후 변화',
-    voices: 1,
     posts: 1,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '9개월 2주 전', // 삭제
+    lastUpdated: '9개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
   {
     id: 15,
@@ -165,10 +151,9 @@ const topicsData = [
     pages: [],
     startedBy: '앨리스',
     category: '백패커스 클럽',
-    voices: 1,
     posts: 1,
-    // lastPostAuthor: '앨리스', // 삭제
-    // lastPostTime: '10개월 2주 전', // 삭제
+    lastUpdated: '10개월 2주 전',
+    lastUpdatedBy: '앨리스',
   },
 ];
 
@@ -270,9 +255,8 @@ function CommunityPage({ isLoggedIn, onNavigate }) { // isLoggedIn, onNavigate p
         <div className="community-topics-list">
           <div className="topic-header">
             <div className="header-item topic-col">주제</div>
-            <div className="header-item voices-col">참여자</div>
             <div className="header-item posts-col">게시글</div>
-            {/* <div className="header-item last-post-col">마지막 게시글</div> */} {/* 삭제 */}
+            <div className="header-item last-updated-col">최근 업데이트</div> {/* ADDED: 최근 업데이트 컬럼 헤더 */}
           </div>
 
           {topicsData.map(topic => (
@@ -294,15 +278,12 @@ function CommunityPage({ isLoggedIn, onNavigate }) { // isLoggedIn, onNavigate p
                   <span className="topic-category">{topic.category}</span>
                 </p>
               </div>
-              <div className="voices-col">{topic.voices}</div>
               <div className="posts-col">{topic.posts}</div>
-              {/* 마지막 게시글 컬럼 삭제 */}
-              {/*
-              <div className="last-post-col">
-                <p className="last-post-author">{topic.lastPostAuthor}</p>
-                <p className="last-post-time">{topic.lastPostTime}</p>
+              {/* ADDED: 최근 업데이트 컬럼 내용 */}
+              <div className="last-updated-col">
+                <p className="last-updated-time">{topic.lastUpdated}</p>
+                <p className="last-updated-author">{topic.lastUpdatedBy}</p>
               </div>
-              */}
             </div>
           ))}
 
