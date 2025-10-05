@@ -7,6 +7,9 @@ import Footer from './components/Footer'; // Footer 컴포넌트 임포트
 import AboutPage from './components/AboutPage'; // AboutPage 컴포넌트 임포트
 import DownloadPage from './components/DownloadPage'; // DownloadPage 컴포넌트 임포트
 import ProfilePage from './components/ProfilePage'; // ProfilePage 컴포넌트 임포트
+import EmploymentPage from './components/EmploymentPage'; // EmploymentPage 컴포넌트 임포트
+import CommunityPage from './components/CommunityPage'; // CommunityPage 컴포넌트 임포트
+
 import './App.css';
 // AuthPage.css는 LoginPage와 SignupPage에서 직접 임포트하므로 여기서 제거
 // import './components/LoginPage.css'; // 이 줄은 제거됩니다.
@@ -85,6 +88,12 @@ function App() {
       break;
     case 'profile': // 'profile' 페이지 케이스 추가
       content = <ProfilePage />;
+      break;
+    case 'employment': // 'employment' 페이지 케이스 추가
+      content = <EmploymentPage isLoggedIn={isLoggedIn} onNavigate={handleNavigate} />;
+      break;
+    case 'community': // 'community' 페이지 케이스 추가
+      content = <CommunityPage isLoggedIn={isLoggedIn} onNavigate={handleNavigate} />;
       break;
     case 'home':
     default:

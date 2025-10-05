@@ -57,8 +57,8 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
             {/* '협회소개' 클릭 시 'about-intro-section'으로 스크롤 이동하도록 수정 */}
             <li onClick={() => handleMenuItemClick('about', 'about-intro-section')}>협회소개</li>
             <li onClick={() => handleMenuItemClick('services')}>주요 서비스</li> {/* 'services'로 페이지 이동 요청 */}
-            <li onClick={() => handleMenuItemClick('project')}>프로젝트</li>
-            <li onClick={() => handleMenuItemClick('employment')}>취업</li>
+            {/* <li onClick={() => handleMenuItemClick('project')}>프로젝트</li> */} {/* 프로젝트 메뉴 삭제 */}
+            <li onClick={() => handleMenuItemClick('employment')}>취업</li> {/* '취업' 메뉴 아이템 추가 */}
             <li onClick={() => handleMenuItemClick('community')}>커뮤니티</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
             <li onClick={() => handleMenuItemClick('download', 'download-intro-section')}>다운로드</li> {/* '다운로드' 메뉴 아이템 추가 및 스크롤 타겟 설정 */}
           </ul>

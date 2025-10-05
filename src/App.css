@@ -1127,3 +1127,9 @@ ul, ol {
 
 /* ProfilePage.css import */
 @import './components/ProfilePage.css';
+/* EmploymentPage.css import */
+@import './components/EmploymentPage.css';
+/* CommunityPage.css import */
+@import './components/CommunityPage.css';
+/* JobDetailPage.css import */
+@import './components/JobDetailPage.css';

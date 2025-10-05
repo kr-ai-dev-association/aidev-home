@@ -1,0 +1,501 @@
+/* src/components/TopicDetailPage.css */
+
+.topic-detail-page-container {
+  display: flex;
+  gap: 2rem;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  background-color: #f0f2f5; /* 전체 배경색 */
+  align-items: flex-start; /* 상단 정렬 */
+  flex-wrap: wrap; /* 모바일에서 줄바꿈 */
+}
+
+.topic-detail-main-content {
+  flex: 1; /* 남은 공간 모두 차지 */
+  min-width: 0; /* flex 아이템의 최소 너비 설정 */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.topic-breadcrumbs {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.topic-breadcrumbs span {
+  margin-right: 0.5em;
+}
+
+.topic-breadcrumbs span:not(:last-child)::after {
+  content: ' > ';
+  margin-left: 0.5em;
+  color: #ccc;
+}
+
+.topic-breadcrumbs .current-category {
+  font-weight: 600;
+  color: #6c5ce7; /* 보라색 계열 */
+}
+
+.topic-breadcrumbs .current-topic {
+  font-weight: 600;
+  color: #333;
+}
+
+.topic-summary-card {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.topic-tags {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.topic-tag {
+  background-color: #e0e2e5;
+  color: #555;
+  padding: 0.3em 0.8em;
+  border-radius: 4px;
+  margin-left: 0.5em;
+  display: inline-block;
+}
+
+.topic-stats {
+  font-size: 1em;
+  color: #555;
+  line-height: 1.5;
+}
+
+.topic-stats strong {
+  color: #333;
+}
+
+.last-updated-author {
+  font-weight: 600;
+  color: #6c5ce7;
+}
+
+.topic-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.post-card {
+  display: flex;
+  background-color: #fcfcfc;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+}
+
+.post-author-info {
+  flex-shrink: 0;
+  width: 150px; /* 고정 너비 */
+  padding: 1rem;
+  border-right: 1px solid #eee;
+  text-align: center;
+}
+
+.author-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.author-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 0.2rem 0;
+}
+
+.author-role {
+  font-size: 0.85em;
+  color: #888;
+  margin: 0;
+}
+
+.post-content-area {
+  flex-grow: 1;
+  padding: 1rem 1.5rem;
+  text-align: left;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.post-date {
+  font-size: 0.9em;
+  color: #888;
+}
+
+.post-number {
+  font-size: 1em;
+  font-weight: bold;
+  color: #6c5ce7;
+}
+
+.post-content p {
+  font-size: 1em;
+  line-height: 1.6;
+  color: #555;
+  margin: 0;
+}
+
+.topic-post-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.topic-post-pagination .pagination-button,
+.topic-post-pagination .pagination-arrow {
+  background-color: #f0f2f5;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0.5em 1em;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.topic-post-pagination .pagination-button.active {
+  background-color: #6c5ce7;
+  color: white;
+  border-color: #6c5ce7;
+}
+
+.topic-post-pagination .pagination-button:hover:not(.active),
+.topic-post-pagination .pagination-arrow:hover {
+  background-color: #e0e2e5;
+  border-color: #ccc;
+}
+
+.login-to-reply-section {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+}
+
+.login-message {
+  font-size: 1.1em;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.login-form-card {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  text-align: left;
+}
+
+.login-form-card h3 {
+  font-size: 1.5em;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.login-form-card .form-group {
+  margin-bottom: 1rem;
+}
+
+.login-form-card label {
+  display: block;
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.login-input {
+  width: calc(100% - 20px);
+  padding: 0.8em 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.form-group-checkbox {
+  display: flex;
+  align-items: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group-checkbox input {
+  margin-right: 0.5rem;
+}
+
+.form-group-checkbox label {
+  margin-bottom: 0;
+  font-size: 0.9em;
+  color: #555;
+  cursor: pointer;
+}
+
+.login-submit-button {
+  width: 100%;
+  background-color: #6c5ce7;
+  color: white;
+  padding: 0.8em 1.5em;
+  border-radius: 5px;
+  font-size: 1.1em;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.login-submit-button:hover {
+  background-color: #5a4acb;
+}
+
+
+/* Sidebar styles (from CommunityPage.css, adjusted for TopicDetailPage context) */
+.community-sidebar {
+  flex: 0 0 300px; /* 고정 너비 사이드바 */
+  position: sticky; /* 스크롤 시 고정 */
+  top: 80px; /* 헤더 높이만큼 아래로 */
+  align-self: flex-start; /* 사이드바만 상단에 고정 */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+.recent-topics-section h3 {
+  font-size: 1.4em;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.recent-topics-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-topics-list li {
+  font-size: 1em;
+  color: #555;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.topic-bullet {
+  margin-right: 0.5em;
+  color: #6c5ce7;
+  font-size: 1.1em;
+  line-height: 1; /* 아이콘과 텍스트의 세로 정렬 */
+}
+
+.sidebar-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.sidebar-footer nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.sidebar-footer nav li {
+  font-size: 0.9em;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.sidebar-footer nav li:hover {
+  color: #6c5ce7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .topic-detail-page-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .topic-detail-main-content {
+    width: 100%;
+  }
+
+  .community-sidebar {
+    width: 100%;
+    max-width: 600px; /* 사이드바 최대 너비 제한 */
+    position: static; /* sticky 해제 */
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .topic-detail-main-content {
+    padding: 1.5rem;
+  }
+  .topic-breadcrumbs {
+    font-size: 0.85em;
+  }
+  .topic-summary-card {
+    padding: 1rem;
+  }
+  .topic-stats {
+    font-size: 0.95em;
+  }
+  .post-card {
+    flex-direction: column;
+  }
+  .post-author-info {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+  }
+  .post-content-area {
+    padding: 1rem;
+  }
+  .post-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .post-number {
+    align-self: flex-end;
+  }
+  .login-to-reply-section {
+    padding: 1.5rem;
+  }
+  .login-form-card {
+    padding: 1rem;
+  }
+  .login-form-card h3 {
+    font-size: 1.3em;
+  }
+  .login-input {
+    width: calc(100% - 20px);
+  }
+  .login-submit-button {
+    font-size: 1em;
+  }
+  .community-sidebar {
+    padding: 1rem;
+  }
+  .recent-topics-section h3 {
+    font-size: 1.2em;
+  }
+  .sidebar-footer nav ul {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .topic-detail-main-content {
+    padding: 1rem;
+  }
+  .topic-breadcrumbs {
+    font-size: 0.8em;
+  }
+  .topic-summary-card {
+    padding: 0.8rem;
+  }
+  .topic-tag {
+    font-size: 0.8em;
+  }
+  .topic-stats {
+    font-size: 0.9em;
+  }
+  .post-author-info {
+    padding: 0.8rem;
+  }
+  .author-avatar {
+    width: 50px;
+    height: 50px;
+  }
+  .author-name {
+    font-size: 1em;
+  }
+  .author-role {
+    font-size: 0.8em;
+  }
+  .post-content-area {
+    padding: 0.8rem;
+  }
+  .post-date, .post-number {
+    font-size: 0.85em;
+  }
+  .post-content p {
+    font-size: 0.9em;
+  }
+  .login-to-reply-section {
+    padding: 1rem;
+  }
+  .login-message {
+    font-size: 1em;
+  }
+  .login-form-card h3 {
+    font-size: 1.1em;
+  }
+  .login-form-card label {
+    font-size: 0.85em;
+  }
+  .login-input {
+    font-size: 0.9em;
+  }
+  .form-group-checkbox label {
+    font-size: 0.85em;
+  }
+  .login-submit-button {
+    font-size: 0.9em;
+    padding: 0.7em 1.2em;
+  }
+  .community-sidebar {
+    padding: 0.8rem;
+  }
+  .recent-topics-section h3 {
+    font-size: 1.1em;
+  }
+  .recent-topics-list li {
+    font-size: 0.9em;
+  }
+  .sidebar-footer nav li {
+    font-size: 0.8em;
+  }
+}
