@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'; // useState와 useEffect 임포트
+import profilePlaceholder from '../assets/profile-placeholder.png'; // 프로필 이미지 임포트
 
 function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,10 +38,19 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
     }
   };
 
+  const handleMobileMenuToggle = () => { // 모바일 메뉴 토글 함수 추가
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <header className="main-header">
       <div className="header-left">
         <h1 className="logo" onClick={handleLogoClick}>AIDEV</h1>
+        {isMobile && ( // 모바일에서만 햄버거 버튼 렌더링
+          <button className="mobile-menu-toggle" onClick={handleMobileMenuToggle} aria-label="메뉴 토글">
+            {isMobileMenuOpen ? '✕' : '☰'} {/* 열림/닫힘 상태에 따라 아이콘 변경 */}
+          </button>
+        )}
         {/* isMobile이 true이고 isMobileMenuOpen도 true일 때 'main-nav-mobile-open' 클래스 추가 */}
         <nav className={`main-nav ${isMobile && isMobileMenuOpen ? 'main-nav-mobile-open' : ''}`}>
           <ul>
@@ -63,9 +73,15 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
             </>
           ) : (
             <>
+              {/* 로그인 후에는 프로필 이미지로 변경되며, 클릭 시 마이페이지(profile)로 이동 */}
+              <img
+                src={profilePlaceholder}
+                alt="Profile"
+                className="header-profile-image"
+                onClick={() => onNavigate('profile')} // 프로필 이미지 클릭 시 profile 페이지로 이동
+              />
+              {/* 로그아웃 버튼을 프로필 이미지 우측으로 이동 */}
               <button onClick={onLogoutClick} className="header-button">로그아웃</button>
-              {/* 마이페이지는 유틸리티 메뉴의 일부이므로, 메인 메뉴 닫기 로직을 적용하지 않음 */}
-              <button onClick={() => onNavigate('mypage')} className="header-button">마이페이지</button>
             </>
           )}
           <select className="lang-select">

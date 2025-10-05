@@ -1,0 +1,522 @@
+/* src/components/ProfilePage.css */
+
+.profile-page-container {
+  display: flex;
+  gap: 2rem;
+  padding-top: 2rem; /* 헤더 아래 여백 */
+  padding-bottom: 4rem; /* 푸터 위 여백 */
+  align-items: flex-start; /* 상단 정렬 */
+  flex-wrap: wrap; /* 모바일에서 줄바꿈 */
+}
+
+.profile-sidebar {
+  flex: 0 0 300px; /* 고정 너비 사이드바 */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  box-sizing: border-box;
+  position: sticky; /* 스크롤 시 고정 */
+  top: 80px; /* 헤더 높이만큼 아래로 */
+  align-self: flex-start; /* 사이드바만 상단에 고정 */
+}
+
+.profile-header-share {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.share-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  color: #666;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.share-icon::before {
+  content: '↗️'; /* 공유 아이콘 (임시) */
+}
+
+.profile-avatar-wrapper {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #f0f0f0;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.profile-status {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e6ffe6;
+  color: #28a745;
+  padding: 0.3em 0.8em;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5em;
+}
+
+.status-dot.available {
+  background-color: #28a745;
+}
+
+.profile-name {
+  font-size: 1.8em;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.contact-button {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  padding: 0.8em 1.5em;
+  border-radius: 5px;
+  font-size: 1.1em;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.contact-button:hover {
+  background-color: #0056b3;
+}
+
+.send-icon::before {
+  content: '✈️'; /* 이모지 아이콘 (임시) */
+}
+
+.profile-section {
+  padding: 1.5rem 0;
+  border-top: 1px solid #eee;
+}
+
+.profile-section:first-of-type {
+  border-top: none; /* 첫번째 섹션은 상단 테두리 없음 */
+  padding-top: 0;
+}
+
+.section-title {
+  font-size: 0.9em;
+  color: #888;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rate-info {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #007bff;
+  background-color: #e7f3ff;
+  border-radius: 5px;
+  padding: 0.5em 1em;
+  display: inline-block;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.badge-tag {
+  background-color: #e6ffe6;
+  color: #28a745;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-weight: 600;
+}
+
+.badge-icon {
+  width: 16px;
+  height: 16px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  display: inline-block;
+}
+
+.payment-icon::before {
+  content: '💵'; /* 임시 아이콘 */
+}
+.verified-icon::before {
+  content: '✅'; /* 임시 아이콘 */
+}
+
+.about-text {
+  font-size: 1em;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.about-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.about-details li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.95em;
+  color: #666;
+}
+
+.icon-location::before { content: '📍'; }
+.icon-time::before { content: '⏰'; }
+.icon-language::before { content: '🗣️'; }
+
+.links-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.link-icon {
+  /* 기존 텍스트 아이콘 스타일 제거 */
+  /* font-size: 1.5em; */
+  /* color: #666; */
+  /* text-decoration: none; */
+  /* transition: color 0.2s ease-in-out; */
+  display: inline-flex; /* 이미지를 중앙 정렬하기 위해 */
+  align-items: center;
+  justify-content: center;
+  width: 40px; /* 아이콘 크기 고정 */
+  height: 40px; /* 아이콘 크기 고정 */
+}
+
+.link-icon:hover {
+  /* color: #007bff; */
+  transform: translateY(-2px); /* 호버 시 약간 위로 이동 */
+}
+
+.social-link-image {
+  width: 100%; /* 부모 .link-icon에 맞춰 크기 조절 */
+  height: 100%; /* 부모 .link-icon에 맞춰 크기 조절 */
+  object-fit: contain; /* 비율 유지하며 컨테이너에 맞춤 */
+}
+
+
+.profile-main-content {
+  flex: 1; /* 남은 공간 모두 차지 */
+  min-width: 0; /* flex 아이템의 최소 너비 설정 */
+}
+
+.main-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.profile-tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.8em 1.5em;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease-in-out;
+}
+
+.tab-button:hover {
+  color: #333;
+}
+
+.tab-button.active {
+  color: #007bff;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; /* border-bottom 위에 오도록 */
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #007bff;
+  border-radius: 2px;
+}
+
+.add-project-section {
+  margin-bottom: 3rem;
+}
+
+.add-project-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: #f8f8f8;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: left;
+}
+
+.add-icon {
+  font-size: 2em;
+  color: #888;
+  background-color: #eee;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.add-text p {
+  margin: 0;
+  color: #555;
+  font-size: 1em;
+}
+
+.add-text p strong {
+  font-size: 1.1em;
+  color: #333;
+}
+
+.import-content-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.95em;
+  padding: 0;
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  text-decoration: underline;
+}
+
+.import-icon::before {
+  content: '🔗'; /* 임시 아이콘 */
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.project-card {
+  display: flex;
+  gap: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  align-items: flex-start;
+  position: relative;
+}
+
+.project-image {
+  flex-shrink: 0;
+  width: 200px; /* 이미지 너비 고정 */
+  height: 150px; /* 이미지 높이 고정 */
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+}
+
+.project-details {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.project-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.8rem;
+}
+
+.project-description {
+  font-size: 0.95em;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.project-card .tags-container {
+  margin-top: 1rem;
+}
+
+.more-options-button {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  color: #888;
+  cursor: pointer;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .profile-page-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    max-width: 600px; /* 사이드바 최대 너비 제한 */
+    position: static; /* sticky 해제 */
+    margin-bottom: 2rem;
+  }
+
+  .profile-main-content {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-sidebar {
+    padding: 1.5rem;
+  }
+  .profile-name {
+    font-size: 1.5em;
+  }
+  .contact-button {
+    font-size: 1em;
+  }
+  .main-title {
+    font-size: 2em;
+  }
+  .tab-button {
+    padding: 0.6em 1em;
+    font-size: 1em;
+  }
+  .add-project-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .project-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .project-image {
+    width: 100%;
+    max-width: 300px; /* 모바일에서 이미지 최대 너비 */
+    height: 180px; /* 모바일에서 이미지 높이 조정 */
+    margin-bottom: 1rem;
+  }
+  .project-title {
+    font-size: 1.3em;
+  }
+  .project-description {
+    font-size: 0.9em;
+  }
+  .more-options-button {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-sidebar {
+    padding: 1rem;
+  }
+  .profile-name {
+    font-size: 1.3em;
+  }
+  .contact-button {
+    font-size: 0.9em;
+  }
+  .main-title {
+    font-size: 1.8em;
+    margin-bottom: 1.5rem;
+  }
+  .profile-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .tab-button {
+    font-size: 0.9em;
+    padding: 0.5em 0.8em;
+  }
+  .add-project-card {
+    padding: 1.5rem;
+  }
+  .add-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.8em;
+  }
+  .add-text p {
+    font-size: 0.9em;
+  }
+  .add-text p strong {
+    font-size: 1em;
+  }
+  .import-content-button {
+    font-size: 0.85em;
+  }
+  .project-card {
+    padding: 1rem;
+  }
+  .project-title {
+    font-size: 1.2em;
+  }
+  .project-description {
+    font-size: 0.85em;
+  }
+}

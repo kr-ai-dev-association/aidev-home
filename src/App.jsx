@@ -6,6 +6,7 @@ import HomePage from './components/HomePage'; // HomePage 컴포넌트 임포트
 import Footer from './components/Footer'; // Footer 컴포넌트 임포트
 import AboutPage from './components/AboutPage'; // AboutPage 컴포넌트 임포트
 import DownloadPage from './components/DownloadPage'; // DownloadPage 컴포넌트 임포트
+import ProfilePage from './components/ProfilePage'; // ProfilePage 컴포넌트 임포트
 import './App.css';
 // AuthPage.css는 LoginPage와 SignupPage에서 직접 임포트하므로 여기서 제거
 // import './components/LoginPage.css'; // 이 줄은 제거됩니다.
@@ -81,6 +82,9 @@ function App() {
           onScrollComplete={handleScrollComplete} // DownloadPage에 스크롤 완료 콜백 전달
         />
       );
+      break;
+    case 'profile': // 'profile' 페이지 케이스 추가
+      content = <ProfilePage />;
       break;
     case 'home':
     default:
