@@ -1,0 +1,89 @@
+/* src/components/AuthPage.css */
+
+.social-login-buttons {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* 버튼 사이 간격 */
+  align-items: center; /* 버튼들을 중앙 정렬 */
+}
+
+/* Google GIS가 렌더링하는 버튼을 감싸는 div에 대한 스타일 */
+.google-login-button-wrapper {
+  width: 100%; /* 컨테이너 너비에 맞춤 */
+  max-width: 300px; /* 최대 너비 제한 (Google 버튼의 width 속성과 일치시킴) */
+  display: flex; /* 내부 Google 버튼을 중앙 정렬하기 위해 */
+  justify-content: center; /* 내부 Google 버튼을 중앙 정렬하기 위해 */
+  /* Google 버튼 자체는 GIS에 의해 스타일이 적용되므로, 이 래퍼는 주로 레이아웃을 위해 사용됩니다. */
+  /* Google 버튼의 기본 높이와 패딩을 고려하여 다른 버튼과 시각적 균형을 맞출 수 있습니다. */
+  padding: 0.1em 0; /* Google 버튼의 높이(large 기준 약 42px)와 합쳐 약 45px가 되도록 패딩 조정 */
+}
+
+
+.social-login-button {
+  width: 100%; /* 컨테이너 너비에 맞춤 */
+  max-width: 300px; /* 최대 너비 제한 */
+  padding: 0; /* 이미지 버튼이므로 패딩 제거 */
+  border-radius: 0; /* 이미지 버튼이므로 테두리 둥글기 제거 */
+  font-size: 0; /* 텍스트가 없으므로 폰트 크기 0 */
+  font-weight: normal; /* 텍스트가 없으므로 */
+  border: none; /* 테두리 제거 */
+  cursor: pointer;
+  display: flex; /* 아이콘과 텍스트 중앙 정렬 */
+  align-items: center;
+  justify-content: center; /* 텍스트와 아이콘 중앙 정렬 */
+  /* text-decoration: none;  a 태그가 아니므로 제거 */
+  color: transparent; /* 텍스트가 없으므로 투명 */
+  box-shadow: none; /* 그림자 제거 */
+  transition: none; /* 트랜지션 제거 */
+  background: none; /* 배경 제거 */
+}
+
+.social-login-button:hover {
+  /* 이미지 버튼이므로 호버 시 별도 스타일 변경 없음 */
+  /* transform: none; */
+  /* box-shadow: none; */
+}
+
+.social-login-button img {
+  height: auto; /* 이미지의 원본 높이 유지 */
+  width: 100%; /* 부모 요소 (버튼)의 너비에 맞추고 비율 유지 */
+  margin-right: 0; /* 이미지와 텍스트 사이 간격 제거 (텍스트 없음) */
+  display: block; /* 이미지가 블록 요소처럼 동작하도록 설정 */
+}
+
+/* 각 소셜 로그인 버튼에 대한 특정 스타일 제거 */
+/* Google 로그인 버튼은 이제 Google GIS 스크립트가 렌더링하므로 이 스타일은 더 이상 직접 적용되지 않습니다. */
+
+.apple-login-button {
+  /* background-color: #000000; */
+  /* color: #ffffff; */
+}
+
+.apple-login-button img {
+  filter: none; /* 애플 로고 색상 반전 필터 제거 (원본 이미지 사용) */
+}
+
+.kakao-login-button {
+  /* background-color: #fee500; */
+  /* color: #3c1e1e; */
+}
+
+/* 기존 이메일/비밀번호 폼 관련 스타일은 App.css에서 제거 예정 */
+
+/* 모바일 반응형 */
+@media (max-width: 480px) {
+  .social-login-button {
+    font-size: 0; /* 텍스트 없으므로 폰트 사이즈 0 */
+    padding: 0; /* 패딩 제거 */
+    max-width: 100%; /* 모바일에서 전체 너비 사용 */
+  }
+  .social-login-button img {
+    height: auto; /* 이미지 원본 높이 유지 */
+    width: 100%; /* 부모 요소 너비에 맞춤 */
+    margin-right: 0; /* 텍스트 없으므로 마진 제거 */
+  }
+  .google-login-button-wrapper {
+    max-width: 100%; /* 모바일에서 전체 너비 사용 */
+  }
+}

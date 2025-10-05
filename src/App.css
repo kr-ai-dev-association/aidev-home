@@ -145,12 +145,8 @@
   text-align: center;
 }
 
-.auth-form-container h2 {
-  font-size: 2.5em;
-  color: #333333;
-  margin-bottom: 2rem;
-}
-
+/* 아래의 form-related 스타일은 LoginPage와 SignupPage에서 더 이상 사용되지 않으므로 제거합니다. */
+/*
 .auth-form .form-group {
   margin-bottom: 1.5rem;
   text-align: left;
@@ -166,7 +162,7 @@
 .auth-form input[type="text"],
 .auth-form input[type="email"],
 .auth-form input[type="password"] {
-  width: calc(100% - 20px); /* 패딩 고려 */
+  width: calc(100% - 20px);
   padding: 10px;
   border: 1px solid #dddddd;
   border-radius: 5px;
@@ -188,6 +184,13 @@
 
 .auth-button:hover {
   background-color: #0056b3;
+}
+*/
+
+.auth-form-container h2 {
+  font-size: 2.5em;
+  color: #333333;
+  margin-bottom: 2rem;
 }
 
 .auth-form-container p {
@@ -559,6 +562,11 @@ ul, ol {
   font-size: 1.2em; /* 한 단계 크게 */
   font-weight: bold; /* bold 체로 변경 */
   margin-bottom: 1rem; /* 아래쪽 마진 조정 */
+  /* ul과 동일한 좌우 마진을 위해 max-width와 auto 마진을 적용 */
+  max-width: 800px; /* .content-area-container ul의 기본 max-width를 가정 */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left; /* 텍스트는 좌측 정렬 유지 */
 }
 
 .about-page-container h3 {
