@@ -48,7 +48,7 @@ function ProfilePage() {
         description: '발달장애인을 위한 100% 로컬 운영(현재 Apple Macbook Pro M4) AI 어시스턴트 앱으로, 음성 상호작용, 얼굴 인식, 로컬 ComfyUI 서버를 통한 실시간 이미지 생성 기능을 제공하여 클라우드 의존성 없이 개인화된 일상생활 지원을 제공합니다.',
         image: '', // 동적으로 생성될 예정
         skills: ['Kotlin', 'LLM', 'Ollama', 'Gemma3', 'Llamma3', 'Pytorch', 'Flask', 'Jetpack Compose', 'Android SDK 35', 'MVVM Architecture', 'ML Kit Face Detection', 'ComfyUI', 'SDXL/FLUX Image generation model', 'VITS TTS'],
-        youtubeUrl: 'https://youtu.be/6cvpTI22_PE?si=zKLmha7nSYeEGEEQ',
+        youtubeUrl: 'https://youtu.be/6cvpTI22_PE?si=zKLmha7nSYEGEEQ',
         githubUrl: 'https://github.com/DAIOSFoundation/pwooda',
       },
       {
@@ -88,7 +88,7 @@ function ProfilePage() {
         description: '다양한 기기에 임베드 가능한 자연어 처리 모듈 생성을 위한 챗봇 빌더 플랫폼을 설계했습니다.',
         image: '', // 동적으로 생성될 예정
         skills: ['NLP', '신경망 언어 모델', 'Django', 'TensorFlow', '딥러닝', '머신러닝', 'Android'],
-        youtubeUrl: 'https://youtu.be/MqZhj5O35r0?si=vDt3_cLhxn57hVwf',
+        youtubeUrl: 'https://youtu.be/MqZhj5O35r0?si=vDt3_cLhxn57Vwf',
         githubUrl: null,
       },
       {
@@ -203,7 +203,7 @@ function ProfilePage() {
       </aside>
 
       <main className="profile-main-content">
-        <h1 className="main-title">성과를 이끄는 디자인 <span role="img" aria-label="로켓">🚀</span></h1>
+        <h1 className="main-title">NLP/NLU 전문 에이전트 개발자</h1>
         
         <nav className="profile-tabs">
           <button className="tab-button active">프로젝트</button>
@@ -237,16 +237,16 @@ function ProfilePage() {
                   ))}
                 </div>
                 <div className="project-links">
-                  {project.youtubeUrl && (
-                    <a href={project.youtubeUrl} target="_blank" rel="noopener noreferrer" className="project-link-icon">
+                  <a href="https://www.youtube.com/@AiMemo" target="_blank" rel="noreferrer">
+                    <div className="project-link-icon">
                       <img src={youtubeIcon} alt="YouTube Icon" />
-                    </a>
-                  )}
-                  {project.githubUrl && (
-                    <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="project-link-icon">
+                    </div>
+                  </a>
+                  <a href="https://github.com/tony" target="_blank" rel="noreferrer">
+                    <div className="project-link-icon">
                       <img src={githubIcon} alt="GitHub Icon" />
-                    </a>
-                  )}
+                    </div>
+                  </a>
                 </div>
               </div>
               <button className="more-options-button">...</button>
