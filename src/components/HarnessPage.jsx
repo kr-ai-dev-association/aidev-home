@@ -99,7 +99,7 @@ function HarnessPage({ onNavigate }) {
         <section className="section-services">
           <h3>프레임워크가 아니라 하네스</h3>
           <p className="section-lead">
-            무거운 오케스트레이션 프레임워크에는 추상화 세금이 붙습니다. Banya Agent Harness는 작업 하나당
+            무거운 오케스트레이션 프레임워크에는 추상화 세금이 붙습니다. Banya Agent Harness는 작업 하나당<br />
             <strong> 의존성 0·빌드 0</strong>의 자족적 실행 단위 — 트럭이 아니라 손에 딱 맞는 연장 한 자루입니다.
           </p>
           <div className="harness-compare-wrap">

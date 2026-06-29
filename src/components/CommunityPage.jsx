@@ -6,7 +6,7 @@ import TopicDetailPage from './TopicDetailPage';
 import RichTextEditor from './RichTextEditor';
 import { isEmptyHtml } from '../lib/html';
 
-const CATEGORIES = ['일반 토론', '바이브코딩', 'AI/LLM', '취업·커리어', '프로젝트 공유', '질문/답변'];
+const CATEGORIES = ['일반 토론', '바이브코딩', 'AI/LLM', '취업·커리어', '질문/답변'];
 const ADMIN_CATEGORY = '공지사항';
 
 // 상대 시간 표시
@@ -21,7 +21,7 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 31536000)}년 전`;
 }
 
-function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, onOpenConversation, onOpenSearch }) {
+function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, onOpenConversation, onOpenSearch, onProfileChanged }) {
   // 관리자는 '공지사항' 카테고리 추가 노출
   const categoryOptions = isAdmin ? [ADMIN_CATEGORY, ...CATEGORIES] : CATEGORIES;
   const [topics, setTopics] = useState([]);
@@ -31,6 +31,13 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
   const [composing, setComposing] = useState(false);
   const [form, setForm] = useState({ title: '', category: CATEGORIES[0], tags: '', content: '' });
   const [submitting, setSubmitting] = useState(false);
+  // 봇 검증: 산술 캡차 + 허니팟 + 최소 작성시간 (서버 10분 간격제한과 2중 방어)
+  const [honeypot, setHoneypot] = useState('');
+  const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
+  const [captchaAns, setCaptchaAns] = useState('');
+  const [openedAt, setOpenedAt] = useState(0);
+  const newCaptcha = () => setCaptcha({ a: 1 + Math.floor(Math.random() * 9), b: 1 + Math.floor(Math.random() * 9) });
+  const captchaOk = parseInt(captchaAns, 10) === captcha.a + captcha.b;
 
   const authorName = profile?.name || user?.email?.split('@')[0] || '익명';
 
@@ -57,6 +64,12 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTopicId]);
 
+  // 공유용 URL 동기화(상세 진입/이탈 시 주소 반영)
+  useEffect(() => {
+    const path = selectedTopicId ? `/community/topic/${selectedTopicId}` : '/community';
+    if (window.location.pathname !== path) window.history.replaceState(null, '', path);
+  }, [selectedTopicId]);
+
   const handleTopicClick = (topicId) => {
     if (!isLoggedIn) {
       alert('로그인해야 토픽 상세 정보를 볼 수 있습니다.');
@@ -73,12 +86,20 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
       onNavigate('login');
       return;
     }
+    newCaptcha();
+    setCaptchaAns('');
+    setHoneypot('');
+    setOpenedAt(Date.now());
     setComposing(true);
   };
 
   const handleCreateTopic = async (e) => {
     e.preventDefault();
     if (!form.title.trim() || isEmptyHtml(form.content) || submitting) return;
+    // 봇 검증 (사람 여부 확인)
+    if (honeypot) { alert('비정상적인 요청으로 작성이 차단되었습니다.'); return; } // 허니팟: 사람은 비워둠
+    if (Date.now() - openedAt < 3000) { alert('너무 빠르게 제출되었습니다. 잠시 후 다시 시도해주세요.'); return; }
+    if (!captchaOk) { alert('자동입력 방지 답이 올바르지 않습니다.'); newCaptcha(); setCaptchaAns(''); return; }
     setSubmitting(true);
     const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean);
     // 1) 주제 생성
@@ -113,6 +134,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     }
     setComposing(false);
     setForm({ title: '', category: CATEGORIES[0], tags: '', content: '' });
+    onProfileChanged?.(); // 적립된 coin 반영
     setSelectedTopicId(topic.id); // 작성한 주제로 이동
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -134,6 +156,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
         profile={profile}
         onNavigate={onNavigate}
         onOpenConversation={onOpenConversation}
+        onProfileChanged={onProfileChanged}
       />
     );
   }
@@ -202,9 +225,27 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
               placeholder="내용을 입력하세요"
             />
           </div>
+          {/* 허니팟(봇 탐지용 — 화면에 보이지 않으며 사람은 비워둠) */}
+          <input
+            type="text" className="nt-honeypot" tabIndex={-1} autoComplete="off"
+            value={honeypot} onChange={(e) => setHoneypot(e.target.value)}
+            aria-hidden="true"
+          />
+          {/* 자동입력 방지(산술 캡차) */}
+          <div className="nt-field nt-captcha">
+            <label>자동입력 방지 — 다음 계산의 답을 입력하세요: <strong>{captcha.a} + {captcha.b} = ?</strong></label>
+            <input
+              type="text" inputMode="numeric" value={captchaAns}
+              onChange={(e) => setCaptchaAns(e.target.value)}
+              placeholder="정답 숫자"
+              className={captchaAns && !captchaOk ? 'nt-captcha-bad' : ''}
+            />
+          </div>
+          <p className="nt-coin-hint">💰 글을 작성하면 <strong>1 coin</strong>이 적립됩니다.</p>
+          {!isAdmin && <p className="nt-ratelimit-hint">⏱️ 도배 방지를 위해 글은 10분에 1회 작성할 수 있습니다.</p>}
           <div className="nt-actions">
             <button type="button" className="nt-btn ghost" onClick={() => setComposing(false)} disabled={submitting}>취소</button>
-            <button type="submit" className="nt-btn primary" disabled={submitting || !form.title.trim() || isEmptyHtml(form.content)}>
+            <button type="submit" className="nt-btn primary" disabled={submitting || !form.title.trim() || isEmptyHtml(form.content) || !captchaOk}>
               {submitting ? '등록 중...' : '주제 등록'}
             </button>
           </div>

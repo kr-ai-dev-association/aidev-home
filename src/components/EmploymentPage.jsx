@@ -8,22 +8,52 @@ import { BOARD_TYPES, CORP_ONLY, badgeStyle, cardInfo } from '../lib/jobFields';
 
 const TABS = ['전체', ...BOARD_TYPES];
 
+function jobSnippet(html) {
+  let t = (html || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&[a-z]+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  // 출처 안내 문구(큐레이션 보일러플레이트)는 미리보기에서 제외
+  const idx = t.indexOf('공유합니다.');
+  if (idx >= 0) t = t.slice(idx + '공유합니다.'.length).trim();
+  return t;
+}
+
 function JobCard({ job, onClick }) {
   const info = cardInfo(job);
   const st = badgeStyle(info.badge);
+  const text = jobSnippet(job.description);
+  const tech = info.tech || [];
   return (
-    <div className="job-card" onClick={() => onClick(job)}>
+    <div className={`job-card${job.closed ? ' job-card-closed' : ''}`} onClick={() => onClick(job)}>
       <div className="job-details">
-        <h3 className="job-title">{job.title}</h3>
-        {info.location && <p className="job-location">{info.location}</p>}
+        <div className="job-title-row">
+          <span className={`job-status ${job.closed ? 'closed' : 'open'}`}>
+            {job.closed ? '🔒 CLOSED' : '🟢 OPEN'}
+          </span>
+          <h3 className="job-title">{job.title}</h3>
+          <div className="job-type" style={{ backgroundColor: st.bg, color: st.color }}>{info.badge}</div>
+        </div>
         {info.company && <p className="job-company">{info.company}</p>}
+        <div className="job-meta">
+          {info.location && <span className="job-meta-item">📍 {info.location}</span>}
+          {(info.meta || []).map((m, i) => <span className="job-meta-item" key={i}>{m}</span>)}
+        </div>
+        {tech.length > 0 && (
+          <div className="job-tech">
+            {tech.slice(0, 6).map((t, i) => <span className="job-tech-chip" key={i}>{t}</span>)}
+            {tech.length > 6 && <span className="job-tech-chip more">+{tech.length - 6}</span>}
+          </div>
+        )}
+        {text && <p className="job-snippet">{text.slice(0, 140)}{text.length > 140 ? '…' : ''}</p>}
       </div>
-      <div className="job-type" style={{ backgroundColor: st.bg, color: st.color }}>{info.badge}</div>
     </div>
   );
 }
 
-function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpenConversation, initialJobId, onJobConsumed, onOpenSearch }) {
+function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpenConversation, initialJobId, onJobConsumed, onOpenSearch, onProfileChanged }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('전체');
@@ -53,6 +83,12 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialJobId, jobs]);
+
+  // 공유용 URL 동기화(공고 상세 진입/이탈 시 주소 반영)
+  useEffect(() => {
+    const path = selectedJob ? `/employment/job/${selectedJob.id}` : '/employment';
+    if (window.location.pathname !== path) window.history.replaceState(null, '', path);
+  }, [selectedJob]);
 
   const handleJobClick = (job) => {
     if (!isLoggedIn) {
@@ -94,6 +130,7 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
     setView('list');
     setEditing(null);
     fetchJobs();
+    onProfileChanged?.(); // 차감된 coin 반영
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -101,6 +138,16 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
     setSelectedJob(null);
     fetchJobs();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 공고 마감/마감취소 (작성자·관리자)
+  const toggleClose = async (job) => {
+    const next = !job.closed;
+    if (next && !window.confirm('이 공고를 마감하시겠습니까? 목록에는 CLOSED로 계속 표시됩니다.')) return;
+    const { error } = await supabase.from('jobs').update({ closed: next }).eq('id', job.id);
+    if (error) { alert(`상태 변경 오류: ${error.message}`); return; }
+    setSelectedJob((j) => (j && j.id === job.id ? { ...j, closed: next } : j));
+    fetchJobs();
   };
 
   // 상세
@@ -114,6 +161,7 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
         canManage={isAdmin || selectedJob.author_id === user?.id}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onToggleClose={toggleClose}
         canMessage={isLoggedIn && selectedJob.author_id !== user?.id}
         onOpenConversation={onOpenConversation}
       />
@@ -136,9 +184,13 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
     );
   }
 
-  // 목록 필터
-  let list = tab === '전체' ? jobs : jobs.filter((j) => j.board_type === tab);
-  if (view === 'manage') list = list.filter((j) => j.author_id === user?.id);
+  // 목록 필터 — 내 공고(manage)는 보드 탭과 무관하게 내가 등록한 전체 공고 표시
+  let list;
+  if (view === 'manage') {
+    list = jobs.filter((j) => j.author_id === user?.id);
+  } else {
+    list = tab === '전체' ? jobs : jobs.filter((j) => j.board_type === tab);
+  }
   if (kw.trim()) {
     const q = kw.toLowerCase();
     list = list.filter((j) =>

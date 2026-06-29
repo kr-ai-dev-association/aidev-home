@@ -60,14 +60,14 @@
 
 .detail-company-name {
   font-size: 1.1em;
-  color: #6366f1; /* 보라색 계열 */
+  color: #818cf8; /* 보라색 계열(다크 배경 대비 보정) */
   font-weight: 600;
   margin: 0 0 0.2rem 0;
 }
 
 .detail-agency-name {
   font-size: 0.95em;
-  color: #7c8aa3;
+  color: #94a3b8;
   margin: 0;
 }
 
@@ -130,7 +130,7 @@
 
 .job-info-card .info-label {
   font-size: 0.85em;
-  color: #7c8aa3;
+  color: #94a3b8;
   margin: 0;
 }
 
@@ -277,7 +277,7 @@
 
 .related-job-company {
   font-size: 0.85em;
-  color: #6366f1;
+  color: #818cf8;
   font-weight: 600;
   margin: 0;
 }
@@ -340,7 +340,7 @@
 
 .job-overview-card .overview-label {
   font-size: 0.85em;
-  color: #7c8aa3;
+  color: #94a3b8;
   margin: 0;
 }
 
@@ -371,6 +371,16 @@
 .back-button:hover {
   background-color: #232b3d;
   border-color: #2a3350;
+}
+
+/* 상단 네비게이션용: 컴팩트 좌측 정렬 */
+.back-button.back-top {
+  width: auto;
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  justify-content: flex-start;
+  padding: 0.55em 1.05em;
+  font-size: 0.95em;
 }
 
 
@@ -534,8 +544,19 @@
 .nt-btn.ghost:hover { filter: brightness(1.1); }
 .nt-btn.danger { color: #fca5a5; border-color: rgba(252,165,165,0.4); }
 .job-description-rich { color: #cbd5e1; line-height: 1.7; }
-.job-description-rich h1,.job-description-rich h2,.job-description-rich h3 { color:#f8fafc; }
-.job-description-rich a { color:#818cf8; }
+/* 다크 테마 가독성: 에디터에 저장된 어두운 인라인 글자색/배경이 다크 배경에서 안 보이는 문제를 보정.
+   인라인 style 의 color 가 CSS 클래스보다 우선하므로 !important 로 본문 색을 강제한다. */
+.job-description-rich,
+.job-description-rich * { color: #cbd5e1 !important; }
+.job-description-rich h1,
+.job-description-rich h2,
+.job-description-rich h3,
+.job-description-rich strong,
+.job-description-rich b { color: #f8fafc !important; }
+.job-description-rich a,
+.job-description-rich a * { color: #818cf8 !important; }
+/* 어두운 인라인 배경 하이라이트가 글자를 가리지 않도록 무력화 */
+.job-description-rich [style*="background"] { background-color: transparent !important; }
 .job-detail-list { padding-left: 1.3em; color: #cbd5e1; line-height: 1.7; }
 
 /* 기능 요구사항 */
@@ -545,8 +566,31 @@
   background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 1.1rem;
 }
 .feature-name { color: #f8fafc; margin: 0 0 0.4rem; font-size: 1.05rem; }
-.feature-detail { color: #94a3b8; margin: 0; line-height: 1.6; }
-.feature-image img { width: 160px; max-width: 38vw; border-radius: 8px; display: block; border: 1px solid rgba(255,255,255,0.1); }
+.feature-detail { color: #cbd5e1; margin: 0; line-height: 1.7; }
+.feature-text { flex: 1; min-width: 0; }
+.feature-image, .screenshot-thumb { background: none; border: none; padding: 0; cursor: zoom-in; display: block; }
+.feature-image img { width: 280px; max-width: 44vw; border-radius: 8px; display: block; border: 1px solid rgba(255,255,255,0.1); transition: opacity 0.15s; }
+.feature-image:hover img, .screenshot-thumb:hover img { opacity: 0.85; }
+
+/* 이미지 라이트박스(팝업 원본) */
+.img-lightbox {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(3, 6, 15, 0.9); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 2rem;
+  cursor: zoom-out;
+}
+.img-lightbox img {
+  max-width: 95vw; max-height: 92vh; border-radius: 10px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65); cursor: default;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.img-lightbox-close {
+  position: fixed; top: 18px; right: 22px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff; font-size: 1.25rem; cursor: pointer; line-height: 1;
+}
+.img-lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
 
 /* 스크린샷 갤러리 */
 .screenshot-gallery { display: flex; flex-wrap: wrap; gap: 0.8rem; }

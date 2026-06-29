@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'; // useState와 useEffect 임포트
 import profilePlaceholder from '../assets/profile-placeholder.png'; // 프로필 이미지 임포트
 import Logo from './Logo'; // 조합 로고 컴포넌트
+import CoinIcon from './CoinIcon'; // 금색 코인 아이콘
 
-function Header({ isLoggedIn, isAdmin, isMember, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
+function Header({ isLoggedIn, isAdmin, isMember, coins = 0, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -70,6 +71,7 @@ function Header({ isLoggedIn, isAdmin, isMember, unreadCount = 0, onInboxClick, 
               <ul className="nav-dropdown">
                 <li onClick={() => handleMenuItemClick('services')}>사업 내용</li>
                 <li onClick={() => handleMenuItemClick('courses')}>강의</li>
+                <li onClick={() => handleMenuItemClick('agentbuild')}>에이전트 구축</li>
                 <li onClick={() => handleMenuItemClick('agenteval')}>에이전트 평가</li>
               </ul>
             </li>
@@ -89,6 +91,17 @@ function Header({ isLoggedIn, isAdmin, isMember, unreadCount = 0, onInboxClick, 
             </>
           ) : (
             <>
+            {/* 보유 코인 잔액 (메시지 아이콘 좌측) */}
+            <button
+              type="button"
+              className="header-coins"
+              aria-label={`보유 코인 ${coins} coin`}
+              title="내 프로필에서 코인 현황 보기"
+              onClick={() => handleMenuItemClick('profile')}
+            >
+              <CoinIcon size={17} className="header-coin-icon" />
+              <span className="header-coin-amount">{Number(coins).toLocaleString()}</span>
+            </button>
             {/* 메시지함 아이콘 + 안 읽음 배지 */}
             <button
               type="button"
@@ -107,6 +120,7 @@ function Header({ isLoggedIn, isAdmin, isMember, unreadCount = 0, onInboxClick, 
               <ul className="profile-dropdown">
                 <li onClick={() => handleMenuItemClick('profile')}>내정보</li>
                 {isAdmin && <li onClick={() => handleMenuItemClick('admin')}>관리자</li>}
+                {isAdmin && <li onClick={() => handleMenuItemClick('b2brequests')}>B2B 의뢰</li>}
                 <li
                   onClick={() => {
                     onLogoutClick();

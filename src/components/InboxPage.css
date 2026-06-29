@@ -29,11 +29,15 @@
 }
 .inbox-tab.active { color: #fff; border-bottom-color: #22d3ee; }
 .inbox-empty { color: #94a3b8; text-align: center; padding: 2.5rem 0; line-height: 1.6; }
+.inbox-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.8rem; }
 .inbox-mark-all {
-  display: block; margin-left: auto; margin-bottom: 0.8rem;
   background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14);
   color: #cbd5e1; border-radius: 8px; padding: 0.4em 0.9em; font-size: 0.85rem; cursor: pointer;
 }
+/* inbox-actions 밖에서 단독으로 쓰일 때를 위한 우측 정렬 유지 */
+.inbox-panel > .inbox-mark-all { display: block; margin-left: auto; margin-bottom: 0.8rem; }
+.inbox-delete-all { color: #fca5a5; border-color: rgba(248,113,113,0.3); }
+.inbox-delete-all:hover { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.55); }
 
 /* 알림 */
 .notif-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -46,9 +50,17 @@
 .notif-item.unread { background: rgba(99,102,241,0.08); }
 .notif-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 0.45rem; flex-shrink: 0; background: transparent; }
 .notif-item.unread .notif-dot { background: #22d3ee; }
+.notif-body { flex: 1 1 auto; min-width: 0; }
 .notif-text { margin: 0; color: #cbd5e1; line-height: 1.5; }
 .notif-text strong { color: #c7d2fe; }
 .notif-time { font-size: 0.78rem; color: #64748b; }
+.notif-delete {
+  flex-shrink: 0; background: none; border: none; cursor: pointer;
+  color: #64748b; font-size: 0.9rem; line-height: 1; padding: 0.2rem 0.3rem;
+  opacity: 0.6; transition: color 0.15s, opacity 0.15s;
+}
+.notif-item:hover .notif-delete { opacity: 1; }
+.notif-delete:hover { color: #fca5a5; }
 
 /* 메시지 (목록 + 스레드 2단) */
 .inbox-messages {

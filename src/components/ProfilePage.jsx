@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CoinIcon from './CoinIcon';
 import './ProfilePage.css';
 import { supabase } from '../lib/supabase';
 import profilePlaceholder from '../assets/profile-placeholder.png';
@@ -138,7 +139,12 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
             <div className="pf-field"><label>대표 타이틀</label>
               <input value={form.main_title} onChange={(e) => update('main_title', e.target.value)} placeholder="예: NLP/NLU 전문 에이전트 개발자" /></div>
             <div className="pf-field"><label>상태</label>
-              <input value={form.status} onChange={(e) => update('status', e.target.value)} placeholder="예: 구직 중" /></div>
+              <select value={form.status} onChange={(e) => update('status', e.target.value)}>
+                <option value="">선택 안 함</option>
+                <option value="재직중">재직중</option>
+                <option value="구직중">구직중</option>
+                <option value="프리랜서">프리랜서</option>
+              </select></div>
             <div className="pf-field"><label>요율</label>
               <input value={form.rate} onChange={(e) => update('rate', e.target.value)} placeholder="예: 시간당 $100 - $150" /></div>
             <div className="pf-field"><label>위치</label>
@@ -218,6 +224,13 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
         <button className="contact-button" onClick={startEdit}>
           <span className="send-icon"></span> 프로필 편집
         </button>
+
+        {/* 보유 코인 현황 */}
+        <div className="profile-coins" title="보유 coin">
+          <CoinIcon size={22} className="coin-icon" />
+          <span className="coin-amount">{Number(profile.coins ?? 0).toLocaleString()}</span>
+          <span className="coin-unit">coin</span>
+        </div>
 
         {v.rate && (
           <div className="profile-section">

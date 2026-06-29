@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import RichTextEditor from './RichTextEditor';
 import { isEmptyHtml } from '../lib/html';
 import { BOARD_TYPES, CORP_ONLY, FIELD_DEFS } from '../lib/jobFields';
+import { MarkdownEditor } from './MarkdownField';
 
 const BUCKET = 'job-images';
 
@@ -42,6 +43,7 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     (FIELD_DEFS[initBoard] || []).forEach((f) => { obj[f.key] = toEditable(d[f.key], f.type); });
     return obj;
   });
+  const [platformApply, setPlatformApply] = useState(!!initial?.platform_apply);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -70,7 +72,13 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     return URLRE.test(s) ? '' : '이메일 또는 http(s) 링크를 입력하세요.';
   })();
   const showErr = (k) => attempted || touched[k];
-  const hasErrors = !!titleError || !!descError || !!contactError || Object.keys(errors).length > 0;
+  // 외주 프로젝트는 상세한 기능 요구사항(이름+상세) 1개 이상 필수
+  const validFeatures = (details.features || []).filter((f) => f && f.name && f.name.trim() && f.detail && f.detail.trim());
+  const featuresRequired = boardType === '외주 프로젝트';
+  const featuresError = featuresRequired && validFeatures.length < 1
+    ? '외주 프로젝트는 상세한 기능 요구사항(기능 이름과 상세 설명)을 1개 이상 입력해야 합니다.'
+    : '';
+  const hasErrors = !!titleError || !!descError || !!contactError || !!featuresError || Object.keys(errors).length > 0;
 
   const changeBoard = (bt) => {
     setBoardType(bt);
@@ -131,7 +139,7 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     const detailsOut = {};
     fields.forEach((f) => { detailsOut[f.key] = fromEditable(details[f.key], f.type); });
 
-    const payload = { board_type: boardType, title: title.trim(), description, contact: contact.trim() || null, details: detailsOut };
+    const payload = { board_type: boardType, title: title.trim(), description, contact: contact.trim() || null, details: detailsOut, platform_apply: platformApply };
     let error;
     if (isEdit) {
       ({ error } = await supabase.from('jobs').update(payload).eq('id', initial.id));
@@ -202,7 +210,11 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       {/* 기능 요구사항 */}
       {fields.filter((f) => f.type === 'features').map((f) => (
         <div className="jf-field" key={f.key}>
-          <label>{f.label}</label>
+          <label>{f.label}{featuresRequired && <span className="jf-req"> *</span>}</label>
+          {featuresRequired && (
+            <p className="jf-hint">외주 프로젝트는 구체적인 기능 요구사항이 있어야 등록할 수 있습니다. (기능 이름 + 상세 설명 1개 이상)</p>
+          )}
+          {attempted && featuresError && <span className="jf-error">{featuresError}</span>}
           {(details[f.key] || []).map((feat, idx) => (
             <div className="jf-feature" key={idx}>
               <div className="jf-feature-head">
@@ -210,7 +222,15 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
                 <button type="button" className="nt-btn danger small" onClick={() => removeFeature(f.key, idx)}>삭제</button>
               </div>
               <input placeholder="기능 이름" value={feat.name} onChange={(e) => updateFeature(f.key, idx, 'name', e.target.value)} />
-              <textarea rows={2} placeholder="상세 설명" value={feat.detail} onChange={(e) => updateFeature(f.key, idx, 'detail', e.target.value)} />
+              <div className="jf-feature-md">
+                <span className="jf-md-label">상세 설명 (Markdown)</span>
+                <MarkdownEditor
+                  value={feat.detail}
+                  onChange={(v) => updateFeature(f.key, idx, 'detail', v)}
+                  height={360}
+                  placeholder={'## 개요\n- 목표:\n- 주요 기능:\n\n### 상세 요구사항\n1. ...\n2. ...\n\n### 완료 기준(AC)\n- [ ] ...'}
+                />
+              </div>
               <div className="jf-feature-img">
                 {feat.image ? (
                   <div className="jf-thumb">
@@ -250,7 +270,7 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       ))}
 
       <div className="jf-field">
-        <label>지원/문의 (이메일 또는 링크)</label>
+        <label>외부 지원/문의 링크 (이메일 또는 링크, 선택)</label>
         <input
           className={(attempted || touched.__contact) && contactError ? 'jf-invalid' : ''}
           value={contact}
@@ -261,6 +281,17 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
         {(attempted || touched.__contact) && contactError && <span className="jf-error">{contactError}</span>}
       </div>
 
+      <label className="jf-toggle">
+        <input type="checkbox" checked={platformApply} onChange={(e) => setPlatformApply(e.target.checked)} />
+        <span>
+          <strong>조합 플랫폼으로 지원받기</strong>
+          <em>켜면 공고에 ‘지원하기’ 버튼이 표시되고, 지원자의 지원 내용·프로필이 ‘내 공고 관리’에 정리됩니다. (문의하기는 항상 제공)</em>
+        </span>
+      </label>
+
+      {!isEdit && (
+        <p className="jf-coin-hint">💰 공고를 등록하면 <strong>10 coin</strong>이 차감됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
+      )}
       <div className="jf-actions">
         <button type="button" className="nt-btn ghost" onClick={onCancel} disabled={submitting}>취소</button>
         <button type="submit" className="nt-btn primary" disabled={hasErrors || submitting || uploading}>

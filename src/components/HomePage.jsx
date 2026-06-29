@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import heroBannerBg from '../assets/hero-banner-bg.jpg';
 import aiDevChallengeBg from '../assets/ai dev challenge.png'; // 중간 배너 배경 이미지
 import ServiceIcon from './ServiceIcon'; // 통일 라인 아이콘 세트
+import YouTubeEmbed from './YouTubeEmbed'; // 소개 영상 임베드
 
 function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNavigate }) { // onNavigate prop 추가
   const [openQuestionId, setOpenQuestionId] = useState(null); // FAQ를 위한 상태 관리
@@ -64,18 +65,18 @@ function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNaviga
       <div className="home-page-container content-area-container">
         {/* 조합 소개 요약 */}
         <section className="section-intro">
-          <h3>한국인공지능개발자 협동조합은?</h3>
-          <p>출자금 규모와 무관하게 모든 조합원이 1인 1표를 행사하는 민주적 협동조합입니다. 단순한 오프라인 협회를 넘어, 강력한 기술 스택을 갖춘 '통합 AI 개발 및 평가 플랫폼'을 구축·운영하며 개인(B2C)·기업(B2B)·학계(B2Academia)를 아우르는 생태계를 만들어갑니다.</p>
-          <button className="detail-button" onClick={() => onNavigate('about')}>자세히 보기</button>
-        </section>
-
-        {/* AI 시대 고용 현실 — 대학생/취업준비생/개발자 문제 진단 */}
-        <section className="section-employment" id="employment-section">
           <h3>AI가 바꾸는 개발자 고용의 현실</h3>
+          <YouTubeEmbed videoId="fCvwZqC-e8M" title="한국인공지능개발자 협동조합 소개 영상" />
           <p className="section-lead">
             'Fable 5' 같은 최첨단 모델과 미국의 사용 제한 조치는 한 가지 신호를 보냅니다 — AI는 이미 국가안보 자산이 되었고,
             접근할 수 있는 소수와 그렇지 못한 다수로 노동 가치가 갈라집니다. 그 끝은 IT 직군의 <strong>소득 초(超)양극화</strong>입니다.
           </p>
+          <p>대한민국 AI 생태계의 미래를 선도하는 개발자 중심 플랫폼. 출자금과 무관하게 모든 조합원이 1인 1표를 행사하는 민주적 협동조합입니다.</p>
+          <button className="detail-button" onClick={() => onNavigate('about')}>자세히 보기</button>
+        </section>
+
+        {/* AI 시대 고용 현실 — 대학생/취업준비생/개발자 문제 진단 (제목·리드는 상단 인트로로 이동) */}
+        <section className="section-employment" id="employment-section">
           <div className="service-cards">
             <div className="service-card">
               <ServiceIcon name="academia" />

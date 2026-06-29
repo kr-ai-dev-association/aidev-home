@@ -491,6 +491,20 @@
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
+/* 봇 방지: 허니팟(화면 밖으로 숨김) */
+.nt-honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px;
+  opacity: 0; pointer-events: none;
+}
+/* 자동입력 방지(산술 캡차) */
+.nt-captcha label strong { color: #67e8f9; font-variant-numeric: tabular-nums; }
+.nt-captcha input.nt-captcha-bad { border-color: #f87171 !important; }
+.nt-coin-hint { margin: 0.2rem 0 0.3rem; color: #fcd34d; font-size: 0.86rem; }
+.nt-coin-hint strong { color: #fde68a; }
+.nt-ratelimit-hint { margin: 0 0 0.6rem; color: #94a3b8; font-size: 0.84rem; }
+
 .nt-actions, .reply-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.5rem; }
 .nt-btn {
   padding: 0.6em 1.3em;

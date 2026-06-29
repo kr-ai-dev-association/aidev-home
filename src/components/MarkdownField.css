@@ -1,0 +1,62 @@
+/* 마크다운 에디터/리더 — 다크 테마에 맞춤 */
+.md-editor-wrap .w-md-editor {
+  background: #0f1524;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.md-editor-wrap .w-md-editor-toolbar {
+  background: #131a2b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.md-editor-wrap .w-md-editor-text,
+.md-editor-wrap textarea {
+  font-size: 0.95rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.md-editor-wrap .w-md-editor-preview { background: #0b101d; }
+
+/* 리더(출력) — 다크 테마 고대비 색상 (github-markdown CSS 변수 오버라이드) */
+.md-view {
+  --color-canvas-default: transparent;
+  --color-canvas-subtle: rgba(255, 255, 255, 0.04);
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #aeb9c7;
+  --color-fg-subtle: #8b97a6;
+  --color-border-default: rgba(255, 255, 255, 0.14);
+  --color-border-muted: rgba(255, 255, 255, 0.1);
+  --color-accent-fg: #93a4ff;
+  --color-neutral-muted: rgba(255, 255, 255, 0.1);
+}
+.md-view .wmde-markdown {
+  background: transparent;
+  color: #e6edf3;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+.md-view .wmde-markdown p,
+.md-view .wmde-markdown li,
+.md-view .wmde-markdown td,
+.md-view .wmde-markdown th { color: #e6edf3; }
+.md-view .wmde-markdown h1,
+.md-view .wmde-markdown h2,
+.md-view .wmde-markdown h3,
+.md-view .wmde-markdown h4,
+.md-view .wmde-markdown h5 { color: #f3f6fb; border-bottom-color: rgba(255, 255, 255, 0.12); }
+.md-view .wmde-markdown strong { color: #ffffff; }
+.md-view .wmde-markdown a { color: #93a4ff; }
+.md-view .wmde-markdown code {
+  background: rgba(125, 211, 252, 0.14);
+  color: #bae6fd;
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+}
+.md-view .wmde-markdown pre { background: #0b101d; border: 1px solid rgba(255, 255, 255, 0.08); }
+.md-view .wmde-markdown pre code { background: transparent; color: #e6edf3; }
+.md-view .wmde-markdown blockquote { color: #aeb9c7; border-left-color: #6366f1; }
+.md-view .wmde-markdown table tr { background: transparent; border-top-color: rgba(255, 255, 255, 0.1); }
+.md-view .wmde-markdown table tr:nth-child(2n) { background: rgba(255, 255, 255, 0.03); }
+.md-view .wmde-markdown table td,
+.md-view .wmde-markdown table th { border-color: rgba(255, 255, 255, 0.14); }
+.md-view .wmde-markdown img { border-radius: 8px; }
+.md-view .wmde-markdown input[type="checkbox"] { accent-color: #6366f1; }

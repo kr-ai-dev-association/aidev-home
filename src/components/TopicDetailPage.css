@@ -1,5 +1,7 @@
 /* src/components/TopicDetailPage.css */
 
+.topic-detail-actions { display: flex; justify-content: flex-end; margin: 0 0 0.8rem; }
+
 .topic-detail-page-container {
   display: flex;
   gap: 2rem;
@@ -136,12 +138,25 @@
 
 .post-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid #232b3d;
   padding-bottom: 0.5rem;
 }
+
+.post-delete {
+  margin-left: auto;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+  font-size: 0.82rem;
+  font-family: inherit;
+  padding: 0.3em 0.7em;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.post-delete:hover { background: rgba(248, 113, 113, 0.18); }
 
 .post-date {
   font-size: 0.9em;
@@ -156,10 +171,12 @@
 
 .post-content p {
   font-size: 1em;
-  line-height: 1.6;
-  color: #94a3b8;
+  line-height: 1.7;
+  color: #d8e0ec;
   margin: 0;
 }
+.post-content li { color: #d8e0ec; line-height: 1.7; }
+.post-content strong { color: #f8fafc; }
 
 .topic-post-pagination {
   display: flex;

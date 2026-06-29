@@ -6,7 +6,7 @@ import ServiceIcon from './ServiceIcon';
 // 출처: 바이브코딩대학 AX 챔피언 프로그램 소개서 / 서비스 패키지 안내
 const CONTACT = 'tonymustbegreat@gmail.com';
 
-function CoursesPage({ onNavigate }) {
+function CoursesPage({ onNavigate, onB2BRequest }) {
   const phases = [
     { tag: 'PHASE 01', title: '전문가의 가능성 증명', desc: '매칭 컨설턴트가 진단·PoC 구축을 수행해 검증된 결과물을 먼저 만듭니다.' },
     { tag: 'PHASE 02', title: '사내 챔피언의 AX 기능 구축', desc: '지정된 챔피언이 PoC 결과를 인수하여 컨설턴트의 교육과 함께 직접 실 기능을 만들며 역량을 흡수합니다.' },
@@ -57,7 +57,7 @@ function CoursesPage({ onNavigate }) {
             그 과정에 참여한 챔피언으로부터 우리 조직의 AX를 시작합니다.
           </p>
           <div className="hero-actions">
-            <a className="cta-button" href={`mailto:${CONTACT}`}>조합 B2B 견적 문의</a>
+            <button type="button" className="cta-button" onClick={() => onB2BRequest("조합 B2B 견적 문의")}>조합 B2B 견적 문의</button>
             <button className="ghost-button" onClick={() => onNavigate('signup')}>조합원 가입</button>
           </div>
         </div>
@@ -161,7 +161,7 @@ function CoursesPage({ onNavigate }) {
         <section className="section-join-us">
           <h3>우리 조직의 챔피언을 찾아보세요</h3>
           <p className="section-lead">진행 방식·인원·기간에 따라 견적을 산정합니다. 회사 정보를 보내주시면 담당자가 검토 후 빠르게 회신드립니다.</p>
-          <a className="cta-button" href={`mailto:${CONTACT}`}>조합 B2B 견적 문의</a>
+          <button type="button" className="cta-button" onClick={() => onB2BRequest("조합 B2B 견적 문의")}>조합 B2B 견적 문의</button>
         </section>
       </div>
     </div>

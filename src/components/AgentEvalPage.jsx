@@ -3,7 +3,7 @@ import evalHeroBg from '../assets/data center.jpg';
 import ServiceIcon from './ServiceIcon';
 
 // 에이전트 평가 (Prototypebench) 소개 페이지 — 다크 프리미엄 테마
-function AgentEvalPage({ onNavigate }) {
+function AgentEvalPage({ onNavigate, onB2BRequest }) {
   const stats = [
     { num: '123', label: '평가 인스턴스 (실제 PR 기반)' },
     { num: '32,885', label: '테스트 케이스' },
@@ -35,7 +35,7 @@ function AgentEvalPage({ onNavigate }) {
             LLM 심판이 아닌 실제 테스트 실행으로 성능·정확성을 객관적으로 평가합니다.
           </p>
           <div className="hero-actions">
-            <button className="cta-button" onClick={() => onNavigate('signup')}>기업 평가 문의하기</button>
+            <button className="cta-button" onClick={() => onB2BRequest('조합 B2B 평가 신청')}>조합 B2B 평가 신청</button>
             <a className="ghost-button" href="https://github.com/prototypebench" target="_blank" rel="noopener noreferrer">GitHub 보기</a>
           </div>
         </div>
@@ -145,7 +145,7 @@ function AgentEvalPage({ onNavigate }) {
           <p className="section-lead">
             한국인공지능개발자 협동조합은 Prototypebench와 연계해 기업의 자체 AI 에이전트를 성능·추론속도·환각·안전성 관점에서 검증하고 공인 평가 리포트를 발급합니다.
           </p>
-          <button className="cta-button" onClick={() => onNavigate('signup')}>조합 B2B 평가 신청</button>
+          <button className="cta-button" onClick={() => onB2BRequest('조합 B2B 평가 신청')}>조합 B2B 평가 신청</button>
         </section>
       </div>
     </div>

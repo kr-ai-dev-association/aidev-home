@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import RichTextEditor from './RichTextEditor';
 import { sanitize, isEmptyHtml } from '../lib/html';
 import { startConversation } from '../lib/inbox';
+import ShareButton from './ShareButton';
 import avatarPlaceholder from '../assets/profile-placeholder.png';
 
 function formatDateTime(iso) {
@@ -16,7 +17,7 @@ function formatDateTime(iso) {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${ampm} ${h12}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenConversation }) {
+function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenConversation, onProfileChanged }) {
   const messageAuthor = async (authorId) => {
     try {
       const cid = await startConversation(authorId);
@@ -79,6 +80,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
     setCommentBusy(false);
     if (error) { alert(`답글 등록 오류: ${error.message}`); return; }
     setCommentDrafts((d) => ({ ...d, [postId]: '' }));
+    onProfileChanged?.(); // 적립된 0.1 coin 반영
     fetchAll();
   };
 
@@ -87,6 +89,27 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
     const { error } = await supabase.from('comments').delete().eq('id', id);
     if (error) { alert(`삭제 오류: ${error.message}`); return; }
     setComments((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  // 게시글 삭제: 첫 게시글이면 주제 전체(답글·게시글 포함) 삭제, 그 외엔 해당 게시글만
+  const deletePost = async (post, isFirst) => {
+    const msg = isFirst
+      ? '이 주제를 삭제하시겠습니까? 모든 게시글과 답글이 함께 삭제됩니다.'
+      : '이 게시글을 삭제하시겠습니까? 달린 답글도 함께 삭제됩니다.';
+    if (!window.confirm(msg)) return;
+    if (isFirst) {
+      const postIds = posts.map((p) => p.id);
+      if (postIds.length) await supabase.from('comments').delete().in('post_id', postIds);
+      await supabase.from('posts').delete().eq('topic_id', topicId);
+      const { error } = await supabase.from('topics').delete().eq('id', topicId);
+      if (error) { alert(`삭제 오류: ${error.message}`); return; }
+      onBackToListings();
+    } else {
+      await supabase.from('comments').delete().eq('post_id', post.id);
+      const { error } = await supabase.from('posts').delete().eq('id', post.id);
+      if (error) { alert(`삭제 오류: ${error.message}`); return; }
+      fetchAll();
+    }
   };
 
   const handleReply = async (e) => {
@@ -139,6 +162,14 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
           <span className="current-topic">{topic.title}</span>
         </nav>
 
+        <div className="topic-detail-actions">
+          <ShareButton
+            url={`${typeof window !== 'undefined' ? window.location.origin : ''}/community/topic/${topicId}`}
+            title={topic.title}
+            text={`[${topic.category}] ${topic.title}`}
+          />
+        </div>
+
         <div className="topic-summary-card">
           {Array.isArray(topic.tags) && topic.tags.length > 0 && (
             <div className="topic-tags">
@@ -168,6 +199,11 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
                 <div className="post-header">
                   <span className="post-date">{formatDateTime(post.created_at)}</span>
                   <span className="post-number">#{idx + 1}</span>
+                  {(isAdmin || post.author_id === user?.id) && (
+                    <button className="post-delete" onClick={() => deletePost(post, idx === 0)}>
+                      🗑 {idx === 0 ? '주제 삭제' : '게시글 삭제'}
+                    </button>
+                  )}
                 </div>
                 <div className="post-content" dangerouslySetInnerHTML={{ __html: sanitize(post.content) }} />
 
@@ -191,7 +227,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
                       <input
                         type="text"
                         className="comment-input"
-                        placeholder="답글 달기..."
+                        placeholder="답글 달기... (작성 시 0.1 coin 적립)"
                         value={commentDrafts[post.id] || ''}
                         onChange={(e) => setCommentDrafts((d) => ({ ...d, [post.id]: e.target.value }))}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addComment(post.id); } }}

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './JobDetailPage.css';
 import '../App.css';
 import { sanitize } from '../lib/html';
 import { startConversation } from '../lib/inbox';
 import { FIELD_DEFS, badgeStyle, cardInfo } from '../lib/jobFields';
+import ShareButton from './ShareButton';
+import { MarkdownView } from './MarkdownField';
 
 function RelatedJobCard({ job, onClick }) {
   const info = cardInfo(job);
@@ -32,7 +34,10 @@ function renderValue(value) {
   return <p className="info-value">{value}</p>;
 }
 
-function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit, onDelete, canMessage, onOpenConversation }) {
+function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit, onDelete, onToggleClose, canMessage, onOpenConversation, isMember, isAdmin, user, profile }) {
+  const [lightbox, setLightbox] = useState(null);
+  const [applyOpen, setApplyOpen] = useState(false);
+
   const messageAuthor = async () => {
     try {
       const cid = await startConversation(job.author_id);
@@ -55,23 +60,43 @@ function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit,
   const info = cardInfo(job);
   const st = badgeStyle(info.badge);
   const related = allJobs.filter((j) => j.id !== job.id && j.board_type === job.board_type).slice(0, 2);
+  const [lightbox, setLightbox] = useState(null);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e) => { if (e.key === 'Escape') setLightbox(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox]);
 
   return (
     <div className="job-detail-page-container content-area-container">
+      <button className="back-button back-top" onClick={onBack}>← 목록으로 돌아가기</button>
       <div className="job-detail-main-content">
         <div className="job-detail-header">
           <div className="job-detail-text-info">
-            <span className="job-board-badge" style={{ backgroundColor: st.bg, color: st.color }}>{job.board_type}</span>
+            <div className="detail-badge-row">
+              <span className="job-board-badge" style={{ backgroundColor: st.bg, color: st.color }}>{job.board_type}</span>
+              <span className={`job-status ${job.closed ? 'closed' : 'open'}`}>{job.closed ? '🔒 CLOSED' : '🟢 OPEN'}</span>
+            </div>
             <h1 className="detail-job-title">{job.title}</h1>
             {info.company && <p className="detail-company-name">{info.company}</p>}
             <p className="detail-agency-name">작성: {job.author_name}</p>
           </div>
           <div className="job-detail-manage">
+            <ShareButton
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/employment/job/${job.id}`}
+              title={job.title}
+              text={`[${job.board_type}] ${job.title}`}
+            />
             {canMessage && (
               <button className="nt-btn ghost" onClick={messageAuthor}>✉️ 작성자에게 메시지</button>
             )}
             {canManage && (
               <>
+                <button className="nt-btn ghost" onClick={() => onToggleClose(job)}>
+                  {job.closed ? '🔓 마감 취소' : '🔒 마감하기'}
+                </button>
                 <button className="nt-btn ghost" onClick={() => onEdit(job)}>수정</button>
                 <button className="nt-btn danger" onClick={() => onDelete(job)}>삭제</button>
               </>
@@ -127,12 +152,12 @@ function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit,
                   <div className="feature-item" key={i}>
                     <div className="feature-text">
                       <h4 className="feature-name">{i + 1}. {feat.name}</h4>
-                      {feat.detail && <p className="feature-detail">{feat.detail}</p>}
+                      {feat.detail && <div className="feature-detail"><MarkdownView source={feat.detail} /></div>}
                     </div>
                     {feat.image && (
-                      <a href={feat.image} target="_blank" rel="noreferrer" className="feature-image">
+                      <button type="button" className="feature-image" onClick={() => setLightbox(feat.image)} aria-label="이미지 크게 보기">
                         <img src={feat.image} alt={feat.name} />
-                      </a>
+                      </button>
                     )}
                   </div>
                 ))}
@@ -150,9 +175,9 @@ function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit,
               <h2 className="section-title">{f.label}</h2>
               <div className="screenshot-gallery">
                 {arr.map((url, i) => (
-                  <a href={url} target="_blank" rel="noreferrer" key={i} className="screenshot-thumb">
+                  <button type="button" key={i} className="screenshot-thumb" onClick={() => setLightbox(url)} aria-label="이미지 크게 보기">
                     <img src={url} alt={`스크린샷 ${i + 1}`} />
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -206,6 +231,13 @@ function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit,
         </div>
         <button className="back-button" onClick={onBack}>← 목록으로 돌아가기</button>
       </aside>
+
+      {lightbox && (
+        <div className="img-lightbox" onClick={() => setLightbox(null)}>
+          <button type="button" className="img-lightbox-close" aria-label="닫기" onClick={() => setLightbox(null)}>✕</button>
+          <img src={lightbox} alt="원본 이미지" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
     </div>
   );
 }

@@ -87,6 +87,24 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic })
     onUnreadChange && onUnreadChange();
   };
 
+  const deleteNotif = async (n) => {
+    if (!window.confirm('이 알림을 삭제하시겠습니까?')) return;
+    const { error } = await supabase.from('notifications').delete().eq('id', n.id);
+    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    setNotifs((prev) => prev.filter((x) => x.id !== n.id));
+    onUnreadChange && onUnreadChange();
+  };
+
+  const deleteAllNotifs = async () => {
+    if (notifs.length === 0) return;
+    if (!window.confirm('모든 알림을 삭제하시겠습니까?')) return;
+    // RLS로 본인 알림만 삭제되도록 user_id 기준으로 일괄 삭제 (목록 50건 제한과 무관)
+    const { error } = await supabase.from('notifications').delete().eq('user_id', myId);
+    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    setNotifs([]);
+    onUnreadChange && onUnreadChange();
+  };
+
   const send = async () => {
     const text = draft.trim();
     if (!text || sending || !activeConv) return;
@@ -139,8 +157,13 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic })
       {/* 알림 탭 */}
       {tab === 'notifications' && (
         <div className="inbox-panel">
-          {notifs.some((n) => !n.read) && (
-            <button className="inbox-mark-all" onClick={markAllNotifsRead}>모두 읽음</button>
+          {notifs.length > 0 && (
+            <div className="inbox-actions">
+              {notifs.some((n) => !n.read) && (
+                <button className="inbox-mark-all" onClick={markAllNotifsRead}>모두 읽음</button>
+              )}
+              <button className="inbox-mark-all inbox-delete-all" onClick={deleteAllNotifs}>모두 삭제</button>
+            </div>
           )}
           {notifs.length === 0 ? (
             <p className="inbox-empty">알림이 없습니다.</p>
@@ -153,6 +176,13 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic })
                     <p className="notif-text"><strong>{n.actor_name}</strong>님 · {n.body}</p>
                     <span className="notif-time">{timeAgo(n.created_at)}</span>
                   </div>
+                  <button
+                    className="notif-delete"
+                    onClick={(e) => { e.stopPropagation(); deleteNotif(n); }}
+                    aria-label="알림 삭제"
+                  >
+                    ✕
+                  </button>
                 </li>
               ))}
             </ul>

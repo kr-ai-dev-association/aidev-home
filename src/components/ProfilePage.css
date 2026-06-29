@@ -21,6 +21,22 @@
   align-self: flex-start; /* 사이드바만 상단에 고정 */
 }
 
+/* 보유 코인 현황 */
+.profile-coins {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(99, 102, 241, 0.14));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+.profile-coins .coin-icon { font-size: 1.25rem; line-height: 1; }
+.profile-coins .coin-amount { font-size: 1.4rem; font-weight: 800; color: #fde68a; font-variant-numeric: tabular-nums; }
+.profile-coins .coin-unit { font-size: 0.85rem; font-weight: 600; color: #fcd34d; }
+
 .profile-header-share {
   text-align: right;
   margin-bottom: 1rem;
@@ -605,7 +621,8 @@
   margin-bottom: 0.4rem;
 }
 .pf-field input,
-.pf-field textarea {
+.pf-field textarea,
+.pf-field select {
   width: 100%;
   box-sizing: border-box;
   background: #0f1524;
@@ -617,7 +634,8 @@
   padding: 0.65em 0.8em;
 }
 .pf-field input:focus,
-.pf-field textarea:focus {
+.pf-field textarea:focus,
+.pf-field select:focus {
   outline: none;
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
