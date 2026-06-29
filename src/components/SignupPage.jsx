@@ -1,97 +1,228 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import '../App.css'; // 공통 스타일
 import './AuthPage.css'; // 인증 페이지 스타일
+import OAuthButtons from './OAuthButtons';
+import { supabase } from '../lib/supabase';
 
-// 소셜 로그인 아이콘 이미지 임포트
-// Google 아이콘은 Google GIS 스크립트가 직접 렌더링하므로 더 이상 필요하지 않습니다.
-import appleIcon from '../assets/appleid_button@2x.png'; // Apple 아이콘
-import kakaoIcon from '../assets/kakao_login_medium_wide.png'; // Kakao 아이콘
+const INDIVIDUAL_CATEGORIES = ['학생', '취업준비생', '프리랜서', '직장인', '자영업'];
 
-function SignupPage({ onSignupSuccess, onTogglePage }) {
+const PRIVACY_TEXT = `[개인정보 수집·이용 동의]
 
-  // Google 회원가입 성공 시 호출될 콜백 함수
-  const handleCredentialResponse = useCallback((response) => {
-    console.log("Encoded JWT ID token: " + response.credential);
-    // 실제 애플리케이션에서는 이 토큰을 서버로 보내 회원가입 및 인증 과정을 완료해야 합니다.
-    // 여기서는 시뮬레이션으로 회원가입 성공 처리
-    alert("Google 회원가입 성공 (시뮬레이션)! JWT 토큰: " + response.credential.substring(0, 30) + "...");
-    onSignupSuccess(); // 회원가입 성공 콜백 호출
-  }, [onSignupSuccess]);
+한국인공지능개발자 협동조합(이하 "조합")은 「개인정보 보호법」 제15조 및 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」에 따라 아래와 같이 개인정보를 수집·이용합니다.
 
-  useEffect(() => {
-    // Google Identity Services 스크립트 로드
-    const script = document.createElement('script');
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true; // defer 속성 추가
-    script.onload = () => {
-      // 스크립트 로드 완료 후 Google GIS 초기화
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, // .env 파일에 VITE_GOOGLE_CLIENT_ID 추가 필요
-          callback: handleCredentialResponse
-        });
-        window.google.id = window.google.accounts.id; // 전역 스코프에 id 객체 설정, 필요시
+1. 수집·이용 목적
+ - 조합원 가입 및 자격 확인, 본인 식별
+ - 조합 서비스 제공 및 가입 관련 안내·고지사항 전달
+ - 문의 응대 및 민원 처리
 
-        window.google.accounts.id.renderButton(
-          document.getElementById("buttonDiv"),
-          { theme: "outline", size: "large", text: "signup_with", shape: "rectangular", width: "300" } // Google 버튼 커스터마이징 (회원가입용)
-        );
-        // window.google.accounts.id.prompt(); // One Tap dialog는 사용자 경험을 위해 필요할 때만 호출
-      }
-    };
-    document.body.appendChild(script);
+2. 수집 항목
+ - (공통) 구분, 이름, 이메일, 전화번호
+ - (개인) 세부 카테고리 / (법인) 회사명, 직책
 
-    return () => {
-      // 컴포넌트 언마운트 시 스크립트 제거 (선택 사항이지만 깔끔하게 관리)
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-      // Google ID 서비스 정리 (필요시)
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        window.google.accounts.id.cancel();
-        window.google.accounts.id.disableAutoSelect();
-      }
-    };
-  }, [handleCredentialResponse]); // handleCredentialResponse를 의존성 배열에 추가
+3. 보유 및 이용 기간
+ - 회원 탈퇴 시 또는 수집·이용 목적 달성 시까지 보유하며, 이후 지체 없이 파기합니다.
+ - 다만 관련 법령에 따라 보존이 필요한 경우 해당 기간 동안 보관합니다.
 
-  // Apple 및 Kakao 회원가입은 기존 방식 유지 (시뮬레이션)
-  const handleSocialSignup = (provider) => {
-    console.log(`${provider} 회원가입 시도...`);
-    // 실제 소셜 회원가입 API 호출 로직이 여기에 들어갑니다.
-    // 성공 시 onSignupSuccess() 호출
-    alert(`${provider} 회원가입 시도 (시뮬레이션)!`);
-    onSignupSuccess(); // 회원가입 성공 콜백 호출
+4. 제3자 제공 및 마케팅 이용 금지
+ - 조합은 정보주체의 별도 동의 없이 개인정보를 제3자에게 제공하지 않으며, 광고성 정보 전송 등 마케팅 목적으로 이용하지 않습니다.
+
+5. 안전성 확보 조치
+ - 수집된 개인정보는 암호화하여 저장·관리하며, 관계 법령이 정한 기술적·관리적 보호조치를 적용합니다.
+
+6. 동의 거부 권리 및 불이익
+ - 귀하는 본 동의를 거부할 권리가 있습니다. 다만 필수 항목 수집에 동의하지 않으실 경우 조합원 가입이 제한될 수 있습니다.
+
+그 밖의 사항은 「개인정보 보호법」 및 「정보통신망법」 등 관련 법령과 조합의 개인정보 처리방침에 따릅니다.`;
+
+// detailsMode: 소셜 인증을 마친 신규 회원의 추가 정보 입력 단계 (App이 제어)
+function SignupPage({ onTogglePage, detailsMode = false, user = null, onProfileSaved }) {
+  const [form, setForm] = useState({
+    accountType: 'individual',
+    name: '',
+    company: '',
+    position: '',
+    category: '',
+    email: user?.email || '',
+    phone: '',
+    agreed: false,
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const isValid =
+    form.name.trim() &&
+    form.email.trim() &&
+    form.phone.trim() &&
+    form.agreed &&
+    (form.accountType === 'corporate'
+      ? form.company.trim() && form.position.trim()
+      : form.category);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isValid || submitting) return;
+    setSubmitting(true);
+    const { data, error } = await supabase.from('profiles').insert({
+      id: user.id,
+      account_type: form.accountType,
+      name: form.name.trim(),
+      company: form.accountType === 'corporate' ? form.company.trim() : null,
+      position: form.accountType === 'corporate' ? form.position.trim() : null,
+      category: form.accountType === 'individual' ? form.category : null,
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      privacy_agreed: form.agreed,
+    }).select().single();
+    setSubmitting(false);
+    if (error) {
+      alert(`가입 정보 저장 오류: ${error.message}`);
+      return;
+    }
+    onProfileSaved?.(data);
   };
 
-  return (
-    <div className="auth-form-container">
-      <h2>회원가입</h2>
-      <div className="social-login-buttons">
-        {/* Google 회원가입 버튼은 Google GIS 스크립트에 의해 렌더링됩니다. */}
-        <div id="buttonDiv" className="google-login-button-wrapper"></div>
-
-        <button 
-          onClick={() => handleSocialSignup('Apple')} 
-          className="social-login-button apple-login-button"
-        >
-          <img src={appleIcon} alt="Apple Icon" />
-          {/* Apple로 회원가입 텍스트 제거 */}
-        </button>
-        <button 
-          onClick={() => handleSocialSignup('Kakao')} 
-          className="social-login-button kakao-login-button"
-        >
-          <img src={kakaoIcon} alt="Kakao Icon" />
-          {/* 카카오로 회원가입 텍스트 제거 */}
-        </button>
+  // 1단계: 소셜 인증 (App에서 detailsMode가 아닐 때)
+  if (!detailsMode) {
+    return (
+      <div className="auth-form-container">
+        <h2>회원가입</h2>
+        <p className="auth-stage-desc">먼저 소셜 계정으로 인증해주세요.</p>
+        <OAuthButtons verb="회원가입" />
+        <p>
+          이미 계정이 있으신가요?{' '}
+          <button type="button" onClick={onTogglePage} className="toggle-button">로그인</button>
+        </p>
       </div>
-      <p>
-        이미 계정이 있으신가요?{' '}
-        <button type="button" onClick={onTogglePage} className="toggle-button">
-          로그인
+    );
+  }
+
+  // 2단계: 추가 정보 입력 (인증 완료 후)
+  return (
+    <div className="auth-form-container signup-details">
+      <h2>정보 입력</h2>
+      <p className="auth-stage-desc">조합원 가입을 위해 아래 정보를 입력해주세요.</p>
+      <form className="signup-form" onSubmit={handleSubmit}>
+        {/* 구분 */}
+        <div className="form-field">
+          <label>구분</label>
+          <div className="type-toggle">
+            <button
+              type="button"
+              className={form.accountType === 'individual' ? 'active' : ''}
+              onClick={() => update('accountType', 'individual')}
+            >
+              개인
+            </button>
+            <button
+              type="button"
+              className={form.accountType === 'corporate' ? 'active' : ''}
+              onClick={() => update('accountType', 'corporate')}
+            >
+              법인
+            </button>
+          </div>
+        </div>
+
+        {/* 이름 (공통) */}
+        <div className="form-field">
+          <label htmlFor="su-name">이름</label>
+          <input
+            id="su-name"
+            type="text"
+            value={form.name}
+            onChange={(e) => update('name', e.target.value)}
+            placeholder="이름을 입력하세요"
+          />
+        </div>
+
+        {/* 개인: 세부 카테고리 */}
+        {form.accountType === 'individual' && (
+          <div className="form-field">
+            <label htmlFor="su-category">세부 카테고리</label>
+            <select
+              id="su-category"
+              value={form.category}
+              onChange={(e) => update('category', e.target.value)}
+            >
+              <option value="">선택하세요</option>
+              {INDIVIDUAL_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* 법인: 회사명 + 직책 */}
+        {form.accountType === 'corporate' && (
+          <>
+            <div className="form-field">
+              <label htmlFor="su-company">회사명</label>
+              <input
+                id="su-company"
+                type="text"
+                value={form.company}
+                onChange={(e) => update('company', e.target.value)}
+                placeholder="회사명을 입력하세요"
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="su-position">직책</label>
+              <input
+                id="su-position"
+                type="text"
+                value={form.position}
+                onChange={(e) => update('position', e.target.value)}
+                placeholder="예: 대표, 팀장, 매니저"
+              />
+            </div>
+          </>
+        )}
+
+        {/* 이메일 */}
+        <div className="form-field">
+          <label htmlFor="su-email">이메일</label>
+          <input
+            id="su-email"
+            type="email"
+            value={form.email}
+            onChange={(e) => update('email', e.target.value)}
+            placeholder="example@email.com"
+          />
+        </div>
+
+        {/* 전화번호 */}
+        <div className="form-field">
+          <label htmlFor="su-phone">전화번호</label>
+          <input
+            id="su-phone"
+            type="tel"
+            value={form.phone}
+            onChange={(e) => update('phone', e.target.value)}
+            placeholder="010-0000-0000"
+          />
+        </div>
+
+        {/* 개인정보 보호 안내 */}
+        <div className="form-field">
+          <label htmlFor="su-privacy">개인정보 수집·이용 안내</label>
+          <textarea id="su-privacy" className="privacy-textarea" value={PRIVACY_TEXT} readOnly rows={12} />
+        </div>
+
+        {/* 동의 체크박스 */}
+        <label className="consent-row">
+          <input
+            type="checkbox"
+            checked={form.agreed}
+            onChange={(e) => update('agreed', e.target.checked)}
+          />
+          <span>위 개인정보 수집·이용에 동의합니다.</span>
+        </label>
+
+        <button type="submit" className="auth-submit-button" disabled={!isValid || submitting}>
+          {submitting ? '처리 중...' : '회원가입'}
         </button>
-      </p>
+      </form>
     </div>
   );
 }

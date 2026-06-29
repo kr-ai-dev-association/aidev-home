@@ -1,0 +1,66 @@
+/* Quill(snow) 다크 테마 오버라이드 */
+.rte .ql-toolbar.ql-snow {
+  background: #0f1524;
+  border-color: rgba(255, 255, 255, 0.14);
+  border-radius: 9px 9px 0 0;
+}
+.rte .ql-container.ql-snow {
+  border-color: rgba(255, 255, 255, 0.14);
+  border-radius: 0 0 9px 9px;
+  background: #0f1524;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 0.98rem;
+}
+.rte .ql-editor {
+  min-height: 160px;
+}
+.rte .ql-editor.ql-blank::before {
+  color: #64748b;
+  font-style: normal;
+}
+
+/* 툴바 아이콘 색상 */
+.rte .ql-snow .ql-stroke { stroke: #cbd5e1; }
+.rte .ql-snow .ql-fill,
+.rte .ql-snow .ql-stroke.ql-fill { fill: #cbd5e1; }
+.rte .ql-snow .ql-picker { color: #cbd5e1; }
+.rte .ql-snow.ql-toolbar button:hover .ql-stroke,
+.rte .ql-snow .ql-toolbar button:hover .ql-stroke,
+.rte .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.rte .ql-snow .ql-picker-label:hover { stroke: #22d3ee; color: #22d3ee; }
+.rte .ql-snow.ql-toolbar button.ql-active .ql-fill { fill: #22d3ee; }
+
+/* 드롭다운(헤더 선택 등) */
+.rte .ql-snow .ql-picker-options {
+  background: #111726;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* 링크 입력 툴팁 */
+.rte .ql-snow .ql-tooltip {
+  background: #111726;
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.rte .ql-snow .ql-tooltip input[type=text] {
+  background: #0f1524;
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.rte .ql-snow .ql-tooltip a.ql-action,
+.rte .ql-snow .ql-tooltip a.ql-remove { color: #818cf8; }
+
+/* 에디터 내부 코드/인용 */
+.rte .ql-editor blockquote {
+  border-left: 3px solid #22d3ee;
+  color: #cbd5e1;
+}
+.rte .ql-editor pre.ql-syntax {
+  background: #0d1424;
+  color: #e2e8f0;
+  border-radius: 8px;
+}
+.rte .ql-editor a { color: #818cf8; }

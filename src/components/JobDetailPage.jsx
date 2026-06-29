@@ -1,179 +1,210 @@
 import React from 'react';
 import './JobDetailPage.css';
-import '../App.css'; // 공통 스타일을 위해 App.css 임포트
-// 회사 로고 이미지 임포트는 EmploymentPage에서 전달받으므로 여기서는 불필요
+import '../App.css';
+import { sanitize } from '../lib/html';
+import { startConversation } from '../lib/inbox';
+import { FIELD_DEFS, badgeStyle, cardInfo } from '../lib/jobFields';
 
-// Social icons (placeholder for now)
-const TwitterIcon = () => <span className="social-icon-text">𝕏</span>;
-const PinterestIcon = () => <span className="social-icon-text">📌</span>;
-
-// Related Job Card for JobDetailPage (simplified version of JobCard)
-function RelatedJobCard({ job, onJobClick }) {
+function RelatedJobCard({ job, onClick }) {
+  const info = cardInfo(job);
+  const st = badgeStyle(info.badge);
   return (
-    <div className="related-job-card-item" onClick={() => onJobClick(job)}>
-      <div className="related-job-logo-wrapper">
-        <img src={job.logo} alt={`${job.companyKo} 로고`} className="related-job-logo" />
-      </div>
+    <div className="related-job-card-item" onClick={() => onClick(job)}>
       <div className="related-job-details">
-        <h4 className="related-job-title">{job.titleKo}</h4>
-        <p className="related-job-location">{job.locationKo}</p>
-        <p className="related-job-company">{job.companyKo}</p>
+        <h4 className="related-job-title">{job.title}</h4>
+        {info.location && <p className="related-job-location">{info.location}</p>}
+        {info.company && <p className="related-job-company">{info.company}</p>}
       </div>
-      <div className="related-job-type" style={{ backgroundColor: job.typeColor, color: job.textColor }}>
-        {job.typeKo}
-      </div>
+      <div className="related-job-type" style={{ backgroundColor: st.bg, color: st.color }}>{info.badge}</div>
     </div>
   );
 }
 
+function renderValue(value) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return null;
+    return (
+      <ul className="job-detail-list">
+        {value.map((v, i) => <li key={i}>{v}</li>)}
+      </ul>
+    );
+  }
+  return <p className="info-value">{value}</p>;
+}
 
-function JobDetailPage({ job, onBackToListings, onSelectJob }) {
+function JobDetailPage({ job, allJobs = [], onBack, onSelect, canManage, onEdit, onDelete, canMessage, onOpenConversation }) {
+  const messageAuthor = async () => {
+    try {
+      const cid = await startConversation(job.author_id);
+      onOpenConversation && onOpenConversation(cid);
+    } catch (e) {
+      alert(`메시지 시작 오류: ${e.message}`);
+    }
+  };
   if (!job) {
     return (
       <div className="job-detail-page-container content-area-container">
         <p>채용 정보를 찾을 수 없습니다.</p>
-        <button className="back-button" onClick={onBackToListings}>목록으로 돌아가기</button>
+        <button className="back-button" onClick={onBack}>목록으로 돌아가기</button>
       </div>
     );
   }
 
-  // Related jobs (excluding the current job)
-  const allJobs = JSON.parse(localStorage.getItem('jobListings')) || []; // EmploymentPage에서 저장된 전체 목록 사용
-  const relatedJobs = allJobs
-    .filter(j => j.id !== job.id)
-    .slice(0, 2); // Show up to 2 related jobs
+  const d = job.details || {};
+  const fields = FIELD_DEFS[job.board_type] || [];
+  const info = cardInfo(job);
+  const st = badgeStyle(info.badge);
+  const related = allJobs.filter((j) => j.id !== job.id && j.board_type === job.board_type).slice(0, 2);
 
   return (
     <div className="job-detail-page-container content-area-container">
       <div className="job-detail-main-content">
         <div className="job-detail-header">
-          <div className="job-detail-company-info">
-            <img src={job.logo} alt={`${job.companyEn} 로고`} className="detail-company-logo" />
-            <div className="job-detail-text-info">
-              <h1 className="detail-job-title">{job.titleEn}</h1>
-              <p className="detail-company-name">{job.companyEn}</p>
-              <p className="detail-agency-name">{job.agency}</p>
-            </div>
+          <div className="job-detail-text-info">
+            <span className="job-board-badge" style={{ backgroundColor: st.bg, color: st.color }}>{job.board_type}</span>
+            <h1 className="detail-job-title">{job.title}</h1>
+            {info.company && <p className="detail-company-name">{info.company}</p>}
+            <p className="detail-agency-name">작성: {job.author_name}</p>
           </div>
-          <div className="job-detail-social-share">
-            <button className="social-share-button"><PinterestIcon /></button>
-            <button className="social-share-button"><TwitterIcon /></button>
-          </div>
-        </div>
-
-        <div className="job-info-card">
-          <div className="info-item">
-            <span className="info-icon">💼</span>
-            <div className="info-text">
-              <p className="info-label">직무 유형</p>
-              <p className="info-value">{job.typeEn}</p>
-            </div>
-          </div>
-          <div className="info-item">
-            <span className="info-icon">📍</span>
-            <div className="info-text">
-              <p className="info-label">위치</p>
-              <p className="info-value">{job.locationEn}</p>
-            </div>
-          </div>
-        </div>
-
-        {job.youtubeEmbedUrl && (
-          <div className="youtube-embed-container">
-            <iframe
-              width="100%"
-              height="315"
-              src={job.youtubeEmbedUrl}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
-          </div>
-        )}
-
-        <div className="job-section">
-          <h2 className="section-title">직무 설명:</h2>
-          {job.descriptionEn.split('\n').map((paragraph, index) => (
-            <p key={index} className="job-description-paragraph">{paragraph}</p>
-          ))}
-        </div>
-
-        <div className="job-section">
-          <h2 className="section-title">책임:</h2>
-          <ul className="job-responsibilities-list">
-            {job.responsibilitiesEn.map((responsibility, index) => (
-              <li key={index}>{responsibility}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="job-section">
-          <h2 className="section-title">요구 사항:</h2>
-          <ul className="job-requirements-list">
-            {job.requirementsEn.map((requirement, index) => (
-              <li key={index}>{requirement}</li>
-            ))}
-          </ul>
-        </div>
-
-        <button className="apply-button">지원하기</button>
-
-        <div className="job-section related-jobs-section">
-          <h2 className="section-title">관련 채용 공고</h2>
-          <div className="related-jobs-list">
-            {relatedJobs.length > 0 ? (
-              relatedJobs.map(relatedJob => (
-                <RelatedJobCard key={relatedJob.id} job={relatedJob} onJobClick={onSelectJob} />
-              ))
-            ) : (
-              <p>관련 채용 공고가 없습니다.</p>
+          <div className="job-detail-manage">
+            {canMessage && (
+              <button className="nt-btn ghost" onClick={messageAuthor}>✉️ 작성자에게 메시지</button>
+            )}
+            {canManage && (
+              <>
+                <button className="nt-btn ghost" onClick={() => onEdit(job)}>수정</button>
+                <button className="nt-btn danger" onClick={() => onDelete(job)}>삭제</button>
+              </>
             )}
           </div>
         </div>
+
+        {/* 보드별 핵심 정보 (단문 필드) */}
+        <div className="job-info-card">
+          {fields.filter((f) => ['text', 'select', 'tags'].includes(f.type)).map((f) => {
+            const val = d[f.key];
+            if (!val || (Array.isArray(val) && val.length === 0)) return null;
+            return (
+              <div className="info-item" key={f.key}>
+                <div className="info-text">
+                  <p className="info-label">{f.label}</p>
+                  <p className="info-value">{Array.isArray(val) ? val.join(', ') : val}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 상세 설명 (리치 텍스트) */}
+        {job.description && (
+          <div className="job-section">
+            <h2 className="section-title">상세 설명</h2>
+            <div className="job-description-rich" dangerouslySetInnerHTML={{ __html: sanitize(job.description) }} />
+          </div>
+        )}
+
+        {/* 리스트형 필드 (주요 업무/자격 요건/모집 분야 등) */}
+        {fields.filter((f) => f.type === 'list').map((f) => {
+          const val = d[f.key];
+          if (!Array.isArray(val) || val.length === 0) return null;
+          return (
+            <div className="job-section" key={f.key}>
+              <h2 className="section-title">{f.label}</h2>
+              {renderValue(val)}
+            </div>
+          );
+        })}
+
+        {/* 기능 요구사항 */}
+        {fields.filter((f) => f.type === 'features').map((f) => {
+          const arr = d[f.key];
+          if (!Array.isArray(arr) || arr.length === 0) return null;
+          return (
+            <div className="job-section" key={f.key}>
+              <h2 className="section-title">{f.label}</h2>
+              <div className="feature-list">
+                {arr.map((feat, i) => (
+                  <div className="feature-item" key={i}>
+                    <div className="feature-text">
+                      <h4 className="feature-name">{i + 1}. {feat.name}</h4>
+                      {feat.detail && <p className="feature-detail">{feat.detail}</p>}
+                    </div>
+                    {feat.image && (
+                      <a href={feat.image} target="_blank" rel="noreferrer" className="feature-image">
+                        <img src={feat.image} alt={feat.name} />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* 스크린샷 */}
+        {fields.filter((f) => f.type === 'images').map((f) => {
+          const arr = d[f.key];
+          if (!Array.isArray(arr) || arr.length === 0) return null;
+          return (
+            <div className="job-section" key={f.key}>
+              <h2 className="section-title">{f.label}</h2>
+              <div className="screenshot-gallery">
+                {arr.map((url, i) => (
+                  <a href={url} target="_blank" rel="noreferrer" key={i} className="screenshot-thumb">
+                    <img src={url} alt={`스크린샷 ${i + 1}`} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {job.contact && (
+          <a className="apply-button" href={job.contact.includes('@') ? `mailto:${job.contact}` : job.contact} target="_blank" rel="noreferrer">
+            지원/문의하기
+          </a>
+        )}
+
+        {related.length > 0 && (
+          <div className="job-section related-jobs-section">
+            <h2 className="section-title">같은 카테고리의 다른 공고</h2>
+            <div className="related-jobs-list">
+              {related.map((r) => <RelatedJobCard key={r.id} job={r} onClick={onSelect} />)}
+            </div>
+          </div>
+        )}
       </div>
 
       <aside className="job-detail-sidebar">
         <div className="job-overview-card">
-          <h3>채용 개요</h3>
-          <div className="overview-item">
-            <span className="overview-icon">📅</span>
-            <div className="overview-text">
-              <p className="overview-label">등록일</p>
-              <p className="overview-value">{job.datePosted}</p>
-            </div>
-          </div>
-          <div className="overview-item">
-            <span className="overview-icon">📍</span>
-            <div className="overview-text">
-              <p className="overview-label">위치</p>
-              <p className="overview-value">{job.locationEn}</p>
-            </div>
-          </div>
-          <div className="overview-item">
-            <span className="overview-icon">💼</span>
-            <div className="overview-text">
-              <p className="overview-label">직무 유형</p>
-              <p className="overview-value">{job.typeEn}</p>
-            </div>
-          </div>
-          <div className="overview-item">
-            <span className="overview-icon">💰</span>
-            <div className="overview-text">
-              <p className="overview-label">급여</p>
-              <p className="overview-value">{job.salary}</p>
-            </div>
-          </div>
+          <h3>개요</h3>
           <div className="overview-item">
             <span className="overview-icon">🏷️</span>
             <div className="overview-text">
-              <p className="overview-label">카테고리</p>
-              <p className="overview-value">{job.category}</p>
+              <p className="overview-label">구분</p>
+              <p className="overview-value">{job.board_type}</p>
             </div>
           </div>
+          {info.company && (
+            <div className="overview-item">
+              <span className="overview-icon">🏢</span>
+              <div className="overview-text">
+                <p className="overview-label">{job.board_type === '채용공고' ? '회사' : '주체'}</p>
+                <p className="overview-value">{info.company}</p>
+              </div>
+            </div>
+          )}
+          {info.location && (
+            <div className="overview-item">
+              <span className="overview-icon">📍</span>
+              <div className="overview-text">
+                <p className="overview-label">정보</p>
+                <p className="overview-value">{info.location}</p>
+              </div>
+            </div>
+          )}
         </div>
-        <button className="back-button" onClick={onBackToListings}>← 목록으로 돌아가기</button>
+        <button className="back-button" onClick={onBack}>← 목록으로 돌아가기</button>
       </aside>
     </div>
   );

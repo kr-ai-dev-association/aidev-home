@@ -1,0 +1,96 @@
+.vote-page {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  min-height: 60vh;
+}
+.vote-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.vote-page-title { font-size: 1.8rem; font-weight: 800; color: #f8fafc; margin: 0; }
+.vote-empty { color: #94a3b8; text-align: center; padding: 2rem 0; }
+
+.nt-btn {
+  padding: 0.6em 1.3em; border-radius: 9px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); color: #e2e8f0;
+}
+.nt-btn.primary { background: linear-gradient(135deg,#6366f1,#22d3ee); border-color: transparent; color: #fff; }
+.nt-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.nt-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 의제 작성 폼 */
+.vote-form {
+  background: #111726; border: 1px solid rgba(255,255,255,0.09); border-radius: 14px;
+  padding: 1.6rem; margin-bottom: 1.6rem;
+}
+.vf-field { display: flex; flex-direction: column; margin-bottom: 1.1rem; }
+.vf-field label { font-size: 0.88rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem; }
+.vf-field input {
+  background: #0f1524; border: 1px solid rgba(255,255,255,0.14); border-radius: 9px;
+  color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 0.6em 0.8em;
+}
+.vf-field input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+.vf-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+/* 섹션 */
+.vote-section { margin-bottom: 2.2rem; }
+.vote-section-title { font-size: 1.2rem; color: #f8fafc; margin: 0 0 1rem; }
+
+/* 투표 카드 */
+.vote-card {
+  background: #111726; border: 1px solid rgba(255,255,255,0.09); border-radius: 14px;
+  padding: 1.4rem; margin-bottom: 1rem;
+}
+.vote-card.ended { opacity: 0.92; }
+.vote-card-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+.vote-card-title { font-size: 1.2rem; color: #f8fafc; margin: 0; }
+.vote-timer {
+  flex-shrink: 0; font-variant-numeric: tabular-nums; font-weight: 700; color: #67e8f9;
+  background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.3); border-radius: 999px; padding: 0.3em 0.8em; font-size: 0.9rem;
+}
+.vote-timer.ended { color: #fca5a5; background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.3); }
+.vote-status { flex-shrink: 0; font-size: 0.82rem; font-weight: 700; padding: 0.3em 0.8em; border-radius: 999px; }
+.vote-status.closed { background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.12); }
+.vote-content { color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem; }
+.vote-content a { color: #818cf8; }
+
+/* 인포그래픽 */
+.vote-info {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1rem;
+}
+.turnout-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.9rem; }
+.turnout-label { color: #cbd5e1; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; width: 48px; }
+.turnout-bar { flex: 1; height: 10px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.turnout-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#22d3ee); border-radius: 999px; transition: width 0.4s ease; }
+.turnout-num { flex-shrink: 0; color: #e2e8f0; font-weight: 700; font-size: 0.9rem; }
+.turnout-num em { color: #94a3b8; font-style: normal; font-weight: 500; font-size: 0.82rem; }
+
+.choice-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+.choice-bar-row { display: flex; align-items: center; gap: 0.7rem; }
+.choice-name { flex-shrink: 0; width: 48px; font-weight: 700; font-size: 0.9rem; }
+.choice-bar { flex: 1; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.choice-fill { height: 100%; border-radius: 7px; transition: width 0.4s ease; }
+.choice-num { flex-shrink: 0; color: #cbd5e1; font-size: 0.85rem; width: 90px; text-align: right; }
+.vote-anon-note { margin: 0.8rem 0 0; color: #64748b; font-size: 0.78rem; }
+
+/* 투표 액션 */
+.vote-actions { margin-top: 0.4rem; }
+.vote-buttons { display: flex; gap: 0.6rem; }
+.vote-btn {
+  flex: 1; background: rgba(255,255,255,0.03); border: 1.5px solid; border-radius: 10px;
+  padding: 0.7em; font-weight: 700; font-size: 1rem; cursor: pointer;
+}
+.vote-btn:hover:not(:disabled) { background: rgba(255,255,255,0.07); }
+.vote-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.vote-voted { color: #cbd5e1; margin: 0; }
+.vote-voted strong { color: #67e8f9; }
+.vote-result-link {
+  margin-top: 0.8rem; background: rgba(99,102,241,0.14); border: 1px solid rgba(99,102,241,0.35);
+  color: #c7d2fe; border-radius: 9px; padding: 0.5em 1em; font-weight: 600; cursor: pointer;
+}
+.vote-result-link:disabled { opacity: 0.5; cursor: not-allowed; }

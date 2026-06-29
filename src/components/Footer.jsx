@@ -7,11 +7,9 @@ function Footer() {
       <div className="footer-content">
         {/* <img src={logo} alt="AIDEV Logo" className="footer-logo" /> 로고 삭제 */}
         <div className="footer-info">
-          <p><strong>사단법인 한국인공지능개발자협회</strong></p>
+          <p><strong>한국인공지능개발자 협동조합</strong></p>
           <p>주소 : 서울시 강남구 삼성로 86길 16 덕산빌딩 5층</p>
-          <p>전화 : 02-000-0000</p>
-          <p>이메일 : sangoh@aidevkr.org</p>
-          <p>대표이사 : 송상오</p>
+          <p>이메일 : tonymustbegreat@gmail.com</p>
         </div>
       </div>
     </footer>

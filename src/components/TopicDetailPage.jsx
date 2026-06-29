@@ -1,75 +1,120 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './TopicDetailPage.css';
-import '../App.css'; // 공통 스타일을 위해 App.css 임포트
-import sephirothAvatar from '../assets/sephiroth-avatar.png'; // 세피로스 아바타 이미지 임포트
-import aliceAvatar from '../assets/alice-avatar.png'; // 앨리스 아바타 이미지 임포트
+import '../App.css';
+import { supabase } from '../lib/supabase';
+import RichTextEditor from './RichTextEditor';
+import { sanitize, isEmptyHtml } from '../lib/html';
+import { startConversation } from '../lib/inbox';
+import avatarPlaceholder from '../assets/profile-placeholder.png';
 
-// Mock data for a specific topic (실제로는 API에서 topicId를 받아 상세 데이터를 가져옵니다)
-const mockTopicDetail = {
-  id: 1,
-  category: '벌집 테마',
-  title: '벌집 테마에 대해 가장 좋아하는 점은 무엇인가요?',
-  tags: ['bbpress', '구조', '스레드'], // 태그 번역
-  replies: 62,
-  voices: 2,
-  lastUpdated: '1주 5일 전',
-  lastUpdatedBy: '앨리스',
-  posts: [
-    {
-      id: 286,
-      author: {
-        name: '세피로스',
-        role: '키마스터', // 역할 번역
-        avatar: sephirothAvatar,
-      },
-      date: '2020년 1월 24일 오후 9:22', // 날짜 형식 유지, 필요시 한글화
-      content: '진실로, 비난받을 만한 것들을 비난하고 고통을 피하려는 이들은 잘못 판단하는 것입니다. 쾌락을 얻으려 노력하는 사람들이나 고통을 겪는 사람들이 없기 때문입니다. 고통을 피하는 자는 아무도 없습니다.', // 내용 번역
-    },
-    {
-      id: 899,
-      author: {
-        name: '앨리스',
-        role: '참여자', // 역할 번역
-        avatar: aliceAvatar,
-      },
-      date: '2020년 7월 26일 오후 9:52',
-      content: '안녕하세요, 좋은 의견입니다.', // 내용 번역 (원문이 의미 없는 문자열이므로 임의 번역)
-    },
-    {
-      id: 1174,
-      author: {
-        name: '앨리스',
-        role: '참여자', // 역할 번역
-        avatar: aliceAvatar,
-      },
-      date: '2020년 9월 12일 오전 6:06',
-      content: '맞아요. 이 테마는 멋져요.', // 내용 번역
-    },
-    {
-      id: 1287,
-      author: {
-        name: '앨리스',
-        role: '참여자', // 역할 번역
-        avatar: aliceAvatar,
-      },
-      date: '2020년 9월 30일 오전 11:55',
-      content: '이것은 앨리스의 또 다른 답변입니다.', // 내용 번역
-    },
-  ],
-};
+function formatDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const h = d.getHours();
+  const ampm = h < 12 ? '오전' : '오후';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${ampm} ${h12}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
 
-const recentTopicsData = [
-  '123',
-  '독립 주택 2층 방 1개 $900에 임대',
-  '오오오',
-  '루나',
-  'ㅂㅅㅂㅅㅇㅅㅇ',
-];
+function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenConversation }) {
+  const messageAuthor = async (authorId) => {
+    try {
+      const cid = await startConversation(authorId);
+      onOpenConversation && onOpenConversation(cid);
+    } catch (e) {
+      alert(`메시지 시작 오류: ${e.message}`);
+    }
+  };
+  const [topic, setTopic] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [recent, setRecent] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [reply, setReply] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [commentDrafts, setCommentDrafts] = useState({});
+  const [commentBusy, setCommentBusy] = useState(false);
 
-function TopicDetailPage({ topicId, onBackToListings }) {
-  // 실제 앱에서는 topicId를 사용하여 서버에서 상세 데이터를 가져옵니다.
-  // 여기서는 mock data를 사용합니다.
-  const topic = mockTopicDetail; // topicId에 따라 실제 데이터를 필터링할 수 있습니다.
+  const authorName = profile?.name || user?.email?.split('@')[0] || '익명';
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    const [{ data: t }, { data: p }, { data: r }] = await Promise.all([
+      supabase.from('topics').select('*').eq('id', topicId).maybeSingle(),
+      supabase.from('posts').select('*').eq('topic_id', topicId).order('created_at', { ascending: true }),
+      supabase.from('topics').select('id, title').order('last_activity_at', { ascending: false }).limit(5),
+    ]);
+    setTopic(t || null);
+    setPosts(p || []);
+    setRecent(r || []);
+    // 게시글들의 답글 일괄 조회
+    const postIds = (p || []).map((x) => x.id);
+    if (postIds.length) {
+      const { data: c } = await supabase
+        .from('comments')
+        .select('*')
+        .in('post_id', postIds)
+        .order('created_at', { ascending: true });
+      setComments(c || []);
+    } else {
+      setComments([]);
+    }
+    setLoading(false);
+  }, [topicId]);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  const addComment = async (postId) => {
+    const text = (commentDrafts[postId] || '').trim();
+    if (!text || commentBusy) return;
+    setCommentBusy(true);
+    const { error } = await supabase.from('comments').insert({
+      post_id: postId,
+      author_id: user.id,
+      author_name: authorName,
+      content: text,
+    });
+    setCommentBusy(false);
+    if (error) { alert(`답글 등록 오류: ${error.message}`); return; }
+    setCommentDrafts((d) => ({ ...d, [postId]: '' }));
+    fetchAll();
+  };
+
+  const deleteComment = async (id) => {
+    if (!window.confirm('답글을 삭제하시겠습니까?')) return;
+    const { error } = await supabase.from('comments').delete().eq('id', id);
+    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    setComments((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const handleReply = async (e) => {
+    e.preventDefault();
+    if (isEmptyHtml(reply) || submitting) return;
+    setSubmitting(true);
+    const { error } = await supabase.from('posts').insert({
+      topic_id: topicId,
+      author_id: user.id,
+      author_name: authorName,
+      content: reply.trim(),
+    });
+    setSubmitting(false);
+    if (error) {
+      alert(`답변 등록 오류: ${error.message}`);
+      return;
+    }
+    setReply('');
+    fetchAll();
+  };
+
+  if (loading) {
+    return (
+      <div className="topic-detail-page-container content-area-container">
+        <p className="community-msg">불러오는 중...</p>
+      </div>
+    );
+  }
 
   if (!topic) {
     return (
@@ -80,16 +125,14 @@ function TopicDetailPage({ topicId, onBackToListings }) {
     );
   }
 
-  // 로그인 상태를 가정 (실제 앱에서는 isLoggedIn 상태를 prop으로 받거나 Context API 사용)
-  const isLoggedIn = false; 
+  const voices = new Set(posts.map((p) => p.author_id)).size;
+  const lastPost = posts[posts.length - 1];
 
   return (
     <div className="topic-detail-page-container content-area-container">
       <div className="topic-detail-main-content">
         <nav className="topic-breadcrumbs">
-          <span>홈 1</span> {/* 번역 */}
-          <span>›</span>
-          <span>포럼</span> {/* 번역 */}
+          <span className="crumb-link" onClick={onBackToListings}>커뮤니티</span>
           <span>›</span>
           <span className="current-category">{topic.category}</span>
           <span>›</span>
@@ -97,67 +140,93 @@ function TopicDetailPage({ topicId, onBackToListings }) {
         </nav>
 
         <div className="topic-summary-card">
-          <div className="topic-tags">
-            태그: {/* 번역 */}
-            {topic.tags.map((tag, index) => (
-              <span key={index} className="topic-tag">{tag}</span>
-            ))}
-          </div>
+          {Array.isArray(topic.tags) && topic.tags.length > 0 && (
+            <div className="topic-tags">
+              태그:
+              {topic.tags.map((tag, i) => <span key={i} className="topic-tag">{tag}</span>)}
+            </div>
+          )}
           <p className="topic-stats">
-            이 주제는 <strong>{topic.replies}</strong>개의 답변, <strong>{topic.voices}</strong>명의 참여자가 있으며, 마지막 업데이트는{' '} {/* 번역 */}
-            <strong>{topic.lastUpdated}</strong>에 <span className="last-updated-author">{topic.lastUpdatedBy}</span>에 의해 이루어졌습니다. {/* 번역 */}
+            이 주제는 <strong>{posts.length}</strong>개의 게시글, <strong>{voices}</strong>명의 참여자가 있으며, 마지막 업데이트는{' '}
+            <strong>{lastPost ? formatDateTime(lastPost.created_at) : '-'}</strong>에{' '}
+            <span className="last-updated-author">{lastPost?.author_name || topic.author_name}</span>에 의해 이루어졌습니다.
           </p>
         </div>
 
         <div className="topic-posts">
-          {topic.posts.map(post => (
+          {posts.map((post, idx) => (
             <div key={post.id} className="post-card">
               <div className="post-author-info">
-                <img src={post.author.avatar} alt={`${post.author.name} 아바타`} className="author-avatar" />
-                <p className="author-name">{post.author.name}</p>
-                <p className="author-role">{post.author.role}</p>
+                <img src={avatarPlaceholder} alt={`${post.author_name} 아바타`} className="author-avatar" />
+                <p className="author-name">{post.author_name}</p>
+                <p className="author-role">{idx === 0 ? '작성자' : '참여자'}</p>
+                {isLoggedIn && post.author_id !== user?.id && (
+                  <button className="dm-button" onClick={() => messageAuthor(post.author_id)}>✉️ 메시지</button>
+                )}
               </div>
               <div className="post-content-area">
                 <div className="post-header">
-                  <span className="post-date">{post.date}</span>
-                  <span className="post-number">#{post.id}</span>
+                  <span className="post-date">{formatDateTime(post.created_at)}</span>
+                  <span className="post-number">#{idx + 1}</span>
                 </div>
-                <div className="post-content">
-                  <p>{post.content}</p>
+                <div className="post-content" dangerouslySetInnerHTML={{ __html: sanitize(post.content) }} />
+
+                {/* 답글 */}
+                <div className="comment-section">
+                  {comments.filter((c) => c.post_id === post.id).map((c) => (
+                    <div className="comment-item" key={c.id}>
+                      <div className="comment-body">
+                        <span className="comment-author">{c.author_name}</span>
+                        <span className="comment-date">{formatDateTime(c.created_at)}</span>
+                        <p className="comment-text">{c.content}</p>
+                      </div>
+                      {(isAdmin || c.author_id === user?.id) && (
+                        <button className="comment-delete" onClick={() => deleteComment(c.id)} aria-label="답글 삭제">✕</button>
+                      )}
+                    </div>
+                  ))}
+
+                  {isLoggedIn && (
+                    <div className="comment-form">
+                      <input
+                        type="text"
+                        className="comment-input"
+                        placeholder="답글 달기..."
+                        value={commentDrafts[post.id] || ''}
+                        onChange={(e) => setCommentDrafts((d) => ({ ...d, [post.id]: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addComment(post.id); } }}
+                      />
+                      <button
+                        className="comment-submit"
+                        disabled={commentBusy || !(commentDrafts[post.id] || '').trim()}
+                        onClick={() => addComment(post.id)}
+                      >
+                        등록
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="topic-post-pagination">
-          <button className="pagination-button active">1</button>
-          <button className="pagination-button">2</button>
-          <button className="pagination-button">3</button>
-          <button className="pagination-button">4</button>
-          <button className="pagination-button">5</button>
-          <button className="pagination-arrow">→</button>
-        </div>
-
-        {!isLoggedIn && (
-          <div className="login-to-reply-section">
-            <p className="login-message">이 주제에 답변하려면 로그인해야 합니다.</p> {/* 번역 */}
-            <div className="login-form-card">
-              <h3>로그인</h3> {/* 번역 */}
-              <div className="form-group">
-                <label htmlFor="username">사용자 이름:</label> {/* 번역 */}
-                <input type="text" id="username" className="login-input" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="password">비밀번호:</label> {/* 번역 */}
-                <input type="password" id="password" className="login-input" />
-              </div>
-              <div className="form-group-checkbox">
-                <input type="checkbox" id="keep-signed-in" />
-                <label htmlFor="keep-signed-in">로그인 유지</label> {/* 번역 */}
-              </div>
-              <button className="login-submit-button">로그인</button> {/* 번역 */}
+        {/* 답변 작성 */}
+        {isLoggedIn ? (
+          <form className="reply-section" onSubmit={handleReply}>
+            <h3>답변 작성</h3>
+            <RichTextEditor value={reply} onChange={setReply} placeholder="답변을 입력하세요..." />
+            <div className="reply-actions">
+              <button type="button" className="nt-btn ghost" onClick={onBackToListings}>목록으로</button>
+              <button type="submit" className="nt-btn primary" disabled={submitting || isEmptyHtml(reply)}>
+                {submitting ? '등록 중...' : '답변 등록'}
+              </button>
             </div>
+          </form>
+        ) : (
+          <div className="login-to-reply-section">
+            <p className="login-message">이 주제에 답변하려면 로그인해야 합니다.</p>
+            <button className="nt-btn primary" onClick={() => onNavigate('login')}>로그인</button>
           </div>
         )}
       </div>
@@ -166,23 +235,10 @@ function TopicDetailPage({ topicId, onBackToListings }) {
         <div className="recent-topics-section">
           <h3>최근 주제</h3>
           <ul className="recent-topics-list">
-            {recentTopicsData.map((topicItem, index) => (
-              <li key={index}>
-                <span className="topic-bullet">💬</span> {topicItem}
-              </li>
+            {recent.map((item) => (
+              <li key={item.id}><span className="topic-bullet">💬</span> {item.title}</li>
             ))}
           </ul>
-        </div>
-        <div className="sidebar-footer">
-          <nav>
-            <ul>
-              <li>홈</li>
-              <li>협회소개</li>
-              <li>자주 묻는 질문</li>
-              <li>블로그</li>
-              <li>문의</li>
-            </ul>
-          </nav>
         </div>
       </aside>
     </div>

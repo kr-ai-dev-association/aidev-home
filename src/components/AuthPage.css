@@ -56,8 +56,8 @@
 /* Google 로그인 버튼은 이제 Google GIS 스크립트가 렌더링하므로 이 스타일은 더 이상 직접 적용되지 않습니다. */
 
 .apple-login-button {
-  /* background-color: #000000; */
-  /* color: #ffffff; */
+  /* background-color: #e2e8f0; */
+  /* color: #111726; */
 }
 
 .apple-login-button img {
@@ -66,7 +66,225 @@
 
 .kakao-login-button {
   /* background-color: #fee500; */
-  /* color: #3c1e1e; */
+  /* color: #fca5a5; */
+}
+
+/* Google 로그인/회원가입 버튼 (밝은 버튼 + 아이콘 + 텍스트) */
+.google-auth-button {
+  width: 100%;
+  max-width: 300px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background-color: #ffffff;
+  color: #1f2430;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.google-auth-button img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.google-auth-button:hover {
+  filter: brightness(0.96);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 480px) {
+  .google-auth-button {
+    max-width: 100%;
+  }
+}
+
+/* GitHub 로그인/회원가입 버튼 (아이콘 + 텍스트) */
+.github-auth-button {
+  width: 100%;
+  max-width: 300px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background-color: #1f2430;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.github-auth-button svg {
+  flex-shrink: 0;
+}
+
+.github-auth-button:hover {
+  background-color: #2a3140;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 480px) {
+  .github-auth-button {
+    max-width: 100%;
+  }
+}
+
+/* --- 회원가입 상세 폼 --- */
+.auth-form-container.signup-details {
+  max-width: 480px;
+}
+
+.auth-stage-desc {
+  margin-top: -0.5rem !important;
+  margin-bottom: 1.5rem;
+  color: #94a3b8 !important;
+  font-size: 0.95rem;
+}
+
+.signup-form {
+  text-align: left;
+}
+
+.form-field {
+  margin-bottom: 1.2rem;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #0f1524;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-family: inherit;
+  padding: 0.7em 0.9em;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: #64748b;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.form-field select option {
+  background-color: #0f1524;
+  color: #e2e8f0;
+}
+
+/* 구분 토글 (개인 / 법인) */
+.type-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.type-toggle button {
+  flex: 1;
+  padding: 0.7em 1em;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #0f1524;
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-toggle button:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #e2e8f0;
+}
+
+.type-toggle button.active {
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+/* 개인정보 안내 텍스트 영역 */
+.privacy-textarea {
+  resize: vertical;
+  line-height: 1.6;
+  font-size: 0.85rem !important;
+  color: #94a3b8 !important;
+  white-space: pre-wrap;
+}
+
+/* 동의 체크박스 */
+.consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0.5rem 0 1.5rem;
+  cursor: pointer;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.consent-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+/* 회원가입 제출 버튼 */
+.auth-submit-button {
+  width: 100%;
+  padding: 0.95em 1.5em;
+  border-radius: 10px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(34, 211, 238, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.auth-submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 16px 40px rgba(34, 211, 238, 0.38);
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* 기존 이메일/비밀번호 폼 관련 스타일은 App.css에서 제거 예정 */

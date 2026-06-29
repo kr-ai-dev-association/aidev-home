@@ -3,10 +3,10 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* 밝은 테마로 기본 설정 */
-  color-scheme: light; /* light 테마만 명시 */
-  color: #213547; /* 어두운 글자색 */
-  background-color: #ffffff; /* 밝은 배경색 */
+  /* 다크 프리미엄 테마 기본 설정 */
+  color-scheme: dark;
+  color: #e2e8f0; /* 밝은 글자색 */
+  background-color: #0a0e1a; /* 다크 네이비 배경 */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,18 +24,16 @@ html, body, #root {
 
 a {
   font-weight: 500;
-  color: #007BFF; /* 포인트 색상 변경 */
+  color: #818cf8; /* 포인트 색상 (인디고) */
   text-decoration: inherit;
 }
 a:hover {
-  color: #0056B3; /* 호버 색상 변경 */
+  color: #a5b4fc; /* 호버 색상 */
 }
 
 body {
-  /* display: flex; /* .app-container가 flexbox를 사용하여 레이아웃을 관리하므로, body의 flex 속성은 제거 */ */
+  /* 레이아웃은 App.css의 .app-container(flexbox)가 담당하므로 body의 flex/centering 속성은 사용하지 않음 */
   min-width: 320px;
-  /* place-items: center; /* App.css의 .app-container가 중앙 정렬을 담당하므로, 여기서는 제거 */ */
-  /* min-height: 100vh; 는 위에서 height: 100%로 대체되었습니다. */
 }
 
 h1 {
@@ -45,19 +43,19 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid #ccc; /* 밝은 테마에 맞게 테두리색 변경 */
+  border: 1px solid #2a3350; /* 다크 테마 테두리 */
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #f9f9f9; /* 밝은 테마에 맞게 버튼 배경색 변경 */
-  color: #213547; /* 밝은 테마에 맞게 버튼 글자색 변경 */
+  background-color: #1a2236; /* 다크 버튼 배경 */
+  color: #e2e8f0; /* 밝은 글자색 */
   cursor: pointer;
   transition: border-color 0.25s, background-color 0.25s;
 }
 button:hover {
-  border-color: #007BFF; /* 포인트 색상 변경 */
-  background-color: #e0e0e0; /* 호버 시 배경색 변경 */
+  border-color: #6366f1; /* 인디고 포인트 */
+  background-color: #232b3d; /* 호버 배경 */
 }
 button:focus,
 button:focus-visible {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'; // useState와 useEffect 임포트
 import profilePlaceholder from '../assets/profile-placeholder.png'; // 프로필 이미지 임포트
+import Logo from './Logo'; // 조합 로고 컴포넌트
 
-function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
+function Header({ isLoggedIn, isAdmin, isMember, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -45,26 +46,41 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
   return (
     <header className="main-header">
       <div className="header-left">
-        <h1 className="logo" onClick={handleLogoClick}>AIDEV</h1>
-        {isMobile && ( // 모바일에서만 햄버거 버튼 렌더링
-          <button className="mobile-menu-toggle" onClick={handleMobileMenuToggle} aria-label="메뉴 토글">
-            {isMobileMenuOpen ? '✕' : '☰'} {/* 열림/닫힘 상태에 따라 아이콘 변경 */}
-          </button>
+        <h1 className="logo" onClick={handleLogoClick} aria-label="한국인공지능개발자 협동조합 홈으로">
+          <Logo />
+        </h1>
+        {isMobile && ( // 모바일: 검색 + 햄버거를 헤더 우상단에 상시 노출
+          <div className="mobile-header-actions">
+            <button className="search-icon" aria-label="검색" onClick={onSearchClick}>🔍</button>
+            <button className="mobile-menu-toggle" onClick={handleMobileMenuToggle} aria-label="메뉴 토글">
+              {isMobileMenuOpen ? '✕' : '☰'} {/* 열림/닫힘 상태에 따라 아이콘 변경 */}
+            </button>
+          </div>
         )}
         {/* isMobile이 true이고 isMobileMenuOpen도 true일 때 'main-nav-mobile-open' 클래스 추가 */}
         <nav className={`main-nav ${isMobile && isMobileMenuOpen ? 'main-nav-mobile-open' : ''}`}>
           <ul>
             {/* '협회소개' 클릭 시 'about-intro-section'으로 스크롤 이동하도록 수정 */}
-            <li onClick={() => handleMenuItemClick('about', 'about-intro-section')}>협회소개</li>
-            <li onClick={() => handleMenuItemClick('services')}>주요 서비스</li> {/* 'services'로 페이지 이동 요청 */}
-            {/* <li onClick={() => handleMenuItemClick('project')}>프로젝트</li> */} {/* 프로젝트 메뉴 삭제 */}
+            <li onClick={() => handleMenuItemClick('about', 'about-intro-section')}>조합소개</li>
+            {/* 사업·서비스 — 강의/에이전트 평가를 하위 드롭다운으로 제공 */}
+            <li className="nav-has-children">
+              <span className="nav-parent" onClick={() => { if (!isMobile) handleMenuItemClick('services'); }}>
+                사업·서비스 <span className="nav-caret" aria-hidden="true">▾</span>
+              </span>
+              <ul className="nav-dropdown">
+                <li onClick={() => handleMenuItemClick('services')}>사업 내용</li>
+                <li onClick={() => handleMenuItemClick('courses')}>강의</li>
+                <li onClick={() => handleMenuItemClick('agenteval')}>에이전트 평가</li>
+              </ul>
+            </li>
+            <li onClick={() => handleMenuItemClick('harness')}>에이전트 하네스</li> {/* harness-collection 기반 페이지 */}
             <li onClick={() => handleMenuItemClick('employment')}>취업</li> {/* '취업' 메뉴 아이템 추가 */}
             <li onClick={() => handleMenuItemClick('community')}>커뮤니티</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
-            <li onClick={() => handleMenuItemClick('download', 'download-intro-section')}>다운로드</li> {/* '다운로드' 메뉴 아이템 추가 및 스크롤 타겟 설정 */}
+            {isMember && <li onClick={() => handleMenuItemClick('vote')}>투표</li>} {/* 정회원 전용 투표 메뉴 */}
           </ul>
         </nav>
       </div>
-      <div className="header-right">
+      <div className={`header-right ${isMobile && isMobileMenuOpen ? 'header-right-open' : ''}`}>
         <div className="utility-menu">
           {!isLoggedIn ? (
             <>
@@ -73,22 +89,41 @@ function Header({ isLoggedIn, onLoginClick, onSignupClick, onLogoutClick, onNavi
             </>
           ) : (
             <>
-              {/* 로그인 후에는 프로필 이미지로 변경되며, 클릭 시 마이페이지(profile)로 이동 */}
-              <img
-                src={profilePlaceholder}
-                alt="Profile"
-                className="header-profile-image"
-                onClick={() => onNavigate('profile')} // 프로필 이미지 클릭 시 profile 페이지로 이동
-              />
-              {/* 로그아웃 버튼을 프로필 이미지 우측으로 이동 */}
-              <button onClick={onLogoutClick} className="header-button">로그아웃</button>
+            {/* 메시지함 아이콘 + 안 읽음 배지 */}
+            <button
+              type="button"
+              className="inbox-button"
+              aria-label="메시지함"
+              onClick={() => { onInboxClick && onInboxClick(); if (isMobile) setIsMobileMenuOpen(false); }}
+            >
+              <span className="inbox-icon">✉️</span>
+              {unreadCount > 0 && <span className="inbox-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+            </button>
+            {/* 로그인 후: 프로필 메뉴(드롭다운) — 내정보 / 관리자(권한자) / 로그아웃 */}
+            <div className="profile-menu">
+              <button type="button" className="profile-trigger" aria-label="프로필 메뉴">
+                <img src={profilePlaceholder} alt="Profile" className="header-profile-image" />
+              </button>
+              <ul className="profile-dropdown">
+                <li onClick={() => handleMenuItemClick('profile')}>내정보</li>
+                {isAdmin && <li onClick={() => handleMenuItemClick('admin')}>관리자</li>}
+                <li
+                  onClick={() => {
+                    onLogoutClick();
+                    if (isMobile) setIsMobileMenuOpen(false);
+                  }}
+                >
+                  로그아웃
+                </li>
+              </ul>
+            </div>
             </>
           )}
           <select className="lang-select">
             <option value="ko">🇰🇷 한국어</option>
             <option value="en">🇬🇧 English</option>
           </select>
-          <button className="search-icon" aria-label="검색">🔍</button>
+          <button className="search-icon" aria-label="검색" onClick={onSearchClick}>🔍</button>
         </div>
       </div>
     </header>

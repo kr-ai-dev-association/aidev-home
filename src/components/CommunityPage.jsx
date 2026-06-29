@@ -1,335 +1,260 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './CommunityPage.css';
-import '../App.css'; // 공통 스타일을 위해 App.css 임포트
-import TopicDetailPage from './TopicDetailPage'; // TopicDetailPage 임포트
+import '../App.css';
+import { supabase } from '../lib/supabase';
+import TopicDetailPage from './TopicDetailPage';
+import RichTextEditor from './RichTextEditor';
+import { isEmptyHtml } from '../lib/html';
 
-// Mock data (실제로는 API에서 가져옵니다)
-const topicsData = [
-  {
-    id: 1,
-    title: '벌집 테마에 대해 가장 좋아하는 점은 무엇인가요?',
-    pages: [1, 2, 4, 5],
-    startedBy: '세피로스',
-    category: '벌집 테마',
-    posts: 63,
-    lastUpdated: '1주 5일 전', // ADDED: 최근 업데이트 날짜
-    lastUpdatedBy: '앨리스', // ADDED: 최근 업데이트 작성자
-  },
-  {
-    id: 2,
-    title: '포럼 사용해보기...',
-    pages: [1, 2],
-    startedBy: '앨리스',
-    category: '백패커스 클럽',
-    posts: 24,
-    lastUpdated: '2주 3일 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 3,
-    title: '주제#123 주제를 만드는 방법',
-    pages: [1, 2],
-    startedBy: '앨리스',
-    category: '백패커스 클럽',
-    posts: 19,
-    lastUpdated: '1개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 4,
-    title: '123',
-    pages: [],
-    startedBy: '앨리스',
-    category: '일반 토론',
-    posts: 1,
-    lastUpdated: '5개월 3주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 5,
-    title: '독립 주택 2층 방 1개 $900에 임대',
-    pages: [],
-    startedBy: '앨리스',
-    category: '일반 토론',
-    posts: 1,
-    lastUpdated: '5개월 3주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 6,
-    title: '오오오',
-    pages: [],
-    startedBy: '앨리스',
-    category: '프로그래밍',
-    posts: 17,
-    lastUpdated: '6개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 7,
-    title: '전 여자친구 페이스북 계정을 어떻게 해킹하나요?',
-    pages: [1, 2],
-    startedBy: '세피로스',
-    category: '프로그래밍',
-    posts: 17,
-    lastUpdated: '6개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 8,
-    title: '루나',
-    pages: [1, 2],
-    startedBy: '앨리스',
-    category: '백패커스 클럽',
-    posts: 2,
-    lastUpdated: '6개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 9,
-    title: '테스트 중',
-    pages: [1],
-    startedBy: '앨리스',
-    category: '벌집 테마',
-    posts: 10,
-    lastUpdated: '6개월 4주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 10,
-    title: '세상에서 가장 위험한 뱀은 무엇인가요?',
-    pages: [1, 2],
-    startedBy: '세피로스',
-    category: '일반 토론',
-    posts: 28,
-    lastUpdated: '7개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 11,
-    title: 'ㅂㅅㅂㅅㅇㅅㅇ', // 원문: بسبسيسيسي (아랍어)
-    pages: [],
-    startedBy: '앨리스',
-    category: '백패커스 클럽',
-    posts: 1,
-    lastUpdated: '8개월 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 12,
-    title: '존경과 경의',
-    pages: [],
-    startedBy: '앨리스',
-    category: '벌집 테마',
-    posts: 4,
-    lastUpdated: '9개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 13,
-    title: '안녕히 주무세요',
-    pages: [],
-    startedBy: '앨리스',
-    category: '백패커스 클럽',
-    posts: 2,
-    lastUpdated: '9개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 14,
-    title: '마닐라가 가라앉고 있다',
-    pages: [],
-    startedBy: '앨리스',
-    category: '기후 변화',
-    posts: 1,
-    lastUpdated: '9개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-  {
-    id: 15,
-    title: '주제 테스트 중', // 원문: ceshiyigezhuti (중국어)
-    pages: [],
-    startedBy: '앨리스',
-    category: '백패커스 클럽',
-    posts: 1,
-    lastUpdated: '10개월 2주 전',
-    lastUpdatedBy: '앨리스',
-  },
-];
+const CATEGORIES = ['일반 토론', '바이브코딩', 'AI/LLM', '취업·커리어', '프로젝트 공유', '질문/답변'];
+const ADMIN_CATEGORY = '공지사항';
 
-function CommunityPage({ isLoggedIn, onNavigate }) { // isLoggedIn, onNavigate prop 추가
-  const [activeTab, setActiveTab] = useState('all-forums');
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 9; // Mock total pages
-  const [selectedTopicId, setSelectedTopicId] = useState(null); // 선택된 토픽 ID 상태 추가
+// 상대 시간 표시
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return '방금 전';
+  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
+  if (diff < 31536000) return `${Math.floor(diff / 2592000)}개월 전`;
+  return `${Math.floor(diff / 31536000)}년 전`;
+}
 
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
+function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, onOpenConversation, onOpenSearch }) {
+  // 관리자는 '공지사항' 카테고리 추가 노출
+  const categoryOptions = isAdmin ? [ADMIN_CATEGORY, ...CATEGORIES] : CATEGORIES;
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [selectedTopicId, setSelectedTopicId] = useState(null);
+  const [composing, setComposing] = useState(false);
+  const [form, setForm] = useState({ title: '', category: CATEGORIES[0], tags: '', content: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const authorName = profile?.name || user?.email?.split('@')[0] || '익명';
+
+  const fetchTopics = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('topics')
+      .select('*, posts(count)')
+      .order('last_activity_at', { ascending: false });
+    if (!error) setTopics(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchTopics();
+  }, [fetchTopics]);
+
+  // 알림 등에서 특정 주제로 바로 진입
+  useEffect(() => {
+    if (initialTopicId) {
+      setSelectedTopicId(initialTopicId);
+      onTopicConsumed && onTopicConsumed();
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTopicId]);
 
   const handleTopicClick = (topicId) => {
     if (!isLoggedIn) {
       alert('로그인해야 토픽 상세 정보를 볼 수 있습니다.');
-      onNavigate('login'); // 로그인 페이지로 리다이렉트
+      onNavigate('login');
       return;
     }
     setSelectedTopicId(topicId);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // 상세 페이지로 이동 시 스크롤 맨 위로
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNewTopicClick = () => {
+    if (!isLoggedIn) {
+      alert('로그인해야 새 주제를 작성할 수 있습니다.');
+      onNavigate('login');
+      return;
+    }
+    setComposing(true);
+  };
+
+  const handleCreateTopic = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim() || isEmptyHtml(form.content) || submitting) return;
+    setSubmitting(true);
+    const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean);
+    // 1) 주제 생성
+    const { data: topic, error: tErr } = await supabase
+      .from('topics')
+      .insert({
+        title: form.title.trim(),
+        category: form.category,
+        tags,
+        author_id: user.id,
+        author_name: authorName,
+        last_activity_by: authorName,
+      })
+      .select()
+      .single();
+    if (tErr) {
+      setSubmitting(false);
+      alert(`주제 생성 오류: ${tErr.message}`);
+      return;
+    }
+    // 2) 첫 게시글(본문) 생성
+    const { error: pErr } = await supabase.from('posts').insert({
+      topic_id: topic.id,
+      author_id: user.id,
+      author_name: authorName,
+      content: form.content.trim(),
+    });
+    setSubmitting(false);
+    if (pErr) {
+      alert(`게시글 생성 오류: ${pErr.message}`);
+      return;
+    }
+    setComposing(false);
+    setForm({ title: '', category: CATEGORIES[0], tags: '', content: '' });
+    setSelectedTopicId(topic.id); // 작성한 주제로 이동
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToListings = () => {
     setSelectedTopicId(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // 목록으로 돌아갈 때 스크롤 맨 위로
+    fetchTopics(); // 목록 갱신(답글 수/최근활동 반영)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    const maxVisibleButtons = 5; // e.g., 1 2 3 ... 8 9
-    const startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
-    const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
-
-    if (startPage > 1) {
-      buttons.push(<button key="first" onClick={() => handlePageChange(1)} className={`pagination-button ${1 === currentPage ? 'active' : ''}`}>1</button>);
-      if (startPage > 2) {
-        buttons.push(<span key="ellipsis-start" className="pagination-ellipsis">...</span>);
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`pagination-button ${i === currentPage ? 'active' : ''}`}
-        >
-          {i}
-        </button>
-      );
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        buttons.push(<span key="ellipsis-end" className="pagination-ellipsis">...</span>);
-      }
-      buttons.push(<button key="last" onClick={() => handlePageChange(totalPages)} className={`pagination-button ${totalPages === currentPage ? 'active' : ''}`}>{totalPages}</button>);
-    }
-
-    return buttons;
-  };
-
-  // selectedTopicId가 있으면 TopicDetailPage를 렌더링
   if (selectedTopicId) {
-    return <TopicDetailPage topicId={selectedTopicId} onBackToListings={handleBackToListings} />;
+    return (
+      <TopicDetailPage
+        topicId={selectedTopicId}
+        onBackToListings={handleBackToListings}
+        isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
+        user={user}
+        profile={profile}
+        onNavigate={onNavigate}
+        onOpenConversation={onOpenConversation}
+      />
+    );
   }
 
-  // 그렇지 않으면 기존 커뮤니티 목록 페이지를 렌더링
+  const filtered = topics.filter((t) =>
+    !search.trim() ||
+    t.title.toLowerCase().includes(search.toLowerCase()) ||
+    (t.category || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  // 공지사항을 항상 최상단에 고정, 그 외에는 최근활동 순 유지
+  const sorted = [...filtered].sort((a, b) => {
+    const an = a.category === ADMIN_CATEGORY ? 1 : 0;
+    const bn = b.category === ADMIN_CATEGORY ? 1 : 0;
+    if (an !== bn) return bn - an;
+    return new Date(b.last_activity_at) - new Date(a.last_activity_at);
+  });
+
   return (
     <div className="community-page-container content-area-container">
       <div className="community-header">
         <div className="community-tabs">
-          <button
-            className={`tab-button ${activeTab === 'all-forums' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all-forums')}
-          >
-            모든 포럼
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'topics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('topics')}
-          >
-            주제
-          </button>
+          <button className="tab-button active">모든 포럼</button>
+          <button className="new-topic-button" onClick={handleNewTopicClick}>+ 새 주제 작성</button>
         </div>
-
         <div className="community-search-bar">
-          <input type="text" placeholder="검색" className="search-input" />
-          <button className="search-button" aria-label="검색">
+          <input
+            type="text"
+            placeholder="검색 (Enter로 통합 검색)"
+            className="search-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') onOpenSearch && onOpenSearch('community', search); }}
+          />
+          <button className="search-button" aria-label="검색" onClick={() => onOpenSearch && onOpenSearch('community', search)}>
             <span className="search-icon">🔍</span>
           </button>
         </div>
       </div>
+
+      {/* 새 주제 작성 폼 */}
+      {composing && (
+        <form className="new-topic-form" onSubmit={handleCreateTopic}>
+          <h3>새 주제 작성</h3>
+          <div className="nt-field">
+            <label>제목</label>
+            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="제목을 입력하세요" />
+          </div>
+          <div className="nt-row">
+            <div className="nt-field">
+              <label>카테고리</label>
+              <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}>
+                {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="nt-field">
+              <label>태그 (쉼표 구분)</label>
+              <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))} placeholder="예: 질문, LLM" />
+            </div>
+          </div>
+          <div className="nt-field">
+            <label>내용</label>
+            <RichTextEditor
+              value={form.content}
+              onChange={(html) => setForm((f) => ({ ...f, content: html }))}
+              placeholder="내용을 입력하세요"
+            />
+          </div>
+          <div className="nt-actions">
+            <button type="button" className="nt-btn ghost" onClick={() => setComposing(false)} disabled={submitting}>취소</button>
+            <button type="submit" className="nt-btn primary" disabled={submitting || !form.title.trim() || isEmptyHtml(form.content)}>
+              {submitting ? '등록 중...' : '주제 등록'}
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="community-main-content">
         <div className="community-topics-list">
           <div className="topic-header">
             <div className="header-item topic-col">주제</div>
             <div className="header-item posts-col">게시글</div>
-            <div className="header-item last-updated-col">최근 업데이트</div> {/* ADDED: 최근 업데이트 컬럼 헤더 */}
+            <div className="header-item last-updated-col">최근 업데이트</div>
           </div>
 
-          {topicsData.map(topic => (
-            <div key={topic.id} className="topic-card" onClick={() => handleTopicClick(topic.id)}> {/* 클릭 핸들러 추가 */}
-              <div className="topic-icon-col">
-                <span className="topic-icon">💬</span>
-              </div>
-              <div className="topic-details-col">
-                <h3 className="topic-title">{topic.title}</h3>
-                {topic.pages.length > 0 && (
-                  <div className="topic-pagination">
-                    {topic.pages.map(page => (
-                      <span key={page} className="page-number">{page}</span>
-                    ))}
+          {loading ? (
+            <p className="community-msg">불러오는 중...</p>
+          ) : filtered.length === 0 ? (
+            <p className="community-msg">{search ? '검색 결과가 없습니다.' : '아직 등록된 주제가 없습니다. 첫 주제를 작성해보세요!'}</p>
+          ) : (
+            sorted.map((topic) => {
+              const postCount = topic.posts?.[0]?.count ?? 0;
+              const isNotice = topic.category === ADMIN_CATEGORY;
+              return (
+                <div key={topic.id} className={`topic-card${isNotice ? ' pinned' : ''}`} onClick={() => handleTopicClick(topic.id)}>
+                  <div className="topic-icon-col"><span className="topic-icon">💬</span></div>
+                  <div className="topic-details-col">
+                    <h3 className="topic-title">
+                      {topic.category === ADMIN_CATEGORY && <span className="notice-badge">📢 공지</span>}
+                      {topic.title}
+                    </h3>
+                    {Array.isArray(topic.tags) && topic.tags.length > 0 && (
+                      <div className="topic-pagination">
+                        {topic.tags.map((tag) => <span key={tag} className="page-number">{tag}</span>)}
+                      </div>
+                    )}
+                    <p className="topic-meta">
+                      시작: <span className="topic-author">{topic.author_name}</span>, 카테고리:{' '}
+                      <span className="topic-category">{topic.category}</span>
+                    </p>
                   </div>
-                )}
-                <p className="topic-meta">
-                  시작: <span className="topic-author">{topic.startedBy}</span>, 카테고리:{' '}
-                  <span className="topic-category">{topic.category}</span>
-                </p>
-              </div>
-              <div className="posts-col">{topic.posts}</div>
-              {/* ADDED: 최근 업데이트 컬럼 내용 */}
-              <div className="last-updated-col">
-                <p className="last-updated-time">{topic.lastUpdated}</p>
-                <p className="last-updated-author">{topic.lastUpdatedBy}</p>
-              </div>
-            </div>
-          ))}
-
-          <div className="community-pagination">
-            <button
-              className="pagination-arrow"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              ←
-            </button>
-            {renderPaginationButtons()}
-            <button
-              className="pagination-arrow"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              →
-            </button>
-          </div>
+                  <div className="posts-col">{postCount}</div>
+                  <div className="last-updated-col">
+                    <p className="last-updated-time">{timeAgo(topic.last_activity_at)}</p>
+                    <p className="last-updated-author">{topic.last_activity_by || topic.author_name}</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
-
-        {/* Sidebar는 TopicDetailPage로 이동했으므로 여기서는 렌더링하지 않습니다. */}
-        {/* <aside className="community-sidebar">
-          <div className="recent-topics-section">
-            <h3>최근 주제</h3>
-            <ul className="recent-topics-list">
-              {recentTopicsData.map((topic, index) => (
-                <li key={index}>
-                  <span className="topic-bullet">💬</span> {topic}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="sidebar-footer">
-            <nav>
-              <ul>
-                <li>홈</li>
-                <li>협회소개</li>
-                <li>자주 묻는 질문</li>
-                <li>블로그</li>
-                <li>문의</li>
-              </ul>
-            </nav>
-          </div>
-        </aside> */}
       </div>
     </div>
   );
