@@ -1,0 +1,107 @@
+/* 분쟁 조정 의뢰 — 폼·타임라인·진행바 */
+
+.med-form { max-width: 860px; }
+.med-field { margin-bottom: 1.3rem; }
+.med-field > label { display: block; font-weight: 700; color: #e6edf3; margin-bottom: 0.5rem; font-size: 0.95rem; }
+.med-field .req { color: #fca5a5; }
+.med-field input[type="text"],
+.med-field select,
+.med-field textarea {
+  width: 100%;
+  background: #0d1424;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  color: #e6edf3;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.med-field textarea { resize: vertical; line-height: 1.6; }
+.med-field input:focus, .med-field select:focus, .med-field textarea:focus {
+  outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+}
+
+.med-radios { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.med-chip {
+  padding: 0.55rem 1.1rem; border-radius: 999px; cursor: pointer;
+  background: #0d1424; border: 1px solid rgba(255, 255, 255, 0.16); color: #cbd5e1; font-weight: 600;
+  transition: all 0.15s;
+}
+.med-chip.on { background: linear-gradient(135deg, #6366f1, #22d3ee); color: #08111f; border-color: transparent; }
+
+.med-links { list-style: none; padding: 0; margin: 0 0 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.med-links li { display: flex; align-items: center; gap: 0.6rem; }
+.med-links a { color: #67e8f9; text-decoration: none; }
+.med-links button { background: none; border: none; color: #fca5a5; cursor: pointer; font-size: 0.9rem; }
+.med-hint { color: #94a3b8; font-size: 0.82rem; margin-top: 0.4rem; }
+.med-cost-notice { margin: 0.2rem 0 0.9rem; padding: 0.7rem 0.9rem; border-radius: 9px; background: rgba(253, 230, 138, 0.1); border: 1px solid rgba(253, 230, 138, 0.3); color: #fde68a; font-size: 0.9rem; }
+.med-actions { margin-top: 0.5rem; }
+.med-privacy { color: #94a3b8; font-size: 0.82rem; margin-top: 0.9rem; }
+.nt-btn.small { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+
+/* 카테고리/유형 칩 */
+.med-cat-pill, .med-type-pill {
+  display: inline-block; margin-left: 8px; padding: 0.15rem 0.6rem; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 700; vertical-align: middle;
+}
+.med-cat-pill { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+.med-type-pill { background: rgba(34, 211, 238, 0.16); color: #67e8f9; }
+
+/* 배정 전문가 */
+.med-assignees { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.med-assignee { padding: 0.3rem 0.7rem; border-radius: 7px; background: rgba(167, 139, 250, 0.16); color: #c4b5fd; font-weight: 600; font-size: 0.85rem; }
+
+/* 진행 단계 타임라인 */
+.med-timeline { list-style: none; padding: 0; margin: 0; }
+.med-timeline li { position: relative; padding: 0 0 1rem 1.2rem; border-left: 2px solid rgba(99, 102, 241, 0.4); }
+.med-timeline li:last-child { border-left-color: transparent; }
+.med-timeline li::before { content: ''; position: absolute; left: -7px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+.med-timeline li strong { color: #e6edf3; }
+.med-timeline li p { margin: 0.3rem 0; color: #cbd5e1; white-space: pre-wrap; }
+.med-time { color: #94a3b8; font-size: 0.8rem; }
+
+/* 상태 진행바 */
+.med-progress { display: flex; align-items: center; margin: 0.2rem 0 1.2rem; }
+.med-step { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+.med-dot {
+  width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #0d1424; border: 2px solid rgba(255, 255, 255, 0.18); color: #94a3b8; font-weight: 700; font-size: 0.85rem;
+}
+.med-step.done .med-dot { background: linear-gradient(135deg, #6366f1, #22d3ee); border-color: transparent; color: #08111f; }
+.med-step-label { font-size: 0.78rem; color: #94a3b8; }
+.med-step.done .med-step-label { color: #e6edf3; }
+.med-bar { flex: 1; height: 2px; background: rgba(255, 255, 255, 0.16); margin: 0 0.3rem; margin-bottom: 1.3rem; }
+.med-bar.done { background: linear-gradient(90deg, #6366f1, #22d3ee); }
+
+/* 관리자 단계 입력 폼 */
+.med-admin-form { margin-top: 1rem; padding: 1rem; border-radius: 10px; background: rgba(99, 102, 241, 0.07); border: 1px solid rgba(99, 102, 241, 0.22); }
+.med-admin-form h5 { margin: 0 0 0.7rem; color: #e6edf3; }
+.med-admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+.med-admin-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+.med-admin-form select, .med-admin-form input, .med-admin-form textarea {
+  width: 100%; background: #0d1424; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 8px; color: #e6edf3; padding: 0.6rem 0.8rem; font-family: inherit; box-sizing: border-box;
+}
+.med-admin-form textarea { resize: vertical; margin-bottom: 0.6rem; }
+
+@media (max-width: 640px) {
+  .med-admin-grid, .med-admin-grid3 { grid-template-columns: 1fr; }
+  .med-step-label { font-size: 0.7rem; }
+}
+
+/* 분쟁 조정 소개 페이지(DisputeServicePage) 보조 스타일 */
+.cards-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+.med-cat-grid { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 0.4rem 0 1.6rem; }
+.med-cat-tile {
+  padding: 0.7rem 1.1rem; border-radius: 10px; font-weight: 700; color: #e6edf3;
+  background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.28);
+}
+.med-disguised-list { list-style: none; padding: 0; margin: 0.4rem 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.med-disguised-list li { display: flex; align-items: center; gap: 0.6rem; color: #e6edf3; font-weight: 600; }
+.md-check { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #22d3ee); color: #08111f; font-size: 0.8rem; flex-shrink: 0; }
+.cta-button.small, .ghost-button.small { padding: 0.5rem 1.1rem; font-size: 0.9rem; margin-top: 0.6rem; }
+
+@media (max-width: 720px) {
+  .cards-row-2 { grid-template-columns: 1fr; }
+  .med-disguised-list { grid-template-columns: 1fr; }
+}

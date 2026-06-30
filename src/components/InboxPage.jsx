@@ -81,7 +81,11 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
     } else if (n.type === 'application' && onNavigate) {
       onNavigate('myjobs'); // 지원 알림 → 내 공고 관리
     } else if (n.type === 'dispute' && onNavigate) {
-      onNavigate('disputes'); // 분쟁 알림 → 분쟁 관리(관리자)
+      onNavigate('disputes'); // 외주 분쟁 알림 → 외주 분쟁 관리(관리자)
+    } else if (n.type === 'mediation' && onNavigate) {
+      onNavigate('mediation', 'status'); // 조정 진행 알림(의뢰자) → 나의 조정 현황
+    } else if (n.type === 'mediation_admin' && onNavigate) {
+      onNavigate('mediations-admin'); // 조정 접수 알림(관리자) → 조정 의뢰 관리
     }
   };
 

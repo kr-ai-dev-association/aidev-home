@@ -14,11 +14,15 @@ import ProfilePage from './components/ProfilePage'; // ProfilePage 컴포넌트 
 import AdminDashboardPage from './components/AdminDashboardPage'; // 관리자 대시보드
 import EmploymentPage from './components/EmploymentPage'; // EmploymentPage 컴포넌트 임포트
 import CommunityPage from './components/CommunityPage'; // CommunityPage 컴포넌트 임포트
+import FAQPage from './components/FAQPage'; // 자주 묻는 질문(FAQ) 페이지
 import InboxPage from './components/InboxPage'; // 메시지함(알림/메시지)
 import VotePage from './components/VotePage'; // 투표(의제)
 import B2BRequestsPage from './components/B2BRequestsPage'; // 조합 B2B 의뢰 관리(관리자)
 import MyJobsPage from './components/MyJobsPage'; // 내 공고 관리(지원 현황)
 import MyApplicationsPage from './components/MyApplicationsPage'; // 내 지원 관리(스크랩·지원 현황)
+import MediationPage from './components/MediationPage'; // 분쟁 조정 의뢰(조합원)
+import MediationsAdminPage from './components/MediationsAdminPage'; // 분쟁 조정 의뢰 관리(관리자)
+import DisputeServicePage from './components/DisputeServicePage'; // 분쟁 조정 소개(사업·서비스)
 import DisputesPage from './components/DisputesPage'; // 분쟁 관리(관리자)
 import B2BRequestModal from './components/B2BRequestModal'; // 조합 B2B 의뢰 입력 모달
 import SearchOverlay from './components/SearchOverlay'; // 통합 검색
@@ -49,6 +53,7 @@ function App() {
   const [unread, setUnread] = useState(0); // 메시지함 안 읽음 합계(배지)
   const [inboxConvId, setInboxConvId] = useState(null); // 메시지함에서 열 대화 id
   const [communityTopicId, setCommunityTopicId] = useState(initRoute.topicId || null); // 알림/딥링크로 열 주제 id
+  const [communityCategory, setCommunityCategory] = useState(null); // 커뮤니티 진입 시 초기 카테고리 필터(예: 공지사항)
   const [employmentJobId, setEmploymentJobId] = useState(initRoute.jobId || null); // 검색/딥링크로 열 공고 id
   const [viewUserId, setViewUserId] = useState(null); // 조회할 타인(지원자) 프로필 user id
   const [viewUserFallback, setViewUserFallback] = useState(null); // 프로필 RLS 차단 시 폴백 스냅샷
@@ -177,8 +182,10 @@ function App() {
     setB2bType(type);
   };
 
-  // handleNavigate 함수: sectionId를 선택적으로 받음
-  const handleNavigate = (page, sectionId = null) => {
+  // handleNavigate 함수: sectionId(스크롤) / community 진입 시 categoryFilter 를 선택적으로 받음
+  const handleNavigate = (page, sectionId = null, categoryFilter = null) => {
+    // 커뮤니티로 이동할 때 카테고리 필터(예: '공지사항') 지정
+    setCommunityCategory(page === 'community' ? categoryFilter : null);
     if (page === 'services') {
       setCurrentPage('home');
       setScrollToSection('services-section');
@@ -327,6 +334,22 @@ function App() {
       case 'disputes':
         content = <DisputesPage isAdmin={isAdmin} onOpenConversation={openInbox} />;
         break;
+      case 'mediation':
+        content = (
+          <MediationPage
+            user={session?.user}
+            isLoggedIn={isLoggedIn}
+            profile={profile}
+            initialTab={scrollToSection}
+          />
+        );
+        break;
+      case 'mediations-admin':
+        content = <MediationsAdminPage isAdmin={isAdmin} onOpenConversation={openInbox} />;
+        break;
+      case 'disputeservice':
+        content = <DisputeServicePage onNavigate={handleNavigate} isLoggedIn={isLoggedIn} />;
+        break;
       case 'vote':
         content = (
           <VotePage
@@ -376,11 +399,16 @@ function App() {
             profile={profile}
             initialTopicId={communityTopicId}
             onTopicConsumed={() => setCommunityTopicId(null)}
+            initialCategory={communityCategory}
+            onCategoryConsumed={() => setCommunityCategory(null)}
             onOpenConversation={openInbox}
             onOpenSearch={openSearch}
             onProfileChanged={refreshProfile}
           />
         );
+        break;
+      case 'faq':
+        content = <FAQPage onNavigate={handleNavigate} />;
         break;
       case 'home':
       default:

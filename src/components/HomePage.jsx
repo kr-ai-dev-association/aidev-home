@@ -193,7 +193,7 @@ function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNaviga
             <li>[뉴스] 인프라 보유 법인 발기인 합류 — 클라우드 무상 공급 MOU 체결</li>
             <li>[세미나] Unsloth 기반 sLLM 양자화·파인튜닝 실무 워크숍</li>
           </ul>
-          <button className="detail-button">더 보기</button>
+          <button className="detail-button" onClick={() => onNavigate('community', null, '공지사항')}>더 보기</button>
         </section>
 
         {/* 자주 묻는 질문 (FAQ) 일부 */}
@@ -219,7 +219,7 @@ function HomePage({ onSignupClick, scrollToSectionId, onScrollComplete, onNaviga
               </li>
             ))}
           </ul>
-          <button className="detail-button">더 보기</button>
+          <button className="detail-button" onClick={() => onNavigate('faq')}>더 보기</button>
         </section>
 
         {/* 회원 가입 유도 */}

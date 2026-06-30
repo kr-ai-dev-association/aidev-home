@@ -21,7 +21,7 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 31536000)}년 전`;
 }
 
-function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, onOpenConversation, onOpenSearch, onProfileChanged }) {
+function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, initialCategory, onCategoryConsumed, onOpenConversation, onOpenSearch, onProfileChanged }) {
   // 관리자는 '공지사항' 카테고리 추가 노출
   const categoryOptions = isAdmin ? [ADMIN_CATEGORY, ...CATEGORIES] : CATEGORIES;
   const [topics, setTopics] = useState([]);
@@ -63,6 +63,16 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTopicId]);
+
+  // 홈 '최신 소식·공지사항 더보기' 등에서 카테고리 필터로 진입 (예: 공지사항)
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedTopicId(null);
+      setSearch(initialCategory);
+      onCategoryConsumed && onCategoryConsumed();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCategory]);
 
   // 공유용 URL 동기화(상세 진입/이탈 시 주소 반영)
   useEffect(() => {

@@ -73,12 +73,14 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
                 <li onClick={() => handleMenuItemClick('courses')}>강의</li>
                 <li onClick={() => handleMenuItemClick('agentbuild')}>에이전트 구축</li>
                 <li onClick={() => handleMenuItemClick('agenteval')}>에이전트 평가</li>
+                <li onClick={() => handleMenuItemClick('disputeservice')}>분쟁 조정</li>
               </ul>
             </li>
             <li onClick={() => handleMenuItemClick('harness')}>에이전트 하네스</li> {/* harness-collection 기반 페이지 */}
             <li onClick={() => handleMenuItemClick('employment')}>취업</li> {/* '취업' 메뉴 아이템 추가 */}
             <li onClick={() => handleMenuItemClick('community')}>커뮤니티</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
             {isMember && <li onClick={() => handleMenuItemClick('vote')}>투표</li>} {/* 정회원 전용 투표 메뉴 */}
+            <li onClick={() => handleMenuItemClick('faq')}>자주 묻는 질문</li> {/* 플랫폼 사용법 FAQ */}
           </ul>
         </nav>
       </div>
@@ -119,11 +121,13 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
               </button>
               <ul className="profile-dropdown">
                 <li onClick={() => handleMenuItemClick('profile')}>내정보</li>
+                <li onClick={() => handleMenuItemClick('mediation', 'request')}>분쟁 조정 의뢰</li>
                 <li onClick={() => handleMenuItemClick('myapplications')}>내 지원 관리</li>
                 <li onClick={() => handleMenuItemClick('myjobs')}>내 공고 관리</li>
-                {isAdmin && <li onClick={() => handleMenuItemClick('admin')}>관리자</li>}
+                {isAdmin && <li onClick={() => handleMenuItemClick('admin')}>회원현황</li>}
                 {isAdmin && <li onClick={() => handleMenuItemClick('b2brequests')}>B2B 의뢰</li>}
-                {isAdmin && <li onClick={() => handleMenuItemClick('disputes')}>분쟁 관리</li>}
+                {isAdmin && <li onClick={() => handleMenuItemClick('disputes')}>외주 분쟁 관리</li>}
+                {isAdmin && <li onClick={() => handleMenuItemClick('mediations-admin')}>조정 의뢰 관리</li>}
                 <li
                   onClick={() => {
                     onLogoutClick();
