@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import BadgeIcon from './BadgeIcon';
 import { EXPERT_FIELDS, expertField, fetchExpertBadges } from '../lib/badges';
+import { useI18n } from '../i18n/I18nProvider';
 
 const SUPER_ADMIN_EMAIL = 'tony@banya.ai';
 
@@ -13,6 +14,7 @@ function formatDate(iso) {
 }
 
 function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
+  const { t } = useI18n();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,8 +30,8 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     setReeval(true);
     const { error } = await supabase.rpc('evaluate_all_member_tiers');
     setReeval(false);
-    if (error) { alert(`재평가 오류: ${error.message}`); return; }
-    alert('등급 배지 재평가가 완료되었습니다.');
+    if (error) { alert(t('admin.reevalError', { msg: error.message })); return; }
+    alert(t('admin.reevalDone'));
   };
 
   // 전문가 배지 수여 모달 열기
@@ -42,7 +44,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     setBadgeBusy(true);
     const { error } = await supabase.from('expert_badges').insert({ user_id: badgeMember.id, field });
     setBadgeBusy(false);
-    if (error) { alert(`수여 오류: ${error.message}`); return; }
+    if (error) { alert(t('admin.awardError', { msg: error.message })); return; }
     setBadgeList(await fetchExpertBadges(badgeMember.id));
   };
   const revokeBadge = async (field) => {
@@ -50,7 +52,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     setBadgeBusy(true);
     const { error } = await supabase.from('expert_badges').delete().eq('user_id', badgeMember.id).eq('field', field);
     setBadgeBusy(false);
-    if (error) { alert(`회수 오류: ${error.message}`); return; }
+    if (error) { alert(t('admin.revokeError', { msg: error.message })); return; }
     setBadgeList(await fetchExpertBadges(badgeMember.id));
   };
 
@@ -65,13 +67,13 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
         total += data?.updated || 0;
         if (!data?.updated) break;
       }
-      alert(`검색 색인 완료: ${total}건 임베딩`);
+      alert(t('admin.indexDone', { total }));
     } catch (e) {
       const msg = String(e?.message || e);
       if (/Failed to send a request|NOT_FOUND|not be found|Failed to fetch/i.test(msg)) {
-        alert("검색 함수(search Edge Function)가 배포되지 않았습니다.\n\n터미널에서 다음으로 배포한 뒤 다시 시도하세요:\nsupabase functions deploy search --project-ref <프로젝트>");
+        alert(t('admin.searchFnNotDeployed'));
       } else {
-        alert(`색인 오류: ${msg}`);
+        alert(t('admin.indexError', { msg }));
       }
     }
     setIndexing(false);
@@ -98,7 +100,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     const { error } = await supabase.rpc('set_admin', { target_id: row.id, value: next });
     setBusyId(null);
     if (error) {
-      alert(`권한 변경 오류: ${error.message}`);
+      alert(t('admin.roleChangeError', { msg: error.message }));
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_admin: next } : r)));
@@ -109,7 +111,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     const { error } = await supabase.rpc('set_approval', { target_id: row.id, status: 'approved' });
     setBusyId(null);
     if (error) {
-      alert(`승인 오류: ${error.message}`);
+      alert(t('admin.approveError', { msg: error.message }));
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, approval_status: 'approved' } : r)));
@@ -121,7 +123,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     const { error } = await supabase.rpc('set_member', { target_id: row.id, value: next });
     setBusyId(null);
     if (error) {
-      alert(`정회원 변경 오류: ${error.message}`);
+      alert(t('admin.memberChangeError', { msg: error.message }));
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_member: next } : r)));
@@ -132,8 +134,8 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
       <div className="home-landing admin-page">
         <div className="home-page-container content-area-container">
           <section className="section-services">
-            <h3>접근 권한이 없습니다</h3>
-            <p className="section-lead">이 페이지는 관리자만 열람할 수 있습니다.</p>
+            <h3>{t('admin.noAccessTitle')}</h3>
+            <p className="section-lead">{t('admin.noAccessDesc')}</p>
           </section>
         </div>
       </div>
@@ -149,27 +151,27 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
   const pending = rows.filter((r) => r.approval_status === 'pending').length;
 
   const stats = [
-    { num: total, label: '전체 회원' },
-    { num: individuals, label: '개인' },
-    { num: corporates, label: '법인' },
-    { num: members, label: '정회원' },
-    { num: admins, label: '관리자' },
-    { num: pending, label: '승인 대기' },
+    { num: total, label: t('admin.statTotal') },
+    { num: individuals, label: t('admin.statIndividual') },
+    { num: corporates, label: t('admin.statCorporate') },
+    { num: members, label: t('admin.statMember') },
+    { num: admins, label: t('admin.statAdmin') },
+    { num: pending, label: t('admin.statPending') },
   ];
 
   return (
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
-          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
-          <h3>회원가입 현황 대시보드</h3>
-          <p className="section-lead">전체 조합원 정보를 조회하고 관리자 권한을 부여할 수 있습니다.</p>
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>{t('admin.backToHub')}</button>}
+          <h3>{t('admin.dashTitle')}</h3>
+          <p className="section-lead">{t('admin.dashLead')}</p>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem', display: 'flex', gap: '0.6rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="admin-action-btn grant" onClick={reindexSearch} disabled={indexing}>
-              {indexing ? '색인 중...' : '🧠 검색 의미색인 갱신'}
+              {indexing ? t('admin.reindexing') : t('admin.reindexBtn')}
             </button>
             <button className="admin-action-btn grant" onClick={reevaluateTiers} disabled={reeval}>
-              {reeval ? '재평가 중...' : '🏅 등급 배지 재평가'}
+              {reeval ? t('admin.reevaluating') : t('admin.reevalBtn')}
             </button>
           </div>
 
@@ -185,27 +187,27 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
 
           {/* 회원 테이블 */}
           {loading ? (
-            <p className="admin-msg">불러오는 중...</p>
+            <p className="admin-msg">{t('admin.loading')}</p>
           ) : error ? (
-            <p className="admin-msg admin-error">오류: {error}</p>
+            <p className="admin-msg admin-error">{t('admin.error', { msg: error })}</p>
           ) : rows.length === 0 ? (
-            <p className="admin-msg">등록된 회원이 없습니다.</p>
+            <p className="admin-msg">{t('admin.noMembers')}</p>
           ) : (
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>이름</th>
-                    <th>구분</th>
-                    <th>소속 / 카테고리</th>
-                    <th>이메일</th>
-                    <th>전화번호</th>
-                    <th>가입일</th>
-                    <th>승인</th>
-                    <th>정회원</th>
-                    <th>권한</th>
-                    <th>배지</th>
-                    <th>관리</th>
+                    <th>{t('admin.colName')}</th>
+                    <th>{t('admin.colType')}</th>
+                    <th>{t('admin.colAffiliation')}</th>
+                    <th>{t('admin.colEmail')}</th>
+                    <th>{t('admin.colPhone')}</th>
+                    <th>{t('admin.colJoined')}</th>
+                    <th>{t('admin.colApproval')}</th>
+                    <th>{t('admin.colMember')}</th>
+                    <th>{t('admin.colRole')}</th>
+                    <th>{t('admin.colBadge')}</th>
+                    <th>{t('admin.colManage')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -220,7 +222,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
                         <td className="cell-name">{r.name || '-'}</td>
                         <td>
                           <span className={`type-pill ${r.account_type}`}>
-                            {r.account_type === 'corporate' ? '법인' : '개인'}
+                            {r.account_type === 'corporate' ? t('admin.typeCorporate') : t('admin.typeIndividual')}
                           </span>
                         </td>
                         <td>{affiliation}</td>
@@ -235,15 +237,15 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
                               disabled={busyId === r.id}
                               onClick={() => approveMember(r)}
                             >
-                              {busyId === r.id ? '처리 중' : '⏳ 승인하기'}
+                              {busyId === r.id ? t('admin.processing') : t('admin.approveBtn')}
                             </button>
                           ) : (
-                            <span className="role-badge approved">✅ 승인</span>
+                            <span className="role-badge approved">{t('admin.approvedBadge')}</span>
                           )}
                         </td>
                         <td>
                           {isSuper ? (
-                            <span className="role-badge super">정회원</span>
+                            <span className="role-badge super">{t('admin.memberBadge')}</span>
                           ) : (
                             <button
                               type="button"
@@ -251,22 +253,22 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
                               disabled={busyId === r.id}
                               onClick={() => toggleMember(r)}
                             >
-                              {busyId === r.id ? '처리 중' : r.is_member ? '정회원 해제' : '정회원 부여'}
+                              {busyId === r.id ? t('admin.processing') : r.is_member ? t('admin.revokeMember') : t('admin.grantMember')}
                             </button>
                           )}
                         </td>
                         <td>
                           {isSuper ? (
-                            <span className="role-badge super">슈퍼관리자</span>
+                            <span className="role-badge super">{t('admin.superAdminBadge')}</span>
                           ) : r.is_admin ? (
-                            <span className="role-badge admin">관리자</span>
+                            <span className="role-badge admin">{t('admin.adminBadge')}</span>
                           ) : (
-                            <span className="role-badge member">일반</span>
+                            <span className="role-badge member">{t('admin.generalBadge')}</span>
                           )}
                         </td>
                         <td>
                           <button type="button" className="admin-action-btn grant" onClick={() => openBadgeModal(r)}>
-                            🎖️ 배지
+                            {t('admin.badgeBtn')}
                           </button>
                         </td>
                         <td>
@@ -279,7 +281,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
                               disabled={busyId === r.id}
                               onClick={() => toggleAdmin(r)}
                             >
-                              {busyId === r.id ? '처리 중' : r.is_admin ? '권한 해제' : '관리자 부여'}
+                              {busyId === r.id ? t('admin.processing') : r.is_admin ? t('admin.revokeAdmin') : t('admin.grantAdmin')}
                             </button>
                           )}
                         </td>
@@ -297,11 +299,11 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
       {badgeMember && (
         <div className="b2b-overlay" onClick={() => setBadgeMember(null)}>
           <div className="b2b-modal badge-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="b2b-close" onClick={() => setBadgeMember(null)} aria-label="닫기">✕</button>
+            <button className="b2b-close" onClick={() => setBadgeMember(null)} aria-label={t('admin.closeAria')}>✕</button>
             <div className="b2b-head">
-              <span className="b2b-badge">전문가 배지 수여</span>
-              <h3>{badgeMember.name || '회원'}</h3>
-              <p>분야를 클릭해 배지를 수여하거나, 수여된 배지를 다시 클릭해 회수합니다. (복수 수여 가능)</p>
+              <span className="b2b-badge">{t('admin.badgeModalTitle')}</span>
+              <h3>{badgeMember.name || t('admin.badgeModalMemberFallback')}</h3>
+              <p>{t('admin.badgeModalDesc')}</p>
             </div>
             <div className="badge-grid">
               {EXPERT_FIELDS.map((f) => {
@@ -313,7 +315,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
                     className={`badge-pick ${owned ? 'owned' : ''}`}
                     disabled={badgeBusy}
                     onClick={() => (owned ? revokeBadge(f.key) : awardBadge(f.key))}
-                    title={owned ? '클릭해 회수' : '클릭해 수여'}
+                    title={owned ? t('admin.badgeRevokeHint') : t('admin.badgeAwardHint')}
                   >
                     <BadgeIcon color={f.color} emoji={f.emoji} size={40} title={f.label} />
                     <span className="badge-pick-label">{f.label}</span>

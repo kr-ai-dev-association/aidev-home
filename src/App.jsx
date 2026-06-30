@@ -21,6 +21,8 @@ import VotePage from './components/VotePage'; // 투표(의제)
 import B2BRequestsPage from './components/B2BRequestsPage'; // 조합 B2B 의뢰 관리(관리자)
 import MyJobsPage from './components/MyJobsPage'; // 내 공고 관리(지원 현황)
 import MyApplicationsPage from './components/MyApplicationsPage'; // 내 지원 관리(스크랩·지원 현황)
+import CoinChargePage from './components/CoinChargePage'; // 코인 충전(Lemon Squeezy)
+import CoinChargesAdminPage from './components/CoinChargesAdminPage'; // 코인 충전 내역(관리자)
 import MediationPage from './components/MediationPage'; // 분쟁 조정 의뢰(조합원)
 import MediationsAdminPage from './components/MediationsAdminPage'; // 분쟁 조정 의뢰 관리(관리자)
 import DisputeServicePage from './components/DisputeServicePage'; // 분쟁 조정 소개(사업·서비스)
@@ -28,6 +30,7 @@ import DisputesPage from './components/DisputesPage'; // 분쟁 관리(관리자
 import B2BRequestModal from './components/B2BRequestModal'; // 조합 B2B 의뢰 입력 모달
 import SearchOverlay from './components/SearchOverlay'; // 통합 검색
 import { fetchUnreadCounts } from './lib/inbox';
+import { useI18n } from './i18n/I18nProvider'; // 다국어(i18n)
 
 import './App.css';
 
@@ -45,6 +48,7 @@ function parseRoute(pathname) {
 const initRoute = typeof window !== 'undefined' ? parseRoute(window.location.pathname) : {};
 
 function App() {
+  const { t } = useI18n();
   const [session, setSession] = useState(null); // Supabase 세션
   const [profile, setProfile] = useState(null); // 조합원 프로필(추가 정보)
   const [needsProfile, setNeedsProfile] = useState(false); // 신규 인증 후 정보입력 필요 여부
@@ -58,6 +62,7 @@ function App() {
   const [employmentJobId, setEmploymentJobId] = useState(initRoute.jobId || null); // 검색/딥링크로 열 공고 id
   const [viewUserId, setViewUserId] = useState(null); // 조회할 타인(지원자) 프로필 user id
   const [viewUserFallback, setViewUserFallback] = useState(null); // 프로필 RLS 차단 시 폴백 스냅샷
+  const [viewReturn, setViewReturn] = useState('home'); // 타인 프로필에서 돌아갈 출발 페이지
   const [searchOpen, setSearchOpen] = useState(false); // 통합 검색 오버레이
   const [searchKind, setSearchKind] = useState('all'); // 'all' | 'job' | 'community'
   const [searchQuery, setSearchQuery] = useState(''); // 초기 검색어
@@ -162,11 +167,12 @@ function App() {
     setCurrentPage('community');
     setScrollToSection(null);
   };
-  // 지원자 등 타인 프로필 페이지 열기 (fallback: 지원 스냅샷)
+  // 지원자/작성자 등 타인 프로필 페이지 열기 (fallback: 스냅샷)
   const openUserProfile = (userId, fallback = null) => {
     if (!userId) return;
     setViewUserId(userId);
     setViewUserFallback(fallback);
+    setViewReturn(currentPage); // 돌아갈 출발 페이지 기억
     setCurrentPage('userprofile');
     setScrollToSection(null);
   };
@@ -186,7 +192,7 @@ function App() {
   // 조합 B2B 의뢰 모달 열기 (가입된 조합원이면 누구나 — 정회원 아니어도 가능)
   const openB2B = (type) => {
     if (!isLoggedIn) {
-      alert('의뢰는 로그인(조합원) 후 이용할 수 있습니다.');
+      alert(t('app.b2bLoginRequired'));
       handleNavigate('login');
       return;
     }
@@ -246,7 +252,7 @@ function App() {
     }
     if (session) await loadProfile(session.user);
     setCurrentPage('home');
-    alert('회원가입이 완료되었습니다. 환영합니다!');
+    alert(t('app.signupComplete'));
   };
 
   let content;
@@ -255,16 +261,13 @@ function App() {
   if (pendingNotice) {
     content = (
       <div className="auth-form-container">
-        <h2>승인 대기 중</h2>
-        <p className="auth-stage-desc">
-          법인 회원은 관리자 승인 후 로그인할 수 있습니다.<br />
-          승인이 완료되면 다시 로그인해주세요.
-        </p>
+        <h2>{t('app.pendingTitle')}</h2>
+        <p className="auth-stage-desc" dangerouslySetInnerHTML={{ __html: t('app.pendingDesc') }} />
         <button
           className="auth-submit-button"
           onClick={() => { setPendingNotice(false); setCurrentPage('home'); }}
         >
-          홈으로
+          {t('app.goHome')}
         </button>
       </div>
     );
@@ -305,7 +308,17 @@ function App() {
         content = <CoursesPage onNavigate={handleNavigate} onB2BRequest={openB2B} />;
         break;
       case 'profile':
-        content = <ProfilePage user={session?.user} profile={profile} onProfileUpdated={setProfile} />;
+        content = <ProfilePage user={session?.user} profile={profile} onProfileUpdated={setProfile} onNavigate={handleNavigate} />;
+        break;
+      case 'coincharge':
+        content = (
+          <CoinChargePage
+            user={session?.user}
+            isLoggedIn={isLoggedIn}
+            profile={profile}
+            onProfileChanged={refreshProfile}
+          />
+        );
         break;
       case 'admin-hub':
         content = <AdminHubPage isAdmin={isAdmin} onNavigate={handleNavigate} />;
@@ -341,7 +354,7 @@ function App() {
           <ProfilePage
             viewUserId={viewUserId}
             viewProfileFallback={viewUserFallback}
-            onBack={() => handleNavigate('myjobs')}
+            onBack={() => handleNavigate(viewReturn || 'myjobs')}
           />
         );
         break;
@@ -360,6 +373,9 @@ function App() {
         break;
       case 'mediations-admin':
         content = <MediationsAdminPage isAdmin={isAdmin} onOpenConversation={openInbox} onBack={() => handleNavigate('admin-hub')} />;
+        break;
+      case 'coincharges':
+        content = <CoinChargesAdminPage isAdmin={isAdmin} onBack={() => handleNavigate('admin-hub')} />;
         break;
       case 'disputeservice':
         content = <DisputeServicePage onNavigate={handleNavigate} isLoggedIn={isLoggedIn} />;
@@ -418,6 +434,7 @@ function App() {
             onOpenConversation={openInbox}
             onOpenSearch={openSearch}
             onProfileChanged={refreshProfile}
+            onViewProfile={openUserProfile}
           />
         );
         break;

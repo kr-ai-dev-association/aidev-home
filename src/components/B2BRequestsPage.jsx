@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { useI18n } from '../i18n/I18nProvider';
 
 const STATUS = {
-  new: { label: '신규', color: '#67e8f9' },
-  in_progress: { label: '처리 중', color: '#fcd34d' },
-  done: { label: '완료', color: '#4ade80' },
+  new: { labelKey: 'admin.b2bStatusNew', color: '#67e8f9' },
+  in_progress: { labelKey: 'admin.b2bStatusInProgress', color: '#fcd34d' },
+  done: { labelKey: 'admin.b2bStatusDone', color: '#4ade80' },
 };
 
 function fmt(iso) {
@@ -14,6 +15,7 @@ function fmt(iso) {
 }
 
 function B2BRequestsPage({ isAdmin, onBack }) {
+  const { t } = useI18n();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,7 +39,7 @@ function B2BRequestsPage({ isAdmin, onBack }) {
     setBusyId(row.id);
     const { error } = await supabase.from('b2b_requests').update({ status }).eq('id', row.id);
     setBusyId(null);
-    if (error) { alert(`상태 변경 오류: ${error.message}`); return; }
+    if (error) { alert(t('admin.statusChangeError', { msg: error.message })); return; }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status } : r)));
   };
 
@@ -46,8 +48,8 @@ function B2BRequestsPage({ isAdmin, onBack }) {
       <div className="home-landing admin-page">
         <div className="home-page-container content-area-container">
           <section className="section-services">
-            <h3>접근 권한이 없습니다</h3>
-            <p className="section-lead">이 페이지는 관리자만 열람할 수 있습니다.</p>
+            <h3>{t('admin.noAccessTitle')}</h3>
+            <p className="section-lead">{t('admin.noAccessDesc')}</p>
           </section>
         </div>
       </div>
@@ -65,15 +67,15 @@ function B2BRequestsPage({ isAdmin, onBack }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
-          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
-          <h3>조합 B2B 의뢰 관리</h3>
-          <p className="section-lead">강의 견적 문의·에이전트 평가 신청 등 B2B 의뢰를 확인하고 처리 상태를 관리합니다.</p>
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>{t('admin.backToHub')}</button>}
+          <h3>{t('admin.b2bTitle')}</h3>
+          <p className="section-lead">{t('admin.b2bLead')}</p>
 
           <div className="b2b-filter">
             {[
-              { k: 'all', label: `전체 (${counts.all})` },
-              { k: '조합 B2B 평가 신청', label: `평가 신청 (${counts['조합 B2B 평가 신청']})` },
-              { k: '조합 B2B 견적 문의', label: `견적 문의 (${counts['조합 B2B 견적 문의']})` },
+              { k: 'all', label: t('admin.b2bFilterAll', { count: counts.all }) },
+              { k: '조합 B2B 평가 신청', label: t('admin.b2bFilterEval', { count: counts['조합 B2B 평가 신청'] }) },
+              { k: '조합 B2B 견적 문의', label: t('admin.b2bFilterQuote', { count: counts['조합 B2B 견적 문의'] }) },
             ].map((f) => (
               <button key={f.k} className={`b2b-filter-btn ${filter === f.k ? 'active' : ''}`} onClick={() => setFilter(f.k)}>
                 {f.label}
@@ -82,11 +84,11 @@ function B2BRequestsPage({ isAdmin, onBack }) {
           </div>
 
           {loading ? (
-            <p className="admin-msg">불러오는 중...</p>
+            <p className="admin-msg">{t('admin.loading')}</p>
           ) : error ? (
-            <p className="admin-msg admin-error">오류: {error}</p>
+            <p className="admin-msg admin-error">{t('admin.error', { msg: error })}</p>
           ) : filtered.length === 0 ? (
-            <p className="admin-msg">접수된 의뢰가 없습니다.</p>
+            <p className="admin-msg">{t('admin.b2bNoRequests')}</p>
           ) : (
             <div className="b2b-list">
               {filtered.map((r) => {
@@ -95,7 +97,7 @@ function B2BRequestsPage({ isAdmin, onBack }) {
                   <div className="b2b-card" key={r.id}>
                     <div className="b2b-card-top">
                       <span className="b2b-type-pill">{r.type}</span>
-                      <span className="b2b-status" style={{ color: st.color, borderColor: st.color }}>{st.label}</span>
+                      <span className="b2b-status" style={{ color: st.color, borderColor: st.color }}>{t(st.labelKey)}</span>
                       <span className="b2b-date">{fmt(r.created_at)}</span>
                     </div>
                     <div className="b2b-card-body">
@@ -104,13 +106,13 @@ function B2BRequestsPage({ isAdmin, onBack }) {
                         {r.contact_name} · <a href={`mailto:${r.email}`}>{r.email}</a>{r.phone ? ` · ${r.phone}` : ''}
                       </p>
                       <p className="b2b-message">{r.message}</p>
-                      <p className="b2b-requester">의뢰 조합원: {r.requester_name || '-'}</p>
+                      <p className="b2b-requester">{t('admin.b2bRequester', { name: r.requester_name || '-' })}</p>
                     </div>
                     <div className="b2b-card-actions">
                       {Object.entries(STATUS).map(([k, v]) => (
                         <button key={k} className={`b2b-status-btn ${r.status === k ? 'active' : ''}`}
                           disabled={busyId === r.id || r.status === k} onClick={() => setStatus(r, k)}>
-                          {v.label}
+                          {t(v.labelKey)}
                         </button>
                       ))}
                     </div>

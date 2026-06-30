@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ShareButton.css';
+import { useI18n } from '../i18n/I18nProvider';
 
 const Icon = {
   copy: (
@@ -37,6 +38,7 @@ const Icon = {
 };
 
 function ShareButton({ url, title, text }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
@@ -48,12 +50,12 @@ function ShareButton({ url, title, text }) {
   }, []);
 
   const u = encodeURIComponent(url);
-  const t = encodeURIComponent(title || '');
+  const tt = encodeURIComponent(title || '');
   const targets = [
-    { key: 'x', label: 'X (트위터)', color: '#e7e9ea', href: `https://twitter.com/intent/tweet?url=${u}&text=${t}` },
-    { key: 'fb', label: 'Facebook', color: '#1877F2', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
-    { key: 'li', label: 'LinkedIn', color: '#0A66C2', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
-    { key: 'rd', label: 'Reddit', color: '#FF4500', href: `https://www.reddit.com/submit?url=${u}&title=${t}` },
+    { key: 'x', label: t('share.targetX'), color: '#e7e9ea', href: `https://twitter.com/intent/tweet?url=${u}&text=${tt}` },
+    { key: 'fb', label: t('share.targetFb'), color: '#1877F2', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
+    { key: 'li', label: t('share.targetLi'), color: '#0A66C2', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
+    { key: 'rd', label: t('share.targetRd'), color: '#FF4500', href: `https://www.reddit.com/submit?url=${u}&title=${tt}` },
   ];
 
   const nativeShare = async () => {
@@ -69,7 +71,7 @@ function ShareButton({ url, title, text }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      window.prompt('아래 링크를 복사하세요', url);
+      window.prompt(t('share.copyPrompt'), url);
     }
   };
 
@@ -82,27 +84,27 @@ function ShareButton({ url, title, text }) {
 
   return (
     <div className="share-wrap" ref={ref}>
-      <button type="button" className="nt-btn ghost share-btn" onClick={onMain}>🔗 공유</button>
+      <button type="button" className="nt-btn ghost share-btn" onClick={onMain}>{t('share.button')}</button>
       {open && (
         <div className="share-pop">
           <button type="button" className="share-item" onClick={copy}>
             <span className="share-ico">{Icon.copy}</span>
-            {copied ? '복사됨!' : '링크 복사'}
+            {copied ? t('share.copied') : t('share.copyLink')}
           </button>
           {navigator.share && (
             <button type="button" className="share-item" onClick={nativeShare}>
               <span className="share-ico">{Icon.share}</span>
-              기기로 공유 (카카오톡 등)
+              {t('share.nativeShare')}
             </button>
           )}
           <div className="share-divider" />
           {targets.map((s) => (
             <a key={s.key} className="share-item" href={s.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
               <span className="share-ico" style={{ color: s.color }}>{Icon[s.key]}</span>
-              {s.label}에 공유
+              {t('share.shareTo', { target: s.label })}
             </a>
           ))}
-          <p className="share-note">슬랙·카카오톡은 링크를 붙여넣으면 썸네일이 표시됩니다.</p>
+          <p className="share-note">{t('share.note')}</p>
         </div>
       )}
     </div>

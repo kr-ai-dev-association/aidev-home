@@ -20,6 +20,8 @@ export const EXPERT_FIELDS = [
   { key: 'management',    label: '경영',              emoji: '📈', color: '#fb923c' },
   { key: 'music',         label: '음악',              emoji: '🎵', color: '#ec4899' },
   { key: 'art',           label: '미술',              emoji: '🎨', color: '#d946ef' },
+  { key: 'video',         label: '영상',              emoji: '🎬', color: '#a855f7' },
+  { key: 'it-instructor', label: 'IT 강사',           emoji: '👨‍🏫', color: '#0ea5e9' },
   { key: 'sports',        label: '체육',              emoji: '🏅', color: '#ef4444' },
   { key: 'food',          label: '음식',              emoji: '🍳', color: '#eab308' },
   { key: 'finance',       label: '금융',              emoji: '💰', color: '#10b981' },

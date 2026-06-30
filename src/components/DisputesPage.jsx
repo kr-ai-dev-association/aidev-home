@@ -3,12 +3,13 @@ import { supabase } from '../lib/supabase';
 import { startConversation } from '../lib/inbox';
 import { sanitize } from '../lib/html';
 import { MarkdownView } from './MarkdownField';
+import { useI18n } from '../i18n/I18nProvider';
 import './JobDetailPage.css'; // 스크린샷 썸네일·라이트박스 스타일 재사용
 
 const STATUS = {
-  open: { label: '접수', color: '#fca5a5' },
-  mediating: { label: '조정 중', color: '#fcd34d' },
-  resolved: { label: '해결', color: '#4ade80' },
+  open: { labelKey: 'admin.disputeStatusOpen', color: '#fca5a5' },
+  mediating: { labelKey: 'admin.disputeStatusMediating', color: '#fcd34d' },
+  resolved: { labelKey: 'admin.disputeStatusResolved', color: '#4ade80' },
 };
 
 function fmt(iso) {
@@ -18,6 +19,7 @@ function fmt(iso) {
 }
 
 function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
+  const { t } = useI18n();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
@@ -41,22 +43,22 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
   useEffect(() => { if (isAdmin) load(); }, [isAdmin, load]);
 
   const mediate = async (d) => {
-    if (!window.confirm('분쟁 조정을 개시하시겠습니까?\n의뢰자·수행자에게 조정단 파견 안내(알림·이메일)가 발송됩니다.')) return;
+    if (!window.confirm(t('admin.mediateConfirm'))) return;
     setBusy(d.id);
     const { error } = await supabase.rpc('mediate_dispute', { p_dispute_id: d.id });
     // 이메일 발송(Edge Function) — 배포되어 있으면 함께 발송, 없으면 알림만
     try { await supabase.functions.invoke('dispute-email', { body: { dispute_id: d.id } }); } catch { /* noop */ }
     setBusy(null);
-    if (error) { alert(`조정 개시 오류: ${error.message}`); return; }
+    if (error) { alert(t('admin.mediateError', { msg: error.message })); return; }
     setRows((prev) => prev.map((x) => (x.id === d.id ? { ...x, status: 'mediating' } : x)));
-    alert('분쟁 조정이 개시되었습니다. 당사자에게 알림이 발송되었습니다.');
+    alert(t('admin.mediateDone'));
   };
 
   const setResolved = async (d) => {
     setBusy(d.id);
     const { error } = await supabase.from('disputes').update({ status: 'resolved' }).eq('id', d.id);
     setBusy(null);
-    if (error) { alert(`상태 변경 오류: ${error.message}`); return; }
+    if (error) { alert(t('admin.statusChangeError', { msg: error.message })); return; }
     setRows((prev) => prev.map((x) => (x.id === d.id ? { ...x, status: 'resolved' } : x)));
   };
 
@@ -69,8 +71,8 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
     return (
       <div className="home-landing admin-page">
         <div className="home-page-container content-area-container">
-          <section className="section-services"><h3>접근 권한이 없습니다</h3>
-            <p className="section-lead">이 페이지는 관리자만 열람할 수 있습니다.</p></section>
+          <section className="section-services"><h3>{t('admin.noAccessTitle')}</h3>
+            <p className="section-lead">{t('admin.noAccessDesc')}</p></section>
         </div>
       </div>
     );
@@ -82,14 +84,14 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
-          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
-          <h3>외주 분쟁 관리</h3>
-          <p className="section-lead">외주 프로젝트 분쟁을 확인하고 조정 절차를 개시합니다. 접수 {counts.open}건 · 조정 중 {counts.mediating}건</p>
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>{t('admin.backToHub')}</button>}
+          <h3>{t('admin.disputeTitle')}</h3>
+          <p className="section-lead">{t('admin.disputeLead', { open: counts.open, mediating: counts.mediating })}</p>
 
           {loading ? (
-            <p className="admin-msg">불러오는 중...</p>
+            <p className="admin-msg">{t('admin.loading')}</p>
           ) : rows.length === 0 ? (
-            <p className="admin-msg">접수된 분쟁이 없습니다.</p>
+            <p className="admin-msg">{t('admin.disputeNone')}</p>
           ) : (
             <div className="myjobs-list">
               {rows.map((d) => {
@@ -104,9 +106,9 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
                   <div className="myjob-card" key={d.id}>
                     <div className="myjob-head" onClick={() => setOpenId(open ? null : d.id)}>
                       <div>
-                        <span className="b2b-status" style={{ color: st.color, borderColor: st.color }}>{st.label}</span>
-                        <h4>{d.job_title || '외주 프로젝트'}</h4>
-                        <span className="myjob-deadline">신고: {d.reporter_name} ({d.reporter_role}) · {fmt(d.created_at)}</span>
+                        <span className="b2b-status" style={{ color: st.color, borderColor: st.color }}>{t(st.labelKey)}</span>
+                        <h4>{d.job_title || t('admin.disputeProjectFallback')}</h4>
+                        <span className="myjob-deadline">{t('admin.disputeReport', { name: d.reporter_name, role: d.reporter_role, date: fmt(d.created_at) })}</span>
                       </div>
                       <div className="myjob-count"><span className="myjob-caret">{open ? '▴' : '▾'}</span></div>
                     </div>
@@ -114,24 +116,24 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
                     {open && (
                       <div className="myjob-apps">
                         <div className="dispute-detail-block">
-                          <h5>분쟁 내용</h5>
+                          <h5>{t('admin.disputeContentHead')}</h5>
                           <p className="apply-msg">{d.content}</p>
                         </div>
                         {snap.description && (
                           <div className="dispute-detail-block">
-                            <h5>공고 내용</h5>
+                            <h5>{t('admin.disputeJobDescHead')}</h5>
                             <div className="post-content" dangerouslySetInnerHTML={{ __html: sanitize(snap.description) }} />
                           </div>
                         )}
                         {features.length > 0 && (
                           <div className="dispute-detail-block">
-                            <h5>기능 요구사항 ({features.length})</h5>
+                            <h5>{t('admin.disputeFeaturesHead', { count: features.length })}</h5>
                             {features.map((f, i) => (
                               <div className="dispute-feature" key={i}>
                                 <strong>{i + 1}. {f.name}</strong>
                                 {f.detail && <MarkdownView source={f.detail} />}
                                 {f.image && (
-                                  <button type="button" className="feature-image" onClick={() => setLightbox(f.image)} aria-label="이미지 크게 보기">
+                                  <button type="button" className="feature-image" onClick={() => setLightbox(f.image)} aria-label={t('admin.imageZoomAria')}>
                                     <img src={f.image} alt={f.name} />
                                   </button>
                                 )}
@@ -141,11 +143,11 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
                         )}
                         {screenshots.length > 0 && (
                           <div className="dispute-detail-block">
-                            <h5>스크린샷 ({screenshots.length})</h5>
+                            <h5>{t('admin.disputeScreenshotsHead', { count: screenshots.length })}</h5>
                             <div className="screenshot-gallery">
                               {screenshots.map((url, i) => (
-                                <button type="button" key={i} className="screenshot-thumb" onClick={() => setLightbox(url)} aria-label="이미지 크게 보기">
-                                  <img src={url} alt={`스크린샷 ${i + 1}`} />
+                                <button type="button" key={i} className="screenshot-thumb" onClick={() => setLightbox(url)} aria-label={t('admin.imageZoomAria')}>
+                                  <img src={url} alt={t('admin.screenshotAlt', { n: i + 1 })} />
                                 </button>
                               ))}
                             </div>
@@ -153,7 +155,7 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
                         )}
                         {attachments.length > 0 && (
                           <div className="dispute-detail-block">
-                            <h5>문서·소스 첨부 ({attachments.length})</h5>
+                            <h5>{t('admin.disputeAttachmentsHead', { count: attachments.length })}</h5>
                             <ul className="detail-attach-list">
                               {attachments.map((a, i) => (
                                 <li className="detail-attach-item" key={i}>
@@ -166,13 +168,13 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
                           </div>
                         )}
                         <div className="apply-actions-row">
-                          <button className="b2b-status-btn" onClick={() => dm(d.client_id)}>✉️ 의뢰자</button>
-                          <button className="b2b-status-btn" onClick={() => dm(d.contractor_id)}>✉️ 수행자</button>
+                          <button className="b2b-status-btn" onClick={() => dm(d.client_id)}>{t('admin.dmClient')}</button>
+                          <button className="b2b-status-btn" onClick={() => dm(d.contractor_id)}>{t('admin.dmContractor')}</button>
                           {d.status !== 'resolved' && (
-                            <button className="b2b-status-btn contract" disabled={busy === d.id} onClick={() => mediate(d)}>⚖️ 분쟁 조정 개시</button>
+                            <button className="b2b-status-btn contract" disabled={busy === d.id} onClick={() => mediate(d)}>{t('admin.mediateBtn')}</button>
                           )}
                           {d.status === 'mediating' && (
-                            <button className="b2b-status-btn" disabled={busy === d.id} onClick={() => setResolved(d)}>✅ 해결 완료</button>
+                            <button className="b2b-status-btn" disabled={busy === d.id} onClick={() => setResolved(d)}>{t('admin.resolveBtn')}</button>
                           )}
                         </div>
                       </div>
@@ -187,8 +189,8 @@ function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
 
       {lightbox && (
         <div className="img-lightbox" onClick={() => setLightbox(null)}>
-          <button type="button" className="img-lightbox-close" aria-label="닫기" onClick={() => setLightbox(null)}>✕</button>
-          <img src={lightbox} alt="원본 이미지" onClick={(e) => e.stopPropagation()} />
+          <button type="button" className="img-lightbox-close" aria-label={t('admin.closeAria')} onClick={() => setLightbox(null)}>✕</button>
+          <img src={lightbox} alt={t('admin.originalImageAlt')} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
     </div>

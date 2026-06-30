@@ -7,23 +7,38 @@ import { sanitize, isEmptyHtml } from '../lib/html';
 import { startConversation } from '../lib/inbox';
 import ShareButton from './ShareButton';
 import avatarPlaceholder from '../assets/profile-placeholder.png';
+import { useI18n } from '../i18n/I18nProvider';
 
-function formatDateTime(iso) {
+function formatDateTime(iso, t) {
   if (!iso) return '';
   const d = new Date(iso);
   const h = d.getHours();
-  const ampm = h < 12 ? '오전' : '오후';
+  const ampm = h < 12 ? t('community.am') : t('community.pm');
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${ampm} ${h12}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return t('community.dateTime', {
+    y: d.getFullYear(),
+    mo: d.getMonth() + 1,
+    d: d.getDate(),
+    ampm,
+    h: h12,
+    min: String(d.getMinutes()).padStart(2, '0'),
+  });
 }
 
-function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenConversation, onProfileChanged }) {
+function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenConversation, onProfileChanged, onViewProfile }) {
+  const { t } = useI18n();
+  // 작성자 이름 → 프로필 페이지 링크 (onViewProfile 제공 시)
+  const Author = ({ id, name, className }) => (
+    onViewProfile && id
+      ? <button type="button" className={`${className} author-link`} onClick={() => onViewProfile(id, { name })}>{name}</button>
+      : <span className={className}>{name}</span>
+  );
   const messageAuthor = async (authorId) => {
     try {
       const cid = await startConversation(authorId);
       onOpenConversation && onOpenConversation(cid);
     } catch (e) {
-      alert(`메시지 시작 오류: ${e.message}`);
+      alert(t('community.alertMessageStartError', { msg: e.message }));
     }
   };
   const [topic, setTopic] = useState(null);
@@ -36,7 +51,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
   const [commentDrafts, setCommentDrafts] = useState({});
   const [commentBusy, setCommentBusy] = useState(false);
 
-  const authorName = profile?.name || user?.email?.split('@')[0] || '익명';
+  const authorName = profile?.name || user?.email?.split('@')[0] || t('community.defaultAuthor');
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -78,36 +93,36 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
       content: text,
     });
     setCommentBusy(false);
-    if (error) { alert(`답글 등록 오류: ${error.message}`); return; }
+    if (error) { alert(t('community.alertCommentCreateError', { msg: error.message })); return; }
     setCommentDrafts((d) => ({ ...d, [postId]: '' }));
     onProfileChanged?.(); // 적립된 0.1 coin 반영
     fetchAll();
   };
 
   const deleteComment = async (id) => {
-    if (!window.confirm('답글을 삭제하시겠습니까?')) return;
+    if (!window.confirm(t('community.confirmDeleteComment'))) return;
     const { error } = await supabase.from('comments').delete().eq('id', id);
-    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    if (error) { alert(t('community.alertDeleteError', { msg: error.message })); return; }
     setComments((prev) => prev.filter((c) => c.id !== id));
   };
 
   // 게시글 삭제: 첫 게시글이면 주제 전체(답글·게시글 포함) 삭제, 그 외엔 해당 게시글만
   const deletePost = async (post, isFirst) => {
     const msg = isFirst
-      ? '이 주제를 삭제하시겠습니까? 모든 게시글과 답글이 함께 삭제됩니다.'
-      : '이 게시글을 삭제하시겠습니까? 달린 답글도 함께 삭제됩니다.';
+      ? t('community.confirmDeleteTopic')
+      : t('community.confirmDeletePost');
     if (!window.confirm(msg)) return;
     if (isFirst) {
       const postIds = posts.map((p) => p.id);
       if (postIds.length) await supabase.from('comments').delete().in('post_id', postIds);
       await supabase.from('posts').delete().eq('topic_id', topicId);
       const { error } = await supabase.from('topics').delete().eq('id', topicId);
-      if (error) { alert(`삭제 오류: ${error.message}`); return; }
+      if (error) { alert(t('community.alertDeleteError', { msg: error.message })); return; }
       onBackToListings();
     } else {
       await supabase.from('comments').delete().eq('post_id', post.id);
       const { error } = await supabase.from('posts').delete().eq('id', post.id);
-      if (error) { alert(`삭제 오류: ${error.message}`); return; }
+      if (error) { alert(t('community.alertDeleteError', { msg: error.message })); return; }
       fetchAll();
     }
   };
@@ -124,7 +139,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
     });
     setSubmitting(false);
     if (error) {
-      alert(`답변 등록 오류: ${error.message}`);
+      alert(t('community.alertReplyCreateError', { msg: error.message }));
       return;
     }
     setReply('');
@@ -134,7 +149,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
   if (loading) {
     return (
       <div className="topic-detail-page-container content-area-container">
-        <p className="community-msg">불러오는 중...</p>
+        <p className="community-msg">{t('community.loading')}</p>
       </div>
     );
   }
@@ -142,8 +157,8 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
   if (!topic) {
     return (
       <div className="topic-detail-page-container content-area-container">
-        <p>토픽을 찾을 수 없습니다.</p>
-        <button className="back-button" onClick={onBackToListings}>목록으로 돌아가기</button>
+        <p>{t('community.notFound')}</p>
+        <button className="back-button" onClick={onBackToListings}>{t('community.backToListings')}</button>
       </div>
     );
   }
@@ -155,7 +170,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
     <div className="topic-detail-page-container content-area-container">
       <div className="topic-detail-main-content">
         <nav className="topic-breadcrumbs">
-          <span className="crumb-link" onClick={onBackToListings}>커뮤니티</span>
+          <span className="crumb-link" onClick={onBackToListings}>{t('community.breadcrumbCommunity')}</span>
           <span>›</span>
           <span className="current-category">{topic.category}</span>
           <span>›</span>
@@ -173,14 +188,17 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
         <div className="topic-summary-card">
           {Array.isArray(topic.tags) && topic.tags.length > 0 && (
             <div className="topic-tags">
-              태그:
+              {t('community.tagsLabel')}
               {topic.tags.map((tag, i) => <span key={i} className="topic-tag">{tag}</span>)}
             </div>
           )}
           <p className="topic-stats">
-            이 주제는 <strong>{posts.length}</strong>개의 게시글, <strong>{voices}</strong>명의 참여자가 있으며, 마지막 업데이트는{' '}
-            <strong>{lastPost ? formatDateTime(lastPost.created_at) : '-'}</strong>에{' '}
-            <span className="last-updated-author">{lastPost?.author_name || topic.author_name}</span>에 의해 이루어졌습니다.
+            {t('community.statsLine', {
+              posts: posts.length,
+              voices,
+              when: lastPost ? formatDateTime(lastPost.created_at, t) : t('community.statsNone'),
+              by: lastPost?.author_name || topic.author_name,
+            })}
           </p>
         </div>
 
@@ -188,20 +206,20 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
           {posts.map((post, idx) => (
             <div key={post.id} className="post-card">
               <div className="post-author-info">
-                <img src={avatarPlaceholder} alt={`${post.author_name} 아바타`} className="author-avatar" />
-                <p className="author-name">{post.author_name}</p>
-                <p className="author-role">{idx === 0 ? '작성자' : '참여자'}</p>
+                <img src={avatarPlaceholder} alt={t('community.avatarAlt', { name: post.author_name })} className="author-avatar" />
+                <Author id={post.author_id} name={post.author_name} className="author-name" />
+                <p className="author-role">{idx === 0 ? t('community.roleAuthor') : t('community.roleParticipant')}</p>
                 {isLoggedIn && post.author_id !== user?.id && (
-                  <button className="dm-button" onClick={() => messageAuthor(post.author_id)}>✉️ 메시지</button>
+                  <button className="dm-button" onClick={() => messageAuthor(post.author_id)}>{t('community.dmButton')}</button>
                 )}
               </div>
               <div className="post-content-area">
                 <div className="post-header">
-                  <span className="post-date">{formatDateTime(post.created_at)}</span>
+                  <span className="post-date">{formatDateTime(post.created_at, t)}</span>
                   <span className="post-number">#{idx + 1}</span>
                   {(isAdmin || post.author_id === user?.id) && (
                     <button className="post-delete" onClick={() => deletePost(post, idx === 0)}>
-                      🗑 {idx === 0 ? '주제 삭제' : '게시글 삭제'}
+                      {idx === 0 ? t('community.deleteTopic') : t('community.deletePost')}
                     </button>
                   )}
                 </div>
@@ -212,12 +230,12 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
                   {comments.filter((c) => c.post_id === post.id).map((c) => (
                     <div className="comment-item" key={c.id}>
                       <div className="comment-body">
-                        <span className="comment-author">{c.author_name}</span>
-                        <span className="comment-date">{formatDateTime(c.created_at)}</span>
+                        <Author id={c.author_id} name={c.author_name} className="comment-author" />
+                        <span className="comment-date">{formatDateTime(c.created_at, t)}</span>
                         <p className="comment-text">{c.content}</p>
                       </div>
                       {(isAdmin || c.author_id === user?.id) && (
-                        <button className="comment-delete" onClick={() => deleteComment(c.id)} aria-label="답글 삭제">✕</button>
+                        <button className="comment-delete" onClick={() => deleteComment(c.id)} aria-label={t('community.commentDeleteAria')}>✕</button>
                       )}
                     </div>
                   ))}
@@ -227,7 +245,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
                       <input
                         type="text"
                         className="comment-input"
-                        placeholder="답글 달기... (작성 시 0.1 coin 적립)"
+                        placeholder={t('community.commentPlaceholder')}
                         value={commentDrafts[post.id] || ''}
                         onChange={(e) => setCommentDrafts((d) => ({ ...d, [post.id]: e.target.value }))}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addComment(post.id); } }}
@@ -237,7 +255,7 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
                         disabled={commentBusy || !(commentDrafts[post.id] || '').trim()}
                         onClick={() => addComment(post.id)}
                       >
-                        등록
+                        {t('community.commentSubmit')}
                       </button>
                     </div>
                   )}
@@ -250,26 +268,26 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
         {/* 답변 작성 */}
         {isLoggedIn ? (
           <form className="reply-section" onSubmit={handleReply}>
-            <h3>답변 작성</h3>
-            <RichTextEditor value={reply} onChange={setReply} placeholder="답변을 입력하세요..." />
+            <h3>{t('community.replyTitle')}</h3>
+            <RichTextEditor value={reply} onChange={setReply} placeholder={t('community.replyPlaceholder')} />
             <div className="reply-actions">
-              <button type="button" className="nt-btn ghost" onClick={onBackToListings}>목록으로</button>
+              <button type="button" className="nt-btn ghost" onClick={onBackToListings}>{t('community.backToList')}</button>
               <button type="submit" className="nt-btn primary" disabled={submitting || isEmptyHtml(reply)}>
-                {submitting ? '등록 중...' : '답변 등록'}
+                {submitting ? t('community.submitting') : t('community.submitReply')}
               </button>
             </div>
           </form>
         ) : (
           <div className="login-to-reply-section">
-            <p className="login-message">이 주제에 답변하려면 로그인해야 합니다.</p>
-            <button className="nt-btn primary" onClick={() => onNavigate('login')}>로그인</button>
+            <p className="login-message">{t('community.loginToReply')}</p>
+            <button className="nt-btn primary" onClick={() => onNavigate('login')}>{t('community.login')}</button>
           </div>
         )}
       </div>
 
       <aside className="community-sidebar">
         <div className="recent-topics-section">
-          <h3>최근 주제</h3>
+          <h3>{t('community.recentTopics')}</h3>
           <ul className="recent-topics-list">
             {recent.map((item) => (
               <li key={item.id}><span className="topic-bullet">💬</span> {item.title}</li>

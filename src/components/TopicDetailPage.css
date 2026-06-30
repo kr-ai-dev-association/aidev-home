@@ -639,3 +639,17 @@
   cursor: pointer;
 }
 .dm-button:hover { background: rgba(99,102,241,0.24); }
+
+/* 작성자 이름 → 프로필 이동 링크 */
+button.author-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+button.author-link:hover { text-decoration: underline; color: #67e8f9; }
+.comment-author.author-link:hover { color: #67e8f9; }

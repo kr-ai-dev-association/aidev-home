@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useI18n } from '../i18n/I18nProvider';
 import { supabase } from '../lib/supabase';
 import RichTextEditor from './RichTextEditor';
 import { isEmptyHtml } from '../lib/html';
@@ -33,6 +34,7 @@ const fromEditable = (raw, type) => {
 const MAX_ATTACH_BYTES = 10 * 1024 * 1024; // 통합 10MB 미만
 
 function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
+  const { t } = useI18n();
   const isEdit = !!initial;
   const allowedBoards = canPostCorp ? BOARD_TYPES : BOARD_TYPES.filter((b) => !CORP_ONLY.includes(b));
 
@@ -66,28 +68,28 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
   // 필드 타입 검증
   const fieldError = (f) => {
     const v = String(details[f.key] || '').trim();
-    if (!v) return f.required ? '필수 항목입니다.' : '';
-    if (f.validate === 'email' && !EMAIL.test(v)) return '올바른 이메일 형식이 아닙니다.';
-    if (f.validate === 'phone' && !PHONE.test(v)) return '숫자, +, -, 공백, () 만 사용해 입력하세요.';
-    if (f.validate === 'url' && !URLRE.test(v)) return 'http(s):// 로 시작하는 URL을 입력하세요.';
+    if (!v) return f.required ? t('employment.errRequired') : '';
+    if (f.validate === 'email' && !EMAIL.test(v)) return t('employment.errEmail');
+    if (f.validate === 'phone' && !PHONE.test(v)) return t('employment.errPhone');
+    if (f.validate === 'url' && !URLRE.test(v)) return t('employment.errUrl');
     return '';
   };
   const errors = {};
   fields.forEach((f) => { const e = fieldError(f); if (e) errors[f.key] = e; });
-  const titleError = !title.trim() ? '필수 항목입니다.' : '';
-  const descError = isEmptyHtml(description) ? '필수 항목입니다.' : '';
+  const titleError = !title.trim() ? t('employment.errRequired') : '';
+  const descError = isEmptyHtml(description) ? t('employment.errRequired') : '';
   const contactError = (() => {
     const s = contact.trim();
     if (!s) return '';
-    if (s.includes('@')) return EMAIL.test(s) ? '' : '올바른 이메일 형식이 아닙니다.';
-    return URLRE.test(s) ? '' : '이메일 또는 http(s) 링크를 입력하세요.';
+    if (s.includes('@')) return EMAIL.test(s) ? '' : t('employment.errEmail');
+    return URLRE.test(s) ? '' : t('employment.errContact');
   })();
   const showErr = (k) => attempted || touched[k];
   // 외주 프로젝트는 상세한 기능 요구사항(이름+상세) 1개 이상 필수
   const validFeatures = (details.features || []).filter((f) => f && f.name && f.name.trim() && f.detail && f.detail.trim());
   const featuresRequired = boardType === '외주 프로젝트';
   const featuresError = featuresRequired && validFeatures.length < 1
-    ? '외주 프로젝트는 상세한 기능 요구사항(기능 이름과 상세 설명)을 1개 이상 입력해야 합니다.'
+    ? t('employment.errFeaturesRequired')
     : '';
   const hasErrors = !!titleError || !!descError || !!contactError || !!featuresError || Object.keys(errors).length > 0;
 
@@ -108,7 +110,7 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     const ext = (file.name.split('.').pop() || 'png').toLowerCase();
     const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
-    if (error) { alert(`이미지 업로드 오류: ${error.message}`); return null; }
+    if (error) { alert(t('employment.alertImageUploadError', { message: error.message })); return null; }
     return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   };
 
@@ -134,10 +136,10 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     const okType = kind === 'pdf'
       ? (file.type === 'application/pdf' || /\.pdf$/i.test(file.name))
       : (/zip/i.test(file.type) || /\.zip$/i.test(file.name));
-    if (!okType) { alert(kind === 'pdf' ? 'PDF 파일만 첨부할 수 있습니다.' : 'ZIP 파일만 첨부할 수 있습니다.'); return; }
+    if (!okType) { alert(kind === 'pdf' ? t('employment.alertPdfOnly') : t('employment.alertZipOnly')); return; }
     const cur = details[key] || [];
     if (attachTotalBytes(cur) + file.size >= MAX_ATTACH_BYTES) {
-      alert('첨부 파일 통합 용량은 10MB 미만이어야 합니다.');
+      alert(t('employment.alertAttachSize'));
       return;
     }
     setUploading(true);
@@ -145,13 +147,13 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     const path = `attachments/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false, contentType: file.type || (kind === 'pdf' ? 'application/pdf' : 'application/zip') });
     setUploading(false);
-    if (error) { alert(`업로드 오류: ${error.message}`); return; }
+    if (error) { alert(t('employment.alertUploadError', { message: error.message })); return; }
     const url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
     setField(key, [...cur, { kind, name: file.name, url, size: file.size }]);
   };
   const addAttachmentLink = (key, url) => {
     const u = (url || '').trim();
-    if (!URLRE.test(u)) { alert('http(s):// 로 시작하는 링크를 입력하세요. (예: GitHub 저장소)'); return; }
+    if (!URLRE.test(u)) { alert(t('employment.alertLinkInvalid')); return; }
     setField(key, [...(details[key] || []), { kind: 'link', name: u, url: u, size: 0 }]);
   };
   const removeAttachment = (key, idx) => setField(key, (details[key] || []).filter((_, i) => i !== idx));
@@ -191,48 +193,48 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       ({ error } = await supabase.from('jobs').insert({ ...payload, author_id: user.id, author_name: authorName }));
     }
     setSubmitting(false);
-    if (error) { alert(`저장 오류: ${error.message}`); return; }
+    if (error) { alert(t('employment.alertSaveError', { message: error.message })); return; }
     onSaved?.();
   };
 
   return (
     <form className="job-form" onSubmit={handleSubmit}>
-      <h2 className="job-form-title">{isEdit ? '공고 수정' : '공고 등록'}</h2>
+      <h2 className="job-form-title">{isEdit ? t('employment.formEditTitle') : t('employment.formNewTitle')}</h2>
 
       {boardType === '외주 프로젝트' && (
         <div className="jf-notice">
-          <div className="jf-notice-title">📋 외주 프로젝트 검수·분쟁 처리 안내</div>
+          <div className="jf-notice-title">{t('employment.noticeTitle')}</div>
           <ul className="jf-notice-list">
-            <li>프로젝트 완료 여부는 <strong>등록하신 ‘기능 요구사항’</strong>을 기준으로 판단합니다.</li>
-            <li>의뢰자·수행자·조합원 간 분쟁이 발생하면, <strong>조합 평가팀</strong>이 완성 결과물의 <strong>소스 코드를 직접 구동</strong>하여 사용자와 동일한 환경에서 <strong>E2E(End-to-End) 테스트</strong>로 모든 기능을 검증합니다.</li>
-            <li>공정한 검수를 위해 <strong>상세한 기능 요구사항·프로토타입·스크린샷</strong>을 반드시 업로드해 주세요.</li>
+            <li dangerouslySetInnerHTML={{ __html: t('employment.noticeItem1') }} />
+            <li dangerouslySetInnerHTML={{ __html: t('employment.noticeItem2') }} />
+            <li dangerouslySetInnerHTML={{ __html: t('employment.noticeItem3') }} />
           </ul>
         </div>
       )}
 
       <div className="jf-field">
-        <label>구분</label>
+        <label>{t('employment.fieldBoard')}</label>
         <select value={boardType} onChange={(e) => changeBoard(e.target.value)} disabled={isEdit}>
           {allowedBoards.map((b) => <option key={b} value={b}>{b}</option>)}
         </select>
-        {!canPostCorp && <p className="jf-hint">채용공고·프로젝트 구인은 승인된 법인 회원만 등록할 수 있습니다.</p>}
+        {!canPostCorp && <p className="jf-hint">{t('employment.hintCorpOnly')}</p>}
       </div>
 
       <div className="jf-field">
-        <label>제목<span className="jf-req"> *</span></label>
+        <label>{t('employment.fieldTitle')}<span className="jf-req"> *</span></label>
         <input
           className={attempted && titleError ? 'jf-invalid' : ''}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={() => markTouched('__title')}
-          placeholder="제목을 입력하세요"
+          placeholder={t('employment.titlePlaceholder')}
         />
         {(attempted || touched.__title) && titleError && <span className="jf-error">{titleError}</span>}
       </div>
 
       <div className="jf-field">
-        <label>프로젝트/상세 설명<span className="jf-req"> *</span></label>
-        <RichTextEditor value={description} onChange={setDescription} placeholder="설명을 입력하세요" />
+        <label>{t('employment.fieldDescription')}<span className="jf-req"> *</span></label>
+        <RichTextEditor value={description} onChange={setDescription} placeholder={t('employment.descriptionPlaceholder')} />
         {attempted && descError && <span className="jf-error">{descError}</span>}
       </div>
 
@@ -242,11 +244,11 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
             <label>{f.label}{f.required && <span className="jf-req"> *</span>}</label>
             {f.type === 'select' ? (
               <select value={details[f.key] || ''} onChange={(e) => setField(f.key, e.target.value)} onBlur={() => markTouched(f.key)}>
-                <option value="">선택하세요</option>
+                <option value="">{t('employment.selectPlaceholder')}</option>
                 {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
             ) : f.type === 'list' ? (
-              <textarea rows={4} value={details[f.key] || ''} onChange={(e) => setField(f.key, e.target.value)} onBlur={() => markTouched(f.key)} placeholder="한 줄에 하나씩 입력" />
+              <textarea rows={4} value={details[f.key] || ''} onChange={(e) => setField(f.key, e.target.value)} onBlur={() => markTouched(f.key)} placeholder={t('employment.listPlaceholder')} />
             ) : (
               <input
                 className={showErr(f.key) && errors[f.key] ? 'jf-invalid' : ''}
@@ -254,7 +256,7 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
                 onChange={(e) => setField(f.key, e.target.value)}
                 onBlur={() => markTouched(f.key)}
                 inputMode={f.validate === 'phone' ? 'tel' : f.validate === 'email' ? 'email' : undefined}
-                placeholder={f.type === 'tags' ? '쉼표로 구분 (예: React, Python)' : f.validate === 'email' ? 'name@example.com' : f.validate === 'phone' ? '010-0000-0000' : ''}
+                placeholder={f.type === 'tags' ? t('employment.tagsPlaceholder') : f.validate === 'email' ? t('employment.emailPlaceholder') : f.validate === 'phone' ? t('employment.phonePlaceholder') : ''}
               />
             )}
             {showErr(f.key) && errors[f.key] && <span className="jf-error">{errors[f.key]}</span>}
@@ -267,41 +269,41 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
         <div className="jf-field" key={f.key}>
           <label>{f.label}{featuresRequired && <span className="jf-req"> *</span>}</label>
           {featuresRequired && (
-            <p className="jf-hint">외주 프로젝트는 구체적인 기능 요구사항이 있어야 등록할 수 있습니다. (기능 이름 + 상세 설명 1개 이상)</p>
+            <p className="jf-hint">{t('employment.featuresHint')}</p>
           )}
           {attempted && featuresError && <span className="jf-error">{featuresError}</span>}
           {(details[f.key] || []).map((feat, idx) => (
             <div className="jf-feature" key={idx}>
               <div className="jf-feature-head">
-                <strong>기능 {idx + 1}</strong>
-                <button type="button" className="nt-btn danger small" onClick={() => removeFeature(f.key, idx)}>삭제</button>
+                <strong>{t('employment.featureLabel', { n: idx + 1 })}</strong>
+                <button type="button" className="nt-btn danger small" onClick={() => removeFeature(f.key, idx)}>{t('employment.delete')}</button>
               </div>
-              <input placeholder="기능 이름" value={feat.name} onChange={(e) => updateFeature(f.key, idx, 'name', e.target.value)} />
+              <input placeholder={t('employment.featureNamePlaceholder')} value={feat.name} onChange={(e) => updateFeature(f.key, idx, 'name', e.target.value)} />
               <div className="jf-feature-md">
-                <span className="jf-md-label">상세 설명 (Markdown)</span>
+                <span className="jf-md-label">{t('employment.featureDetailLabel')}</span>
                 <MarkdownEditor
                   value={feat.detail}
                   onChange={(v) => updateFeature(f.key, idx, 'detail', v)}
                   height={360}
-                  placeholder={'## 개요\n- 목표:\n- 주요 기능:\n\n### 상세 요구사항\n1. ...\n2. ...\n\n### 완료 기준(AC)\n- [ ] ...'}
+                  placeholder={t('employment.featureDetailPlaceholder')}
                 />
               </div>
               <div className="jf-feature-img">
                 {feat.image ? (
                   <div className="jf-thumb">
-                    <img src={feat.image} alt="기능 이미지" />
+                    <img src={feat.image} alt={t('employment.featureImageAlt')} />
                     <button type="button" onClick={() => updateFeature(f.key, idx, 'image', '')}>✕</button>
                   </div>
                 ) : (
                   <label className="jf-upload">
-                    이미지 첨부
+                    {t('employment.attachImage')}
                     <input type="file" accept="image/*" hidden onChange={(e) => featureImage(f.key, idx, e.target.files?.[0])} />
                   </label>
                 )}
               </div>
             </div>
           ))}
-          <button type="button" className="nt-btn small" onClick={() => addFeature(f.key)}>+ 기능 추가</button>
+          <button type="button" className="nt-btn small" onClick={() => addFeature(f.key)}>{t('employment.addFeature')}</button>
         </div>
       ))}
 
@@ -312,12 +314,12 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
         return (
           <div className="jf-field" key={f.key}>
             <label>{f.label}</label>
-            <p className="jf-hint">기능 요구사항을 뒷받침할 기획서·명세서(PDF), 프로토타입 소스(ZIP), 또는 GitHub 저장소 링크를 첨부하세요. 통합 용량 10MB 미만.</p>
+            <p className="jf-hint">{t('employment.attachHint')}</p>
             {list.length > 0 && (
               <ul className="jf-attach-list">
                 {list.map((a, idx) => (
                   <li className="jf-attach-item" key={idx}>
-                    <span className="jf-attach-kind">{a.kind === 'pdf' ? '📄 PDF' : a.kind === 'zip' ? '🗜️ ZIP' : '🔗 LINK'}</span>
+                    <span className="jf-attach-kind">{a.kind === 'pdf' ? t('employment.attachKindPdf') : a.kind === 'zip' ? t('employment.attachKindZip') : t('employment.attachKindLink')}</span>
                     <a href={a.url} target="_blank" rel="noreferrer" className="jf-attach-name">{a.name}</a>
                     {a.size ? <span className="jf-attach-size">{(a.size / (1024 * 1024)).toFixed(1)}MB</span> : null}
                     <button type="button" className="jf-attach-del" onClick={() => removeAttachment(f.key, idx)}>✕</button>
@@ -327,17 +329,17 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
             )}
             <div className="jf-attach-actions">
               <label className="jf-upload">
-                📄 문서(PDF) 추가
+                {t('employment.addPdf')}
                 <input type="file" accept="application/pdf,.pdf" hidden onChange={(e) => { addAttachmentFile(f.key, 'pdf', e.target.files?.[0]); e.target.value = ''; }} />
               </label>
               <label className="jf-upload">
-                🗜️ 소스(ZIP) 추가
+                {t('employment.addZip')}
                 <input type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden onChange={(e) => { addAttachmentFile(f.key, 'zip', e.target.files?.[0]); e.target.value = ''; }} />
               </label>
-              <button type="button" className="jf-upload" onClick={() => { const u = window.prompt('GitHub 저장소 또는 문서 링크 (https://...)'); if (u) addAttachmentLink(f.key, u); }}>
-                🔗 GitHub/링크 추가
+              <button type="button" className="jf-upload" onClick={() => { const u = window.prompt(t('employment.promptLink')); if (u) addAttachmentLink(f.key, u); }}>
+                {t('employment.addLink')}
               </button>
-              <span className="jf-attach-used">사용 {usedMB} / 10MB</span>
+              <span className="jf-attach-used">{t('employment.attachUsed', { used: usedMB })}</span>
             </div>
           </div>
         );
@@ -350,12 +352,12 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
           <div className="jf-images">
             {(details[f.key] || []).map((url, idx) => (
               <div className="jf-thumb" key={idx}>
-                <img src={url} alt={`스크린샷 ${idx + 1}`} />
+                <img src={url} alt={t('employment.screenshotAlt', { n: idx + 1 })} />
                 <button type="button" onClick={() => removeImage(f.key, idx)}>✕</button>
               </div>
             ))}
             <label className="jf-upload">
-              + 이미지 추가
+              {t('employment.addImage')}
               <input type="file" accept="image/*" multiple hidden onChange={(e) => handleScreenshotsAdd(f.key, e.target.files)} />
             </label>
           </div>
@@ -363,13 +365,13 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       ))}
 
       <div className="jf-field">
-        <label>외부 지원/문의 링크 (이메일 또는 링크, 선택)</label>
+        <label>{t('employment.fieldContact')}</label>
         <input
           className={(attempted || touched.__contact) && contactError ? 'jf-invalid' : ''}
           value={contact}
           onChange={(e) => setContact(e.target.value)}
           onBlur={() => markTouched('__contact')}
-          placeholder="예: hr@company.com 또는 https://..."
+          placeholder={t('employment.contactPlaceholder')}
         />
         {(attempted || touched.__contact) && contactError && <span className="jf-error">{contactError}</span>}
       </div>
@@ -377,30 +379,30 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       <label className="jf-toggle">
         <input type="checkbox" checked={platformApply} onChange={(e) => setPlatformApply(e.target.checked)} />
         <span>
-          <strong>조합 플랫폼으로 지원받기</strong>
-          <em>켜면 공고에 ‘지원하기’ 버튼이 표시되고, 지원자의 지원 내용·프로필이 ‘내 공고 관리’에 정리됩니다. (문의하기는 항상 제공)</em>
+          <strong>{t('employment.platformApplyTitle')}</strong>
+          <em>{t('employment.platformApplyDesc')}</em>
         </span>
       </label>
 
       {boardType === '외주 프로젝트' && (
         <div className="jf-field">
-          <label>마감 기한 (날짜·시간)</label>
+          <label>{t('employment.fieldDeadline')}</label>
           <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-          <p className="jf-hint">⚠️ 마감 기한이 지나면 공고가 <strong>자동 삭제</strong>됩니다. 마감은 <strong>지원자 중 계약자를 지정</strong>해야 가능하며(‘내 공고 관리’), 연장하려면 이 공고를 수정해 기한을 변경하세요.</p>
+          <p className="jf-hint" dangerouslySetInnerHTML={{ __html: t('employment.deadlineHint') }} />
         </div>
       )}
 
       {!isEdit && (
         boardType === '외주 프로젝트' ? (
-          <p className="jf-coin-hint">🎁 외주 프로젝트는 <strong>첫 등록 시(최초 1회)</strong>, 이후엔 <strong>계약 체결(마감) 시 100 coin</strong>이 적립됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
+          <p className="jf-coin-hint" dangerouslySetInnerHTML={{ __html: t('employment.coinHintOutsource', { coins: Number(profile?.coins ?? 0).toLocaleString() }) }} />
         ) : (
-          <p className="jf-coin-hint">💰 공고를 등록하면 <strong>10 coin</strong>이 차감됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
+          <p className="jf-coin-hint" dangerouslySetInnerHTML={{ __html: t('employment.coinHintDefault', { coins: Number(profile?.coins ?? 0).toLocaleString() }) }} />
         )
       )}
       <div className="jf-actions">
-        <button type="button" className="nt-btn ghost" onClick={onCancel} disabled={submitting}>취소</button>
+        <button type="button" className="nt-btn ghost" onClick={onCancel} disabled={submitting}>{t('employment.cancel')}</button>
         <button type="submit" className="nt-btn primary" disabled={hasErrors || submitting || uploading}>
-          {uploading ? '업로드 중...' : submitting ? '저장 중...' : isEdit ? '수정 완료' : '등록'}
+          {uploading ? t('employment.uploading') : submitting ? t('employment.saving') : isEdit ? t('employment.editDone') : t('employment.submit')}
         </button>
       </div>
     </form>

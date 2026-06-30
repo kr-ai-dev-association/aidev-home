@@ -1,0 +1,20 @@
+export default {
+  disputeModal: {
+    close: '닫기',
+    doneTitle: '분쟁이 접수되었습니다',
+    doneDesc: '공고와 기능 요구사항이 함께 조합 관리자에게 전달되었습니다. 검토 후 조정 절차를 안내드립니다.',
+    confirm: '확인',
+    badge: '분쟁 해결',
+    introHtml: '분쟁 내용을 작성하면 아래 <strong>공고와 기능 요구사항</strong>이 자동으로 링크되어 조합 관리자에게 전달됩니다. (귀하: <strong>{role}</strong>)',
+    linkedHtml: '🔗 연동: <strong>{title}</strong> · 기능 요구사항 {count}건',
+    contentLabel: '분쟁 내용',
+    contentPlaceholder: '발생한 분쟁의 경위, 쟁점이 되는 기능/요구사항, 요청사항 등을 구체적으로 작성해 주세요.',
+    note: '⚖️ 분쟁은 공고의 내용·기능 요구사항·당사자 간 계약서에 근거하여 조정됩니다.',
+    cancel: '취소',
+    submitting: '접수 중...',
+    submit: '분쟁 접수',
+    errorAlert: '분쟁 접수 오류: {msg}',
+    roleClient: '의뢰자',
+    rolePerformer: '수행자',
+  },
+};

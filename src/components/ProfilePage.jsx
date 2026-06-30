@@ -4,6 +4,7 @@ import RichTextEditor from './RichTextEditor';
 import BadgeIcon from './BadgeIcon';
 import { sanitize } from '../lib/html';
 import { TIER_BADGES, EXPERT_FIELDS, expertField, fetchExpertBadges } from '../lib/badges';
+import { useI18n } from '../i18n/I18nProvider';
 import './ProfilePage.css';
 import { supabase } from '../lib/supabase';
 import profilePlaceholder from '../assets/profile-placeholder.png';
@@ -28,7 +29,8 @@ const emptyProject = () => ({ title: '', description: '', skills: [], youtubeUrl
 
 // viewUserId 가 주어지면 '다른 조합원 프로필' 읽기 전용 보기 모드로 동작한다.
 // (지원자 프로필 페이지 — 본인 편집 UI는 모두 숨김)
-function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewProfileFallback = null, onBack }) {
+function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewProfileFallback = null, onBack, onNavigate }) {
+  const { t } = useI18n();
   const readOnly = !!viewUserId;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -83,22 +85,22 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
     if (loadingView && !subject) {
       return (
         <div className="profile-page-container content-area-container">
-          <p style={{ color: '#94a3b8', padding: '2rem' }}>프로필을 불러오는 중...</p>
+          <p style={{ color: '#94a3b8', padding: '2rem' }}>{t('profilePage.loadingProfile')}</p>
         </div>
       );
     }
     if (!subject) {
       return (
         <div className="profile-page-container content-area-container">
-          {onBack && <button className="back-button back-top" onClick={onBack}>← 돌아가기</button>}
-          <p style={{ color: '#94a3b8', padding: '2rem' }}>프로필 정보를 찾을 수 없습니다.</p>
+          {onBack && <button className="back-button back-top" onClick={onBack}>{t('profilePage.back')}</button>}
+          <p style={{ color: '#94a3b8', padding: '2rem' }}>{t('profilePage.profileNotFound')}</p>
         </div>
       );
     }
   } else if (!profile) {
     return (
       <div className="profile-page-container content-area-container">
-        <p style={{ color: '#94a3b8', padding: '2rem' }}>로그인 후 이용할 수 있습니다.</p>
+        <p style={{ color: '#94a3b8', padding: '2rem' }}>{t('profilePage.loginRequired')}</p>
       </div>
     );
   }
@@ -112,7 +114,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
     const path = `avatars/${user.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('job-images').upload(path, file, { upsert: true });
     setUploadingAvatar(false);
-    if (error) { alert(`이미지 업로드 오류: ${error.message}`); return; }
+    if (error) { alert(t('profilePage.imageUploadError', { message: error.message })); return; }
     const url = supabase.storage.from('job-images').getPublicUrl(path).data.publicUrl;
     update('avatar_url', url);
   };
@@ -174,7 +176,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
       .single();
     setSaving(false);
     if (error) {
-      alert(`저장 오류: ${error.message}`);
+      alert(t('profilePage.saveError', { message: error.message }));
       return;
     }
     onProfileUpdated?.(data);
@@ -195,7 +197,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
       .select()
       .single();
     setSavingService(false);
-    if (error) { alert(`저장 오류: ${error.message}`); return; }
+    if (error) { alert(t('profilePage.saveError', { message: error.message })); return; }
     onProfileUpdated?.(data);
     setEditingService(false);
   };
@@ -214,84 +216,84 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
       <div className="profile-page-container content-area-container profile-edit">
         <main className="profile-edit-main">
           <div className="profile-edit-head">
-            <h1 className="main-title">프로필 편집</h1>
+            <h1 className="main-title">{t('profilePage.editTitle')}</h1>
             <div className="profile-edit-actions">
-              <button className="pf-btn ghost" onClick={() => setEditing(false)} disabled={saving}>취소</button>
-              <button className="pf-btn primary" onClick={handleSave} disabled={saving || uploadingAvatar}>{saving ? '저장 중...' : '저장'}</button>
+              <button className="pf-btn ghost" onClick={() => setEditing(false)} disabled={saving}>{t('profilePage.cancel')}</button>
+              <button className="pf-btn primary" onClick={handleSave} disabled={saving || uploadingAvatar}>{saving ? t('profilePage.saving') : t('profilePage.save')}</button>
             </div>
           </div>
 
           <div className="pf-avatar-edit">
-            <img src={form.avatar_url || profilePlaceholder} alt="프로필 이미지" className="pf-avatar-preview" />
+            <img src={form.avatar_url || profilePlaceholder} alt={t('profilePage.avatarAlt')} className="pf-avatar-preview" />
             <div className="pf-avatar-actions">
               <label className="pf-btn ghost">
-                {uploadingAvatar ? '업로드 중...' : '📷 이미지 변경'}
+                {uploadingAvatar ? t('profilePage.uploading') : t('profilePage.changeImage')}
                 <input type="file" accept="image/*" hidden disabled={uploadingAvatar}
                   onChange={(e) => uploadAvatar(e.target.files?.[0])} />
               </label>
               {form.avatar_url && (
-                <button type="button" className="pf-btn ghost" onClick={() => update('avatar_url', '')}>제거</button>
+                <button type="button" className="pf-btn ghost" onClick={() => update('avatar_url', '')}>{t('profilePage.remove')}</button>
               )}
-              <p className="pf-avatar-hint">정사각형 이미지를 권장합니다. (JPG·PNG)</p>
+              <p className="pf-avatar-hint">{t('profilePage.avatarHint')}</p>
             </div>
           </div>
 
           <div className="pf-grid">
-            <div className="pf-field"><label>이름</label>
-              <input value={form.name} onChange={(e) => update('name', e.target.value)} placeholder="이름" /></div>
-            <div className="pf-field"><label>대표 타이틀</label>
-              <input value={form.main_title} onChange={(e) => update('main_title', e.target.value)} placeholder="예: NLP/NLU 전문 에이전트 개발자" /></div>
-            <div className="pf-field"><label>상태</label>
+            <div className="pf-field"><label>{t('profilePage.name')}</label>
+              <input value={form.name} onChange={(e) => update('name', e.target.value)} placeholder={t('profilePage.namePlaceholder')} /></div>
+            <div className="pf-field"><label>{t('profilePage.mainTitle')}</label>
+              <input value={form.main_title} onChange={(e) => update('main_title', e.target.value)} placeholder={t('profilePage.mainTitlePlaceholder')} /></div>
+            <div className="pf-field"><label>{t('profilePage.status')}</label>
               <select value={form.status} onChange={(e) => update('status', e.target.value)}>
-                <option value="">선택 안 함</option>
-                <option value="재직중">재직중</option>
-                <option value="구직중">구직중</option>
-                <option value="프리랜서">프리랜서</option>
+                <option value="">{t('profilePage.statusNone')}</option>
+                <option value="재직중">{t('profilePage.statusEmployed')}</option>
+                <option value="구직중">{t('profilePage.statusJobSeeking')}</option>
+                <option value="프리랜서">{t('profilePage.statusFreelancer')}</option>
               </select></div>
-            <div className="pf-field"><label>요율</label>
-              <input value={form.rate} onChange={(e) => update('rate', e.target.value)} placeholder="예: 시간당 $100 - $150" /></div>
-            <div className="pf-field"><label>위치</label>
-              <input value={form.location} onChange={(e) => update('location', e.target.value)} placeholder="예: 서울, 대한민국" /></div>
-            <div className="pf-field"><label>타임존</label>
-              <input value={form.timezone} onChange={(e) => update('timezone', e.target.value)} placeholder="예: (GMT+9) 한국 표준시" /></div>
-            <div className="pf-field"><label>언어</label>
-              <input value={form.language} onChange={(e) => update('language', e.target.value)} placeholder="예: 한국어" /></div>
+            <div className="pf-field"><label>{t('profilePage.rate')}</label>
+              <input value={form.rate} onChange={(e) => update('rate', e.target.value)} placeholder={t('profilePage.ratePlaceholder')} /></div>
+            <div className="pf-field"><label>{t('profilePage.location')}</label>
+              <input value={form.location} onChange={(e) => update('location', e.target.value)} placeholder={t('profilePage.locationPlaceholder')} /></div>
+            <div className="pf-field"><label>{t('profilePage.timezone')}</label>
+              <input value={form.timezone} onChange={(e) => update('timezone', e.target.value)} placeholder={t('profilePage.timezonePlaceholder')} /></div>
+            <div className="pf-field"><label>{t('profilePage.language')}</label>
+              <input value={form.language} onChange={(e) => update('language', e.target.value)} placeholder={t('profilePage.languagePlaceholder')} /></div>
           </div>
 
-          <div className="pf-field"><label>소개</label>
-            <textarea rows={3} value={form.about} onChange={(e) => update('about', e.target.value)} placeholder="자기소개" /></div>
+          <div className="pf-field"><label>{t('profilePage.about')}</label>
+            <textarea rows={3} value={form.about} onChange={(e) => update('about', e.target.value)} placeholder={t('profilePage.aboutPlaceholder')} /></div>
 
           <div className="pf-grid">
-            <div className="pf-field"><label>LinkedIn URL</label>
+            <div className="pf-field"><label>{t('profilePage.linkedinUrl')}</label>
               <input value={form.linkedin_url} onChange={(e) => update('linkedin_url', e.target.value)} placeholder="https://www.linkedin.com/in/..." /></div>
-            <div className="pf-field"><label>Instagram URL</label>
+            <div className="pf-field"><label>{t('profilePage.instagramUrl')}</label>
               <input value={form.instagram_url} onChange={(e) => update('instagram_url', e.target.value)} placeholder="https://www.instagram.com/..." /></div>
           </div>
 
-          <div className="pf-field"><label>기술 및 도구 (쉼표로 구분)</label>
+          <div className="pf-field"><label>{t('profilePage.skillsLabel')}</label>
             <input
               value={form.skills.join(', ')}
               onChange={(e) => update('skills', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
-              placeholder="예: React, Python, LLM"
+              placeholder={t('profilePage.skillsPlaceholder')}
             /></div>
 
           <div className="pf-projects-edit">
             <div className="pf-projects-head">
-              <h3>프로젝트</h3>
-              <button className="pf-btn small" onClick={addProject}>+ 프로젝트 추가</button>
+              <h3>{t('profilePage.projects')}</h3>
+              <button className="pf-btn small" onClick={addProject}>{t('profilePage.addProject')}</button>
             </div>
-            {form.projects.length === 0 && <p className="pf-empty">아직 등록된 프로젝트가 없습니다.</p>}
+            {form.projects.length === 0 && <p className="pf-empty">{t('profilePage.noProjectsEdit')}</p>}
             {form.projects.map((p, i) => (
               <div className="pf-project-item" key={i}>
                 <div className="pf-project-itemhead">
-                  <strong>프로젝트 {i + 1}</strong>
-                  <button className="pf-btn danger small" onClick={() => removeProject(i)}>삭제</button>
+                  <strong>{t('profilePage.projectN', { n: i + 1 })}</strong>
+                  <button className="pf-btn danger small" onClick={() => removeProject(i)}>{t('profilePage.delete')}</button>
                 </div>
-                <div className="pf-field"><label>제목</label>
+                <div className="pf-field"><label>{t('profilePage.projectTitle')}</label>
                   <input value={p.title} onChange={(e) => updateProject(i, 'title', e.target.value)} /></div>
-                <div className="pf-field"><label>설명</label>
+                <div className="pf-field"><label>{t('profilePage.projectDescription')}</label>
                   <textarea rows={2} value={p.description} onChange={(e) => updateProject(i, 'description', e.target.value)} /></div>
-                <div className="pf-field"><label>기술 (쉼표 구분)</label>
+                <div className="pf-field"><label>{t('profilePage.projectSkills')}</label>
                   <input
                     value={(Array.isArray(p.skills) ? p.skills : []).join(', ')}
                     onChange={(e) => updateProject(i, 'skills', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
@@ -314,46 +316,49 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
   return (
     <div className="profile-page-container content-area-container">
       {readOnly && onBack && (
-        <button className="back-button back-top profile-fullwidth-back" onClick={onBack}>← 지원자 목록으로</button>
+        <button className="back-button back-top profile-fullwidth-back" onClick={onBack}>{t('profilePage.backToApplicants')}</button>
       )}
       <aside className="profile-sidebar">
         {!readOnly && (
           <div className="profile-header-share">
-            <button className="share-button" aria-label="프로필 공유"><span className="share-icon"></span></button>
+            <button className="share-button" aria-label={t('profilePage.shareProfile')}><span className="share-icon"></span></button>
           </div>
         )}
         <div className="profile-avatar-wrapper">
-          <img src={v.avatar_url || profilePlaceholder} alt="프로필 아바타" className="profile-avatar" />
+          <img src={v.avatar_url || profilePlaceholder} alt={t('profilePage.avatarWrapperAlt')} className="profile-avatar" />
           {v.status && (
             <div className="profile-status"><span className="status-dot available"></span> {v.status}</div>
           )}
         </div>
-        <h2 className="profile-name">{v.name || '이름 미설정'}</h2>
+        <h2 className="profile-name">{v.name || t('profilePage.nameUnset')}</h2>
         {!readOnly && (
           <button className="contact-button" onClick={startEdit}>
-            <span className="send-icon"></span> 프로필 편집
+            <span className="send-icon"></span> {t('profilePage.editProfile')}
           </button>
         )}
 
         {/* 보유 코인 현황 (본인만) */}
         {!readOnly && (
-          <div className="profile-coins" title="보유 coin">
+          <div className="profile-coins" title={t('profilePage.coinTitle')}>
             <CoinIcon size={22} className="coin-icon" />
             <span className="coin-amount">{Number(profile.coins ?? 0).toLocaleString()}</span>
             <span className="coin-unit">coin</span>
+            {onNavigate && (
+              <button type="button" className="coin-charge-btn" onClick={() => onNavigate('coincharge')}>{t('profilePage.coinTopup')}</button>
+            )}
           </div>
         )}
 
         {v.rate && (
           <div className="profile-section">
-            <h3 className="section-title">요율</h3>
+            <h3 className="section-title">{t('profilePage.sectionRate')}</h3>
             <div className="rate-info">{v.rate}</div>
           </div>
         )}
 
         {skills.length > 0 && (
           <div className="profile-section">
-            <h3 className="section-title">기술 및 도구</h3>
+            <h3 className="section-title">{t('profilePage.sectionSkills')}</h3>
             <div className="tags-container">
               {skills.map((s, i) => <span key={i} className="tag">{s}</span>)}
             </div>
@@ -361,7 +366,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
         )}
 
         <div className="profile-section">
-          <h3 className="section-title">소개</h3>
+          <h3 className="section-title">{t('profilePage.sectionAbout')}</h3>
           {v.about && <p className="about-text">{v.about}</p>}
           <ul className="about-details">
             {v.location && <li><span className="icon-location"></span> {v.location}</li>}
@@ -372,7 +377,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
 
         {(v.linkedin_url || v.instagram_url) && (
           <div className="profile-section">
-            <h3 className="section-title">링크</h3>
+            <h3 className="section-title">{t('profilePage.sectionLinks')}</h3>
             <div className="links-container">
               {v.linkedin_url && (
                 <a href={v.linkedin_url} target="_blank" rel="noopener noreferrer" className="link-icon">
@@ -390,18 +395,18 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
       </aside>
 
       <main className="profile-main-content">
-        <h1 className="main-title">{v.main_title || v.name || (readOnly ? '지원자 프로필' : '나의 정보')}</h1>
+        <h1 className="main-title">{v.main_title || v.name || (readOnly ? t('profilePage.applicantProfile') : t('profilePage.myInfo'))}</h1>
 
         <nav className="profile-tabs">
-          <button className={`tab-button ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}>프로젝트</button>
-          <button className={`tab-button ${activeTab === 'services' ? 'active' : ''}`} onClick={() => setActiveTab('services')}>서비스</button>
-          <button className={`tab-button ${activeTab === 'badges' ? 'active' : ''}`} onClick={() => setActiveTab('badges')}>추천</button>
+          <button className={`tab-button ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}>{t('profilePage.tabProjects')}</button>
+          <button className={`tab-button ${activeTab === 'services' ? 'active' : ''}`} onClick={() => setActiveTab('services')}>{t('profilePage.tabServices')}</button>
+          <button className={`tab-button ${activeTab === 'badges' ? 'active' : ''}`} onClick={() => setActiveTab('badges')}>{t('profilePage.tabBadges')}</button>
         </nav>
 
         {/* ===== 추천 탭: 조합 관리자가 부여하는 배지 ===== */}
         {activeTab === 'badges' && (
           <div className="badge-tab">
-            <p className="badge-tab-desc">조합 관리자가 부여하는 인증 배지입니다. 등급 배지(성실·모범·우등)는 활동에 따라 자동 수여되며, 전문가 배지는 분야별로 관리자가 지정합니다.</p>
+            <p className="badge-tab-desc">{t('profilePage.badgeTabDesc')}</p>
 
             {/* 등급 배지 */}
             {v.tier_badge && TIER_BADGES[v.tier_badge] ? (
@@ -413,13 +418,13 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
                 </div>
               </div>
             ) : (
-              <p className="pf-empty" style={{ color: '#94a3b8' }}>아직 획득한 등급 배지가 없습니다.</p>
+              <p className="pf-empty" style={{ color: '#94a3b8' }}>{t('profilePage.noTierBadge')}</p>
             )}
 
             {/* 전문가 배지 (복수) */}
             {expertBadges.length > 0 && (
               <div className="badge-section">
-                <h4 className="badge-section-title">🎓 전문가 조합원</h4>
+                <h4 className="badge-section-title">{t('profilePage.expertMember')}</h4>
                 {expertBadges.map((b) => {
                   const f = expertField(b.field);
                   if (!f) return null;
@@ -427,8 +432,8 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
                     <div className="badge-row" key={b.field}>
                       <BadgeIcon color={f.color} emoji={f.emoji} size={56} title={f.label} />
                       <div className="badge-row-text">
-                        <h4 style={{ color: f.color }}>{f.label} 전문가</h4>
-                        <p>관리자가 인증한 {f.label} 분야 전문가입니다.</p>
+                        <h4 style={{ color: f.color }}>{t('profilePage.expertFieldTitle', { field: f.label })}</h4>
+                        <p>{t('profilePage.expertFieldDesc', { field: f.label })}</p>
                       </div>
                     </div>
                   );
@@ -444,28 +449,28 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
             {!readOnly && !editingService && (
               <div className="service-edit-bar">
                 <button className="pf-btn primary" onClick={startServiceEdit}>
-                  {v.services ? '✏️ 서비스 편집' : '+ 서비스 작성'}
+                  {v.services ? t('profilePage.editService') : t('profilePage.writeService')}
                 </button>
               </div>
             )}
             {!readOnly && editingService ? (
               <div className="service-editor">
-                <p className="service-editor-hint">제공하는 서비스를 자유롭게 작성하세요. 제목·목록·이미지·링크·유튜브 등 서식을 지원합니다.</p>
+                <p className="service-editor-hint">{t('profilePage.serviceEditorHint')}</p>
                 <RichTextEditor
                   value={serviceDraft}
                   onChange={setServiceDraft}
-                  placeholder="예) 제공 서비스, 작업 범위, 가격/패키지, 진행 절차, 포트폴리오 링크 등"
+                  placeholder={t('profilePage.servicePlaceholder')}
                 />
                 <div className="profile-edit-actions" style={{ marginTop: '1rem' }}>
-                  <button className="pf-btn ghost" onClick={() => setEditingService(false)} disabled={savingService}>취소</button>
-                  <button className="pf-btn primary" onClick={saveService} disabled={savingService}>{savingService ? '저장 중...' : '저장'}</button>
+                  <button className="pf-btn ghost" onClick={() => setEditingService(false)} disabled={savingService}>{t('profilePage.cancel')}</button>
+                  <button className="pf-btn primary" onClick={saveService} disabled={savingService}>{savingService ? t('profilePage.saving') : t('profilePage.save')}</button>
                 </div>
               </div>
             ) : v.services ? (
               <div className="service-content" dangerouslySetInnerHTML={{ __html: sanitize(v.services) }} />
             ) : (
               <p className="pf-empty" style={{ color: '#94a3b8' }}>
-                {readOnly ? '등록된 서비스가 없습니다.' : '아직 등록된 서비스가 없습니다. 프리랜서·자영업자라면 제공하는 서비스를 소개해보세요.'}
+                {readOnly ? t('profilePage.noServiceReadOnly') : t('profilePage.noServiceOwner')}
               </p>
             )}
           </div>
@@ -478,15 +483,15 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
             <div className="add-project-card" onClick={startEdit} role="button" tabIndex={0}>
               <div className="add-icon">+</div>
               <div className="add-text">
-                <p><strong>프로젝트 추가</strong></p>
-                <p>프로필을 편집해 최고의 기술과 경험을 보여주세요.</p>
+                <p><strong>{t('profilePage.addProjectTitle')}</strong></p>
+                <p>{t('profilePage.addProjectDesc')}</p>
               </div>
             </div>
           </div>
         )}
 
         {readOnly && projects.length === 0 && (
-          <p className="pf-empty" style={{ color: '#94a3b8' }}>등록된 프로젝트가 없습니다.</p>
+          <p className="pf-empty" style={{ color: '#94a3b8' }}>{t('profilePage.noProjectsReadOnly')}</p>
         )}
 
         <div className="projects-list">

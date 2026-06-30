@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './EmploymentPage.css';
 import '../App.css';
+import { useI18n } from '../i18n/I18nProvider';
 import { supabase } from '../lib/supabase';
 import JobDetailPage from './JobDetailPage';
 import JobForm from './JobForm';
@@ -23,6 +24,7 @@ function jobSnippet(html) {
 }
 
 function JobCard({ job, onClick, scrapped, onToggleScrap }) {
+  const { t } = useI18n();
   const info = cardInfo(job);
   const st = badgeStyle(info.badge);
   const text = jobSnippet(job.description);
@@ -33,8 +35,8 @@ function JobCard({ job, onClick, scrapped, onToggleScrap }) {
         <button
           type="button"
           className={`scrap-btn${scrapped ? ' on' : ''}`}
-          title={scrapped ? '스크랩 해제' : '스크랩'}
-          aria-label={scrapped ? '스크랩 해제' : '스크랩'}
+          title={scrapped ? t('employment.scrapOn') : t('employment.scrap')}
+          aria-label={scrapped ? t('employment.scrapOn') : t('employment.scrap')}
           onClick={(e) => { e.stopPropagation(); onToggleScrap(job); }}
         >
           {scrapped ? '🔖' : '🏷️'}
@@ -45,10 +47,10 @@ function JobCard({ job, onClick, scrapped, onToggleScrap }) {
           {/* 외주는 OPEN/CLOSED, 채용·프로젝트 구인은 마감 시에만 '마감' 배지 */}
           {job.board_type === '외주 프로젝트' ? (
             <span className={`job-status ${job.closed ? 'closed' : 'open'}`}>
-              {job.closed ? '🔒 CLOSED' : '🟢 OPEN'}
+              {job.closed ? t('employment.statusClosed') : t('employment.statusOpen')}
             </span>
           ) : job.closed ? (
-            <span className="job-status closed">🔒 마감</span>
+            <span className="job-status closed">{t('employment.statusDeadline')}</span>
           ) : null}
           <h3 className="job-title">{job.title}</h3>
           <div className="job-type" style={{ backgroundColor: st.bg, color: st.color }}>{info.badge}</div>
@@ -71,6 +73,7 @@ function JobCard({ job, onClick, scrapped, onToggleScrap }) {
 }
 
 function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profile, onOpenConversation, initialJobId, onJobConsumed, onOpenSearch, onProfileChanged }) {
+  const { t } = useI18n();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('전체');
@@ -92,13 +95,13 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
   }, [user]);
 
   const toggleScrap = async (job) => {
-    if (!user?.id) { alert('스크랩은 로그인 후 이용할 수 있습니다.'); return; }
+    if (!user?.id) { alert(t('employment.alertScrapLogin')); return; }
     const has = scrapIds.has(job.id);
     setScrapIds((prev) => { const n = new Set(prev); if (has) n.delete(job.id); else n.add(job.id); return n; }); // 낙관적 갱신
     const { error } = has ? await removeScrap(user.id, job.id) : await addScrap(user.id, job.id);
     if (error) {
       setScrapIds((prev) => { const n = new Set(prev); if (has) n.add(job.id); else n.delete(job.id); return n; }); // 롤백
-      alert(`스크랩 오류: ${error.message}`);
+      alert(t('employment.alertScrapError', { message: error.message }));
     }
   };
 
@@ -136,7 +139,7 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
 
   const handleJobClick = (job) => {
     if (!isLoggedIn) {
-      alert('로그인해야 채용 상세 정보를 볼 수 있습니다.');
+      alert(t('employment.alertJobDetailLogin'));
       onNavigate('login');
       return;
     }
@@ -146,7 +149,7 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
 
   const handleNew = () => {
     if (!isLoggedIn) {
-      alert('로그인 후 공고를 등록할 수 있습니다.');
+      alert(t('employment.alertPostLogin'));
       onNavigate('login');
       return;
     }
@@ -163,9 +166,9 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
   };
 
   const handleDelete = async (job) => {
-    if (!window.confirm('이 공고를 삭제하시겠습니까?')) return;
+    if (!window.confirm(t('employment.confirmDelete'))) return;
     const { error } = await supabase.from('jobs').delete().eq('id', job.id);
-    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    if (error) { alert(t('employment.alertDeleteError', { message: error.message })); return; }
     setSelectedJob(null);
     fetchJobs();
   };
@@ -189,16 +192,16 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
     const next = !job.closed;
     // 외주 프로젝트는 계약자 지정으로만 마감 가능 (직접 마감 차단)
     if (next && job.board_type === '외주 프로젝트') {
-      alert('외주 프로젝트는 ‘내 공고 관리’에서 지원자 중 계약자를 지정해야 마감됩니다.\n계약 없이 종료하려면 공고를 삭제해 주세요.');
+      alert(t('employment.alertOutsourceCloseBlocked'));
       return;
     }
-    if (next && !window.confirm('이 공고를 마감하시겠습니까?\n목록에는 마감으로 계속 표시되며, 채용·프로젝트 구인은 마감 1개월 후 자동 삭제됩니다.\n기간을 수정하면 다시 재개시할 수 있습니다.')) return;
+    if (next && !window.confirm(t('employment.confirmClose'))) return;
     // 마감 시 closed_at 기록(1개월 자동삭제 기준) / 재오픈 시 해제, 외주는 계약자도 해제
     const patch = next
       ? { closed: true, closed_at: new Date().toISOString() }
       : { closed: false, closed_at: null, ...(job.board_type === '외주 프로젝트' ? { contractor_id: null } : {}) };
     const { error } = await supabase.from('jobs').update(patch).eq('id', job.id);
-    if (error) { alert(`상태 변경 오류: ${error.message}`); return; }
+    if (error) { alert(t('employment.alertStatusError', { message: error.message })); return; }
     setSelectedJob((j) => (j && j.id === job.id ? { ...j, ...patch } : j));
     fetchJobs();
   };
@@ -267,44 +270,41 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
         <div className="emp-fee-icon-chip" aria-hidden="true">🤝</div>
         <div className="emp-fee-content">
           <div className="emp-fee-headline">
-            <span className="emp-fee-badge">중계 수수료 0%</span>
-            <h3>조합원을 위한, 수수료 없는 매칭</h3>
+            <span className="emp-fee-badge">{t('employment.feeBadge')}</span>
+            <h3>{t('employment.feeHeadline')}</h3>
           </div>
-          <p>
-            조합은 조합원 간의 <strong>채용·프로젝트 구인·외주 업무</strong>에 대해 <strong>어떠한 중계 수수료도 받지 않습니다.</strong>
-            모든 플랫폼 기능은 <strong>조합원의 회비</strong>와 <strong>조합의 수익 사업</strong>으로 운영됩니다.
-          </p>
+          <p dangerouslySetInnerHTML={{ __html: t('employment.feeBody') }} />
         </div>
       </div>
       <div className="employment-header">
         <div className="employment-tabs">
-          {TABS.map((t) => (
+          {TABS.map((tabName) => (
             <button
-              key={t}
-              className={`tab-button ${view === 'list' && tab === t ? 'active' : ''}`}
-              onClick={() => { setTab(t); setView('list'); }}
+              key={tabName}
+              className={`tab-button ${view === 'list' && tab === tabName ? 'active' : ''}`}
+              onClick={() => { setTab(tabName); setView('list'); }}
             >
-              {t}
+              {tabName === '전체' ? t('employment.tabAll') : tabName}
             </button>
           ))}
           {isLoggedIn && (
             <button className={`tab-button ${view === 'manage' ? 'active' : ''}`} onClick={() => setView('manage')}>
-              내 공고({myCount})
+              {t('employment.myJobs', { count: myCount })}
             </button>
           )}
-          <button className="new-topic-button" onClick={handleNew}>+ 공고 등록</button>
+          <button className="new-topic-button" onClick={handleNew}>{t('employment.newJob')}</button>
         </div>
 
         <div className="search-bar">
           <input
             type="text"
-            placeholder="키워드 (Enter로 통합 검색)"
+            placeholder={t('employment.searchPlaceholder')}
             className="search-input"
             value={kw}
             onChange={(e) => setKw(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') onOpenSearch && onOpenSearch('job', kw); }}
           />
-          <button className="search-button" aria-label="검색" onClick={() => onOpenSearch && onOpenSearch('job', kw)}>
+          <button className="search-button" aria-label={t('employment.searchAria')} onClick={() => onOpenSearch && onOpenSearch('job', kw)}>
             <span className="search-icon">🔍</span>
           </button>
         </div>
@@ -313,10 +313,10 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
       <div className="employment-main-content">
         <div className="job-listings">
           {loading ? (
-            <p className="community-msg">불러오는 중...</p>
+            <p className="community-msg">{t('employment.loading')}</p>
           ) : list.length === 0 ? (
             <p className="community-msg">
-              {view === 'manage' ? '등록한 공고가 없습니다.' : '등록된 공고가 없습니다. 첫 공고를 등록해보세요!'}
+              {view === 'manage' ? t('employment.emptyManage') : t('employment.emptyList')}
             </p>
           ) : (
             list.map((job) => (
@@ -333,7 +333,7 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
 
         <aside className="employment-sidebar">
           <div className="featured-jobs-section">
-            <h3>최근 공고</h3>
+            <h3>{t('employment.recentJobs')}</h3>
             <div className="featured-jobs-list">
               {jobs.slice(0, 5).map((job) => {
                 const info = cardInfo(job);
@@ -347,7 +347,7 @@ function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profi
                   </div>
                 );
               })}
-              {jobs.length === 0 && <p className="community-msg" style={{ padding: '1rem 0' }}>공고 없음</p>}
+              {jobs.length === 0 && <p className="community-msg" style={{ padding: '1rem 0' }}>{t('employment.noJobs')}</p>}
             </div>
           </div>
         </aside>

@@ -1,15 +1,17 @@
 import React from 'react';
+import { useI18n } from '../i18n/I18nProvider';
 // import logo from '../assets/logo.png'; // 로고 이미지 임포트 (더 이상 사용하지 않으므로 주석 처리 또는 삭제)
 
 function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="main-footer">
       <div className="footer-content">
         {/* <img src={logo} alt="AIDEV Logo" className="footer-logo" /> 로고 삭제 */}
         <div className="footer-info">
-          <p><strong>한국인공지능개발자 협동조합</strong></p>
-          <p>주소 : 서울시 강남구 삼성로 86길 16 덕산빌딩 5층</p>
-          <p>이메일 : tonymustbegreat@gmail.com</p>
+          <p><strong>{t('footer.orgName')}</strong></p>
+          <p>{t('footer.address')}</p>
+          <p>{t('footer.email')}</p>
         </div>
       </div>
     </footer>

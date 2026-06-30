@@ -10,7 +10,7 @@ const FROM = '한국인공지능개발자 협동조합 <no-reply@prototypebench.
 
 Deno.serve(async (req) => {
   try {
-    const { dispute_id, to_override } = await req.json(); // to_override: 테스트 단일 수신자(관리자 전용)
+    const { dispute_id } = await req.json();
     if (!dispute_id) return new Response('dispute_id required', { status: 400 });
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -34,9 +34,7 @@ Deno.serve(async (req) => {
     // 당사자 이메일 조회
     const ids = [d.client_id, d.contractor_id].filter(Boolean);
     const { data: profs } = await admin.from('profiles').select('id,name,email').in('id', ids);
-    const emails = to_override
-      ? (Array.isArray(to_override) ? to_override : [to_override])
-      : (profs || []).map((p: any) => p.email).filter(Boolean);
+    const emails = (profs || []).map((p: any) => p.email).filter(Boolean);
 
     const subject = `[한국인공지능개발자 협동조합] 외주 프로젝트 「${d.job_title ?? '프로젝트'}」 분쟁 조정 개시 안내`;
     const body = [

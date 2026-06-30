@@ -1,0 +1,20 @@
+export default {
+  disputeModal: {
+    close: 'Close',
+    doneTitle: 'Your dispute has been submitted',
+    doneDesc: 'The posting and its feature requirements have been forwarded to the cooperative admin. We will guide you through the mediation process after review.',
+    confirm: 'OK',
+    badge: 'Dispute Resolution',
+    introHtml: 'When you write the dispute, the <strong>posting and feature requirements</strong> below are automatically linked and forwarded to the cooperative admin. (You: <strong>{role}</strong>)',
+    linkedHtml: '🔗 Linked: <strong>{title}</strong> · {count} feature requirement(s)',
+    contentLabel: 'Dispute details',
+    contentPlaceholder: 'Describe the dispute in detail — what happened, the disputed features/requirements, and your requests.',
+    note: '⚖️ Disputes are mediated based on the posting content, feature requirements, and the contract between the parties.',
+    cancel: 'Cancel',
+    submitting: 'Submitting...',
+    submit: 'Submit dispute',
+    errorAlert: 'Dispute submission error: {msg}',
+    roleClient: 'Client',
+    rolePerformer: 'Contractor',
+  },
+};

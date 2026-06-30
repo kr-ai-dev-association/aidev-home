@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './InboxPage.css';
 import { supabase } from '../lib/supabase';
-
-function timeAgo(iso) {
-  if (!iso) return '';
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return '방금';
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
-  return `${Math.floor(diff / 2592000)}개월 전`;
-}
+import { useI18n } from '../i18n/I18nProvider';
 
 function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, onNavigate }) {
+  const { t } = useI18n();
   const myId = user?.id;
+
+  const timeAgo = (iso) => {
+    if (!iso) return '';
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60) return t('inbox.timeNow');
+    if (diff < 3600) return t('inbox.timeMinutes', { n: Math.floor(diff / 60) });
+    if (diff < 86400) return t('inbox.timeHours', { n: Math.floor(diff / 3600) });
+    if (diff < 2592000) return t('inbox.timeDays', { n: Math.floor(diff / 86400) });
+    return t('inbox.timeMonths', { n: Math.floor(diff / 2592000) });
+  };
   const [tab, setTab] = useState(initialConversationId ? 'messages' : 'notifications');
   const [notifs, setNotifs] = useState([]);
   const [convs, setConvs] = useState([]);
@@ -68,7 +70,7 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
     threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [thread]);
 
-  const otherName = (c) => (c.user_a === myId ? c.user_b_name : c.user_a_name) || '사용자';
+  const otherName = (c) => (c.user_a === myId ? c.user_b_name : c.user_a_name) || t('inbox.fallbackUser');
 
   const markNotifRead = async (n) => {
     if (!n.read) {
@@ -96,19 +98,19 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
   };
 
   const deleteNotif = async (n) => {
-    if (!window.confirm('이 알림을 삭제하시겠습니까?')) return;
+    if (!window.confirm(t('inbox.confirmDeleteNotif'))) return;
     const { error } = await supabase.from('notifications').delete().eq('id', n.id);
-    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    if (error) { alert(t('inbox.deleteError', { msg: error.message })); return; }
     setNotifs((prev) => prev.filter((x) => x.id !== n.id));
     onUnreadChange && onUnreadChange();
   };
 
   const deleteAllNotifs = async () => {
     if (notifs.length === 0) return;
-    if (!window.confirm('모든 알림을 삭제하시겠습니까?')) return;
+    if (!window.confirm(t('inbox.confirmDeleteAllNotifs'))) return;
     // RLS로 본인 알림만 삭제되도록 user_id 기준으로 일괄 삭제 (목록 50건 제한과 무관)
     const { error } = await supabase.from('notifications').delete().eq('user_id', myId);
-    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    if (error) { alert(t('inbox.deleteError', { msg: error.message })); return; }
     setNotifs([]);
     onUnreadChange && onUnreadChange();
   };
@@ -117,33 +119,33 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
     const text = draft.trim();
     if (!text || sending || !activeConv) return;
     setSending(true);
-    const myDisplay = (activeConv.user_a === myId ? activeConv.user_a_name : activeConv.user_b_name) || '나';
+    const myDisplay = (activeConv.user_a === myId ? activeConv.user_a_name : activeConv.user_b_name) || t('inbox.fallbackMe');
     const { data, error } = await supabase
       .from('messages')
       .insert({ conversation_id: activeConv.id, sender_id: myId, sender_name: myDisplay, content: text })
       .select()
       .single();
     setSending(false);
-    if (error) { alert(`전송 오류: ${error.message}`); return; }
-    setThread((t) => [...t, data]);
+    if (error) { alert(t('inbox.sendError', { msg: error.message })); return; }
+    setThread((prev) => [...prev, data]);
     setDraft('');
     loadLists();
   };
 
   const deleteMessage = async (id) => {
-    if (!window.confirm('메시지를 삭제하시겠습니까?')) return;
+    if (!window.confirm(t('inbox.confirmDeleteMsg'))) return;
     const { error } = await supabase.from('messages').delete().eq('id', id);
-    if (error) { alert(`삭제 오류: ${error.message}`); return; }
-    setThread((t) => t.filter((m) => m.id !== id));
+    if (error) { alert(t('inbox.deleteError', { msg: error.message })); return; }
+    setThread((prev) => prev.filter((m) => m.id !== id));
     loadLists();
     onUnreadChange && onUnreadChange();
   };
 
   const deleteConversation = async () => {
     if (!activeConv) return;
-    if (!window.confirm('이 대화를 삭제하시겠습니까? 주고받은 메시지가 모두 삭제됩니다.')) return;
+    if (!window.confirm(t('inbox.confirmDeleteConv'))) return;
     const { error } = await supabase.from('conversations').delete().eq('id', activeConv.id);
-    if (error) { alert(`삭제 오류: ${error.message}`); return; }
+    if (error) { alert(t('inbox.deleteError', { msg: error.message })); return; }
     setActiveConv(null);
     setThread([]);
     loadLists();
@@ -152,13 +154,13 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
 
   return (
     <div className="inbox-page content-area-container">
-      <h1 className="inbox-title">메시지함</h1>
+      <h1 className="inbox-title">{t('inbox.title')}</h1>
       <div className="inbox-tabs">
         <button className={`inbox-tab ${tab === 'notifications' ? 'active' : ''}`} onClick={() => { setTab('notifications'); setActiveConv(null); }}>
-          알림{notifs.some((n) => !n.read) ? ` (${notifs.filter((n) => !n.read).length})` : ''}
+          {t('inbox.tabNotifications')}{notifs.some((n) => !n.read) ? ` (${notifs.filter((n) => !n.read).length})` : ''}
         </button>
         <button className={`inbox-tab ${tab === 'messages' ? 'active' : ''}`} onClick={() => { setTab('messages'); }}>
-          메시지
+          {t('inbox.tabMessages')}
         </button>
       </div>
 
@@ -168,26 +170,26 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
           {notifs.length > 0 && (
             <div className="inbox-actions">
               {notifs.some((n) => !n.read) && (
-                <button className="inbox-mark-all" onClick={markAllNotifsRead}>모두 읽음</button>
+                <button className="inbox-mark-all" onClick={markAllNotifsRead}>{t('inbox.markAll')}</button>
               )}
-              <button className="inbox-mark-all inbox-delete-all" onClick={deleteAllNotifs}>모두 삭제</button>
+              <button className="inbox-mark-all inbox-delete-all" onClick={deleteAllNotifs}>{t('inbox.deleteAll')}</button>
             </div>
           )}
           {notifs.length === 0 ? (
-            <p className="inbox-empty">알림이 없습니다.</p>
+            <p className="inbox-empty">{t('inbox.notifEmpty')}</p>
           ) : (
             <ul className="notif-list">
               {notifs.map((n) => (
                 <li key={n.id} className={`notif-item ${n.read ? '' : 'unread'}`} onClick={() => markNotifRead(n)}>
                   <span className="notif-dot" />
                   <div className="notif-body">
-                    <p className="notif-text"><strong>{n.actor_name}</strong>님 · {n.body}</p>
+                    <p className="notif-text"><strong>{n.actor_name}</strong>{t('inbox.notifSuffix')}{n.body}</p>
                     <span className="notif-time">{timeAgo(n.created_at)}</span>
                   </div>
                   <button
                     className="notif-delete"
                     onClick={(e) => { e.stopPropagation(); deleteNotif(n); }}
-                    aria-label="알림 삭제"
+                    aria-label={t('inbox.deleteNotifAria')}
                   >
                     ✕
                   </button>
@@ -203,7 +205,7 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
         <div className="inbox-messages">
           <div className="conv-list">
             {convs.length === 0 ? (
-              <p className="inbox-empty">대화가 없습니다.<br />게시글·공고 상세에서 작성자에게 메시지를 보낼 수 있습니다.</p>
+              <p className="inbox-empty">{t('inbox.convEmpty')}<br />{t('inbox.convEmptyHint')}</p>
             ) : (
               convs.map((c) => (
                 <div
@@ -214,7 +216,7 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
                   <div className="conv-avatar">{otherName(c).charAt(0)}</div>
                   <div className="conv-meta">
                     <p className="conv-name">{otherName(c)}</p>
-                    <p className="conv-last">{c.last_message_text || '대화를 시작하세요'}</p>
+                    <p className="conv-last">{c.last_message_text || t('inbox.convDefaultLast')}</p>
                   </div>
                   <span className="conv-time">{timeAgo(c.last_message_at)}</span>
                 </div>
@@ -224,18 +226,18 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
 
           <div className="conv-thread">
             {!activeConv ? (
-              <p className="inbox-empty thread-empty">대화를 선택하세요.</p>
+              <p className="inbox-empty thread-empty">{t('inbox.threadEmpty')}</p>
             ) : (
               <>
                 <div className="thread-header">
                   <span>{otherName(activeConv)}</span>
-                  <button className="thread-delete" onClick={deleteConversation}>대화 삭제</button>
+                  <button className="thread-delete" onClick={deleteConversation}>{t('inbox.deleteConv')}</button>
                 </div>
                 <div className="thread-messages">
                   {thread.map((m) => (
                     <div key={m.id} className={`bubble-row ${m.sender_id === myId ? 'mine' : 'theirs'}`}>
                       {m.sender_id === myId && (
-                        <button className="msg-delete" onClick={() => deleteMessage(m.id)} aria-label="메시지 삭제">✕</button>
+                        <button className="msg-delete" onClick={() => deleteMessage(m.id)} aria-label={t('inbox.deleteMsgAria')}>✕</button>
                       )}
                       <div className="bubble">
                         <p>{m.content}</p>
@@ -251,9 +253,9 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }}
-                    placeholder="메시지를 입력하세요..."
+                    placeholder={t('inbox.inputPlaceholder')}
                   />
-                  <button onClick={send} disabled={sending || !draft.trim()}>전송</button>
+                  <button onClick={send} disabled={sending || !draft.trim()}>{t('inbox.sendBtn')}</button>
                 </div>
               </>
             )}

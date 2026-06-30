@@ -132,3 +132,17 @@
   border-radius: 8px; padding: 0.45rem 0.9rem; cursor: pointer; font-size: 0.88rem; transition: all 0.15s;
 }
 .admin-back-btn:hover { border-color: rgba(99,102,241,0.5); color: #fff; }
+
+/* 코인 충전 내역(관리자) */
+.cca-toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; margin: 1rem 0 1.2rem; }
+.cca-search {
+  flex: 1; min-width: 220px; background: #0d1424; border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 9px; color: #e6edf3; padding: 0.6rem 0.9rem; font-size: 0.95rem; box-sizing: border-box;
+}
+.cca-search:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
+.cca-sort { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.cca-sort .b2b-status-btn { white-space: nowrap; min-width: 104px; padding: 0.5rem 1rem; }
+.cca-th { cursor: pointer; user-select: none; white-space: nowrap; }
+.cca-th:hover { color: #a5b4fc; }
+.cca-coins { color: #4ade80; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cca-order { color: #94a3b8; font-variant-numeric: tabular-nums; }

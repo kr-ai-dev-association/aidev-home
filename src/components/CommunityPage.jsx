@@ -5,23 +5,25 @@ import { supabase } from '../lib/supabase';
 import TopicDetailPage from './TopicDetailPage';
 import RichTextEditor from './RichTextEditor';
 import { isEmptyHtml } from '../lib/html';
+import { useI18n } from '../i18n/I18nProvider';
 
 const CATEGORIES = ['일반 토론', '바이브코딩', 'AI/LLM', '취업·커리어', '질문/답변'];
 const ADMIN_CATEGORY = '공지사항';
 
 // 상대 시간 표시
-function timeAgo(iso) {
+function timeAgo(iso, t) {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return '방금 전';
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)}개월 전`;
-  return `${Math.floor(diff / 31536000)}년 전`;
+  if (diff < 60) return t('community.timeJustNow');
+  if (diff < 3600) return t('community.timeMinutesAgo', { n: Math.floor(diff / 60) });
+  if (diff < 86400) return t('community.timeHoursAgo', { n: Math.floor(diff / 3600) });
+  if (diff < 2592000) return t('community.timeDaysAgo', { n: Math.floor(diff / 86400) });
+  if (diff < 31536000) return t('community.timeMonthsAgo', { n: Math.floor(diff / 2592000) });
+  return t('community.timeYearsAgo', { n: Math.floor(diff / 31536000) });
 }
 
-function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, initialCategory, onCategoryConsumed, onOpenConversation, onOpenSearch, onProfileChanged }) {
+function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, initialCategory, onCategoryConsumed, onOpenConversation, onOpenSearch, onProfileChanged, onViewProfile }) {
+  const { t } = useI18n();
   // 관리자는 '공지사항' 카테고리 추가 노출
   const categoryOptions = isAdmin ? [ADMIN_CATEGORY, ...CATEGORIES] : CATEGORIES;
   const [topics, setTopics] = useState([]);
@@ -39,7 +41,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
   const newCaptcha = () => setCaptcha({ a: 1 + Math.floor(Math.random() * 9), b: 1 + Math.floor(Math.random() * 9) });
   const captchaOk = parseInt(captchaAns, 10) === captcha.a + captcha.b;
 
-  const authorName = profile?.name || user?.email?.split('@')[0] || '익명';
+  const authorName = profile?.name || user?.email?.split('@')[0] || t('community.defaultAuthor');
 
   const fetchTopics = useCallback(async () => {
     setLoading(true);
@@ -82,7 +84,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
 
   const handleTopicClick = (topicId) => {
     if (!isLoggedIn) {
-      alert('로그인해야 토픽 상세 정보를 볼 수 있습니다.');
+      alert(t('community.alertLoginToView'));
       onNavigate('login');
       return;
     }
@@ -92,7 +94,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
 
   const handleNewTopicClick = () => {
     if (!isLoggedIn) {
-      alert('로그인해야 새 주제를 작성할 수 있습니다.');
+      alert(t('community.alertLoginToWrite'));
       onNavigate('login');
       return;
     }
@@ -107,9 +109,9 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     e.preventDefault();
     if (!form.title.trim() || isEmptyHtml(form.content) || submitting) return;
     // 봇 검증 (사람 여부 확인)
-    if (honeypot) { alert('비정상적인 요청으로 작성이 차단되었습니다.'); return; } // 허니팟: 사람은 비워둠
-    if (Date.now() - openedAt < 3000) { alert('너무 빠르게 제출되었습니다. 잠시 후 다시 시도해주세요.'); return; }
-    if (!captchaOk) { alert('자동입력 방지 답이 올바르지 않습니다.'); newCaptcha(); setCaptchaAns(''); return; }
+    if (honeypot) { alert(t('community.alertBotBlocked')); return; } // 허니팟: 사람은 비워둠
+    if (Date.now() - openedAt < 3000) { alert(t('community.alertTooFast')); return; }
+    if (!captchaOk) { alert(t('community.alertCaptchaWrong')); newCaptcha(); setCaptchaAns(''); return; }
     setSubmitting(true);
     const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean);
     // 1) 주제 생성
@@ -127,7 +129,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
       .single();
     if (tErr) {
       setSubmitting(false);
-      alert(`주제 생성 오류: ${tErr.message}`);
+      alert(t('community.alertTopicCreateError', { msg: tErr.message }));
       return;
     }
     // 2) 첫 게시글(본문) 생성
@@ -139,7 +141,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     });
     setSubmitting(false);
     if (pErr) {
-      alert(`게시글 생성 오류: ${pErr.message}`);
+      alert(t('community.alertPostCreateError', { msg: pErr.message }));
       return;
     }
     setComposing(false);
@@ -167,6 +169,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
         onNavigate={onNavigate}
         onOpenConversation={onOpenConversation}
         onProfileChanged={onProfileChanged}
+        onViewProfile={onViewProfile}
       />
     );
   }
@@ -189,19 +192,19 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     <div className="community-page-container content-area-container">
       <div className="community-header">
         <div className="community-tabs">
-          <button className="tab-button active">모든 포럼</button>
-          <button className="new-topic-button" onClick={handleNewTopicClick}>+ 새 주제 작성</button>
+          <button className="tab-button active">{t('community.tabAllForums')}</button>
+          <button className="new-topic-button" onClick={handleNewTopicClick}>{t('community.newTopic')}</button>
         </div>
         <div className="community-search-bar">
           <input
             type="text"
-            placeholder="검색 (Enter로 통합 검색)"
+            placeholder={t('community.searchPlaceholder')}
             className="search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') onOpenSearch && onOpenSearch('community', search); }}
           />
-          <button className="search-button" aria-label="검색" onClick={() => onOpenSearch && onOpenSearch('community', search)}>
+          <button className="search-button" aria-label={t('community.searchAria')} onClick={() => onOpenSearch && onOpenSearch('community', search)}>
             <span className="search-icon">🔍</span>
           </button>
         </div>
@@ -210,29 +213,29 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
       {/* 새 주제 작성 폼 */}
       {composing && (
         <form className="new-topic-form" onSubmit={handleCreateTopic}>
-          <h3>새 주제 작성</h3>
+          <h3>{t('community.newTopicTitle')}</h3>
           <div className="nt-field">
-            <label>제목</label>
-            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="제목을 입력하세요" />
+            <label>{t('community.labelTitle')}</label>
+            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder={t('community.placeholderTitle')} />
           </div>
           <div className="nt-row">
             <div className="nt-field">
-              <label>카테고리</label>
+              <label>{t('community.labelCategory')}</label>
               <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}>
                 {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="nt-field">
-              <label>태그 (쉼표 구분)</label>
-              <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))} placeholder="예: 질문, LLM" />
+              <label>{t('community.labelTags')}</label>
+              <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))} placeholder={t('community.placeholderTags')} />
             </div>
           </div>
           <div className="nt-field">
-            <label>내용</label>
+            <label>{t('community.labelContent')}</label>
             <RichTextEditor
               value={form.content}
               onChange={(html) => setForm((f) => ({ ...f, content: html }))}
-              placeholder="내용을 입력하세요"
+              placeholder={t('community.placeholderContent')}
             />
           </div>
           {/* 허니팟(봇 탐지용 — 화면에 보이지 않으며 사람은 비워둠) */}
@@ -243,20 +246,20 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
           />
           {/* 자동입력 방지(산술 캡차) */}
           <div className="nt-field nt-captcha">
-            <label>자동입력 방지 — 다음 계산의 답을 입력하세요: <strong>{captcha.a} + {captcha.b} = ?</strong></label>
+            <label>{t('community.captchaLabel')} <strong>{captcha.a} + {captcha.b} = ?</strong></label>
             <input
               type="text" inputMode="numeric" value={captchaAns}
               onChange={(e) => setCaptchaAns(e.target.value)}
-              placeholder="정답 숫자"
+              placeholder={t('community.captchaPlaceholder')}
               className={captchaAns && !captchaOk ? 'nt-captcha-bad' : ''}
             />
           </div>
-          <p className="nt-coin-hint">💰 글을 작성하면 <strong>1 coin</strong>이 적립됩니다.</p>
-          {!isAdmin && <p className="nt-ratelimit-hint">⏱️ 도배 방지를 위해 글은 10분에 1회 작성할 수 있습니다.</p>}
+          <p className="nt-coin-hint">{t('community.coinHintPrefix')}<strong>{t('community.coinHintStrong')}</strong>{t('community.coinHintSuffix')}</p>
+          {!isAdmin && <p className="nt-ratelimit-hint">{t('community.rateLimitHint')}</p>}
           <div className="nt-actions">
-            <button type="button" className="nt-btn ghost" onClick={() => setComposing(false)} disabled={submitting}>취소</button>
+            <button type="button" className="nt-btn ghost" onClick={() => setComposing(false)} disabled={submitting}>{t('community.cancel')}</button>
             <button type="submit" className="nt-btn primary" disabled={submitting || !form.title.trim() || isEmptyHtml(form.content) || !captchaOk}>
-              {submitting ? '등록 중...' : '주제 등록'}
+              {submitting ? t('community.submitting') : t('community.submitTopic')}
             </button>
           </div>
         </form>
@@ -265,15 +268,15 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
       <div className="community-main-content">
         <div className="community-topics-list">
           <div className="topic-header">
-            <div className="header-item topic-col">주제</div>
-            <div className="header-item posts-col">게시글</div>
-            <div className="header-item last-updated-col">최근 업데이트</div>
+            <div className="header-item topic-col">{t('community.colTopic')}</div>
+            <div className="header-item posts-col">{t('community.colPosts')}</div>
+            <div className="header-item last-updated-col">{t('community.colLastUpdated')}</div>
           </div>
 
           {loading ? (
-            <p className="community-msg">불러오는 중...</p>
+            <p className="community-msg">{t('community.loading')}</p>
           ) : filtered.length === 0 ? (
-            <p className="community-msg">{search ? '검색 결과가 없습니다.' : '아직 등록된 주제가 없습니다. 첫 주제를 작성해보세요!'}</p>
+            <p className="community-msg">{search ? t('community.emptySearch') : t('community.emptyNoTopics')}</p>
           ) : (
             sorted.map((topic) => {
               const postCount = topic.posts?.[0]?.count ?? 0;
@@ -283,7 +286,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
                   <div className="topic-icon-col"><span className="topic-icon">💬</span></div>
                   <div className="topic-details-col">
                     <h3 className="topic-title">
-                      {topic.category === ADMIN_CATEGORY && <span className="notice-badge">📢 공지</span>}
+                      {topic.category === ADMIN_CATEGORY && <span className="notice-badge">{t('community.noticeBadge')}</span>}
                       {topic.title}
                     </h3>
                     {Array.isArray(topic.tags) && topic.tags.length > 0 && (
@@ -292,13 +295,13 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
                       </div>
                     )}
                     <p className="topic-meta">
-                      시작: <span className="topic-author">{topic.author_name}</span>, 카테고리:{' '}
+                      {t('community.metaStartedBy')} <span className="topic-author">{topic.author_name}</span>, {t('community.metaCategory')}{' '}
                       <span className="topic-category">{topic.category}</span>
                     </p>
                   </div>
                   <div className="posts-col">{postCount}</div>
                   <div className="last-updated-col">
-                    <p className="last-updated-time">{timeAgo(topic.last_activity_at)}</p>
+                    <p className="last-updated-time">{timeAgo(topic.last_activity_at, t)}</p>
                     <p className="last-updated-author">{topic.last_activity_by || topic.author_name}</p>
                   </div>
                 </div>

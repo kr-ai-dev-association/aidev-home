@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'; // useState와 useEffect 임
 import profilePlaceholder from '../assets/profile-placeholder.png'; // 프로필 이미지 임포트
 import Logo from './Logo'; // 조합 로고 컴포넌트
 import CoinIcon from './CoinIcon'; // 금색 코인 아이콘
+import { useI18n } from '../i18n/I18nProvider'; // 다국어(i18n)
 
 function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
+  const { t, lang, setLang } = useI18n();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -52,7 +54,7 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
         </h1>
         {isMobile && ( // 모바일: 검색 + 햄버거를 헤더 우상단에 상시 노출
           <div className="mobile-header-actions">
-            <button className="search-icon" aria-label="검색" onClick={onSearchClick}>🔍</button>
+            <button className="search-icon" aria-label={t('common.search')} onClick={onSearchClick}>🔍</button>
             <button className="mobile-menu-toggle" onClick={handleMobileMenuToggle} aria-label="메뉴 토글">
               {isMobileMenuOpen ? '✕' : '☰'} {/* 열림/닫힘 상태에 따라 아이콘 변경 */}
             </button>
@@ -62,25 +64,25 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
         <nav className={`main-nav ${isMobile && isMobileMenuOpen ? 'main-nav-mobile-open' : ''}`}>
           <ul>
             {/* '협회소개' 클릭 시 'about-intro-section'으로 스크롤 이동하도록 수정 */}
-            <li onClick={() => handleMenuItemClick('about', 'about-intro-section')}>조합소개</li>
+            <li onClick={() => handleMenuItemClick('about', 'about-intro-section')}>{t('nav.about')}</li>
             {/* 사업·서비스 — 강의/에이전트 평가를 하위 드롭다운으로 제공 */}
             <li className="nav-has-children">
               <span className="nav-parent" onClick={() => { if (!isMobile) handleMenuItemClick('services'); }}>
-                사업·서비스 <span className="nav-caret" aria-hidden="true">▾</span>
+                {t('nav.bizParent')} <span className="nav-caret" aria-hidden="true">▾</span>
               </span>
               <ul className="nav-dropdown">
-                <li onClick={() => handleMenuItemClick('services')}>사업 내용</li>
-                <li onClick={() => handleMenuItemClick('courses')}>강의</li>
-                <li onClick={() => handleMenuItemClick('agentbuild')}>에이전트 구축</li>
-                <li onClick={() => handleMenuItemClick('agenteval')}>에이전트 평가</li>
-                <li onClick={() => handleMenuItemClick('disputeservice')}>분쟁 조정</li>
+                <li onClick={() => handleMenuItemClick('services')}>{t('nav.bizContent')}</li>
+                <li onClick={() => handleMenuItemClick('courses')}>{t('nav.courses')}</li>
+                <li onClick={() => handleMenuItemClick('agentbuild')}>{t('nav.agentBuild')}</li>
+                <li onClick={() => handleMenuItemClick('agenteval')}>{t('nav.agentEval')}</li>
+                <li onClick={() => handleMenuItemClick('disputeservice')}>{t('nav.dispute')}</li>
               </ul>
             </li>
-            <li onClick={() => handleMenuItemClick('harness')}>에이전트 하네스</li> {/* harness-collection 기반 페이지 */}
-            <li onClick={() => handleMenuItemClick('employment')}>취업</li> {/* '취업' 메뉴 아이템 추가 */}
-            <li onClick={() => handleMenuItemClick('community')}>커뮤니티</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
-            {isMember && <li onClick={() => handleMenuItemClick('vote')}>투표</li>} {/* 정회원 전용 투표 메뉴 */}
-            <li onClick={() => handleMenuItemClick('faq')}>자주 묻는 질문</li> {/* 플랫폼 사용법 FAQ */}
+            <li onClick={() => handleMenuItemClick('harness')}>{t('nav.harness')}</li> {/* harness-collection 기반 페이지 */}
+            <li onClick={() => handleMenuItemClick('employment')}>{t('nav.employment')}</li> {/* '취업' 메뉴 아이템 추가 */}
+            <li onClick={() => handleMenuItemClick('community')}>{t('nav.community')}</li> {/* '커뮤니티' 메뉴 아이템 추가 */}
+            {isMember && <li onClick={() => handleMenuItemClick('vote')}>{t('nav.vote')}</li>} {/* 정회원 전용 투표 메뉴 */}
+            <li onClick={() => handleMenuItemClick('faq')}>{t('nav.faq')}</li> {/* 플랫폼 사용법 FAQ */}
           </ul>
         </nav>
       </div>
@@ -88,8 +90,8 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
         <div className="utility-menu">
           {!isLoggedIn ? (
             <>
-              <button onClick={onLoginClick} className="header-button">로그인</button>
-              <button onClick={onSignupClick} className="header-button">회원가입</button>
+              <button onClick={onLoginClick} className="header-button">{t('auth.login')}</button>
+              <button onClick={onSignupClick} className="header-button">{t('auth.signup')}</button>
             </>
           ) : (
             <>
@@ -98,7 +100,7 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
               type="button"
               className="header-coins"
               aria-label={`보유 코인 ${coins} coin`}
-              title="내 프로필에서 코인 현황 보기"
+              title={t('common.coinTitle')}
               onClick={() => handleMenuItemClick('profile')}
             >
               <CoinIcon size={17} className="header-coin-icon" />
@@ -108,7 +110,7 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
             <button
               type="button"
               className="inbox-button"
-              aria-label="메시지함"
+              aria-label={t('common.inbox')}
               onClick={() => { onInboxClick && onInboxClick(); if (isMobile) setIsMobileMenuOpen(false); }}
             >
               <span className="inbox-icon">✉️</span>
@@ -120,28 +122,29 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
                 <img src={avatarUrl || profilePlaceholder} alt="Profile" className="header-profile-image" />
               </button>
               <ul className="profile-dropdown">
-                <li onClick={() => handleMenuItemClick('profile')}>내정보</li>
-                <li onClick={() => handleMenuItemClick('mediation', 'request')}>분쟁 조정 의뢰</li>
-                <li onClick={() => handleMenuItemClick('myapplications')}>내 지원 관리</li>
-                <li onClick={() => handleMenuItemClick('myjobs')}>내 공고 관리</li>
-                {isAdmin && <li onClick={() => handleMenuItemClick('admin-hub')}>관리자</li>}
+                <li onClick={() => handleMenuItemClick('profile')}>{t('profile.myinfo')}</li>
+                <li onClick={() => handleMenuItemClick('coincharge')}><span className="menu-icon" aria-hidden="true">🪙</span> {t('profile.coinCharge')}</li>
+                <li onClick={() => handleMenuItemClick('mediation', 'request')}>{t('profile.mediation')}</li>
+                <li onClick={() => handleMenuItemClick('myapplications')}>{t('profile.myApplications')}</li>
+                <li onClick={() => handleMenuItemClick('myjobs')}>{t('profile.myJobs')}</li>
+                {isAdmin && <li onClick={() => handleMenuItemClick('admin-hub')}><span className="menu-icon" aria-hidden="true">⚙️</span> {t('profile.admin')}</li>}
                 <li
                   onClick={() => {
                     onLogoutClick();
                     if (isMobile) setIsMobileMenuOpen(false);
                   }}
                 >
-                  로그아웃
+                  <span className="menu-icon" aria-hidden="true">🚪</span> {t('profile.logout')}
                 </li>
               </ul>
             </div>
             </>
           )}
-          <select className="lang-select">
+          <select className="lang-select" value={lang} onChange={(e) => setLang(e.target.value)} aria-label="Language">
             <option value="ko">🇰🇷 한국어</option>
             <option value="en">🇬🇧 English</option>
           </select>
-          <button className="search-icon" aria-label="검색" onClick={onSearchClick}>🔍</button>
+          <button className="search-icon" aria-label={t('common.search')} onClick={onSearchClick}>🔍</button>
         </div>
       </div>
     </header>

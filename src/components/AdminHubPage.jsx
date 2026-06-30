@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import './MediationPage.css';
 import { supabase } from '../lib/supabase';
+import { useI18n } from '../i18n/I18nProvider';
 
 // 관리자 대시보드 허브 — 각 관리 기능으로 이동하는 단일 진입점
 const CARDS = [
-  { key: 'admin', emoji: '👥', title: '회원현황', desc: '회원 승인·정회원 부여 및 회원 관리', countKey: 'pending', countLabel: '승인 대기' },
-  { key: 'b2brequests', emoji: '🏢', title: 'B2B 의뢰', desc: '기업·조합원의 견적·평가 의뢰 처리', countKey: 'b2b', countLabel: '신규' },
-  { key: 'disputes', emoji: '🛡️', title: '외주 분쟁 관리', desc: '외주 계약 분쟁 접수·조정', countKey: 'disputes', countLabel: '접수' },
-  { key: 'mediations-admin', emoji: '⚖️', title: '조정 의뢰 관리', desc: '노동·계약 분쟁 조정 의뢰 처리', countKey: 'mediations', countLabel: '진행 중' },
+  { key: 'admin', emoji: '👥', titleKey: 'admin.hubCardAdminTitle', descKey: 'admin.hubCardAdminDesc', countKey: 'pending', countLabelKey: 'admin.hubCardAdminCount' },
+  { key: 'b2brequests', emoji: '🏢', titleKey: 'admin.hubCardB2bTitle', descKey: 'admin.hubCardB2bDesc', countKey: 'b2b', countLabelKey: 'admin.hubCardB2bCount' },
+  { key: 'disputes', emoji: '🛡️', titleKey: 'admin.hubCardDisputesTitle', descKey: 'admin.hubCardDisputesDesc', countKey: 'disputes', countLabelKey: 'admin.hubCardDisputesCount' },
+  { key: 'mediations-admin', emoji: '⚖️', titleKey: 'admin.hubCardMediationsTitle', descKey: 'admin.hubCardMediationsDesc', countKey: 'mediations', countLabelKey: 'admin.hubCardMediationsCount' },
+  { key: 'coincharges', emoji: '🪙', titleKey: 'admin.hubCardCoinChargesTitle', descKey: 'admin.hubCardCoinChargesDesc' },
 ];
 
 function AdminHubPage({ isAdmin, onNavigate }) {
+  const { t } = useI18n();
   const [counts, setCounts] = useState({});
 
   useEffect(() => {
@@ -40,8 +43,8 @@ function AdminHubPage({ isAdmin, onNavigate }) {
     return (
       <div className="home-landing admin-page">
         <div className="home-page-container content-area-container">
-          <section className="section-services"><h3>접근 권한이 없습니다</h3>
-            <p className="section-lead">이 페이지는 관리자만 열람할 수 있습니다.</p></section>
+          <section className="section-services"><h3>{t('admin.noAccessTitle')}</h3>
+            <p className="section-lead">{t('admin.noAccessDesc')}</p></section>
         </div>
       </div>
     );
@@ -51,8 +54,8 @@ function AdminHubPage({ isAdmin, onNavigate }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
-          <h3>관리자 대시보드</h3>
-          <p className="section-lead">조합 운영에 필요한 관리 기능을 한 곳에서 이용합니다. 각 항목을 선택해 관리 페이지로 이동하세요.</p>
+          <h3>{t('admin.hubTitle')}</h3>
+          <p className="section-lead">{t('admin.hubLead')}</p>
           <div className="admin-hub-grid">
             {CARDS.map((c) => {
               const n = counts[c.countKey];
@@ -60,10 +63,10 @@ function AdminHubPage({ isAdmin, onNavigate }) {
                 <button type="button" className="admin-hub-card" key={c.key} onClick={() => onNavigate(c.key)}>
                   <span className="admin-hub-emoji" aria-hidden="true">{c.emoji}</span>
                   <div className="admin-hub-text">
-                    <h4>{c.title}</h4>
-                    <p>{c.desc}</p>
+                    <h4>{t(c.titleKey)}</h4>
+                    <p>{t(c.descKey)}</p>
                   </div>
-                  {n > 0 && <span className="admin-hub-badge">{c.countLabel} {n}</span>}
+                  {n > 0 && <span className="admin-hub-badge">{t(c.countLabelKey)} {n}</span>}
                   <span className="admin-hub-arrow" aria-hidden="true">›</span>
                 </button>
               );

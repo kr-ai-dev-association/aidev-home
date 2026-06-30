@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './SearchOverlay.css';
 import { supabase } from '../lib/supabase';
-
-const SOURCE_LABEL = { job: '취업', topic: '커뮤니티', post: '커뮤니티' };
-const FILTERS = [
-  { key: 'all', label: '전체' },
-  { key: 'job', label: '취업' },
-  { key: 'community', label: '커뮤니티' },
-];
+import { useI18n } from '../i18n/I18nProvider';
 
 function SearchOverlay({ open, initialKind = 'all', initialQuery = '', onClose, onOpenJob, onOpenTopic }) {
+  const { t } = useI18n();
+  const SOURCE_LABEL = { job: t('search.sourceJob'), topic: t('search.sourceCommunity'), post: t('search.sourceCommunity') };
+  const FILTERS = [
+    { key: 'all', label: t('search.filterAll') },
+    { key: 'job', label: t('search.filterJob') },
+    { key: 'community', label: t('search.filterCommunity') },
+  ];
   const [q, setQ] = useState('');
   const [kind, setKind] = useState('all');
   const [semantic, setSemantic] = useState(false); // 의미(코사인) 검색 모드
@@ -75,10 +76,10 @@ function SearchOverlay({ open, initialKind = 'all', initialQuery = '', onClose, 
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') run(q, kind, semantic); }}
-            placeholder="취업·커뮤니티 통합 검색"
+            placeholder={t('search.placeholder')}
           />
-          <button className="search-go" onClick={() => run(q, kind, semantic)}>검색</button>
-          <button className="search-close" onClick={onClose} aria-label="닫기">✕</button>
+          <button className="search-go" onClick={() => run(q, kind, semantic)}>{t('search.goBtn')}</button>
+          <button className="search-close" onClick={onClose} aria-label={t('search.closeAria')}>✕</button>
         </div>
 
         <div className="search-filters">
@@ -94,15 +95,15 @@ function SearchOverlay({ open, initialKind = 'all', initialQuery = '', onClose, 
           <button
             className={`search-filter semantic-toggle ${semantic ? 'active' : ''}`}
             onClick={toggleSemantic}
-            title="의미 유사도(코사인) 기반 검색"
+            title={t('search.semanticTitle')}
           >
-            🧠 의미 검색
+            {t('search.semanticLabel')}
           </button>
         </div>
 
         <div className="search-results">
           {loading ? (
-            <p className="search-msg">검색 중...</p>
+            <p className="search-msg">{t('search.loading')}</p>
           ) : results.length > 0 ? (
             results.map((r) => (
               <div className="search-result-item" key={`${r.source}-${r.id}`} onClick={() => goto(r)}>
@@ -114,9 +115,9 @@ function SearchOverlay({ open, initialKind = 'all', initialQuery = '', onClose, 
               </div>
             ))
           ) : searched ? (
-            <p className="search-msg">검색 결과가 없습니다.</p>
+            <p className="search-msg">{t('search.noResults')}</p>
           ) : (
-            <p className="search-msg">키워드를 입력하고 Enter를 누르세요.</p>
+            <p className="search-msg">{t('search.prompt')}</p>
           )}
         </div>
       </div>
