@@ -12,7 +12,7 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 2592000)}개월 전`;
 }
 
-function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic }) {
+function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, onNavigate }) {
   const myId = user?.id;
   const [tab, setTab] = useState(initialConversationId ? 'messages' : 'notifications');
   const [notifs, setNotifs] = useState([]);
@@ -78,6 +78,10 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic })
     }
     if ((n.type === 'comment' || n.type === 'notice') && n.data?.topic_id && onOpenTopic) {
       onOpenTopic(n.data.topic_id);
+    } else if (n.type === 'application' && onNavigate) {
+      onNavigate('myjobs'); // 지원 알림 → 내 공고 관리
+    } else if (n.type === 'dispute' && onNavigate) {
+      onNavigate('disputes'); // 분쟁 알림 → 분쟁 관리(관리자)
     }
   };
 

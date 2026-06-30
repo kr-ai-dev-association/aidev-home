@@ -1760,6 +1760,54 @@ ul, ol {
 .b2b-status-btn.active { background: rgba(99,102,241,0.25); border-color: #6366f1; color: #fff; }
 .b2b-status-btn:disabled { cursor: default; opacity: 0.55; }
 
+/* 내 공고 관리 */
+.myjobs-list { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
+.myjob-card { background: #111726; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; overflow: hidden; }
+.myjob-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.3rem; cursor: pointer; }
+.myjob-head:hover { background: rgba(255,255,255,0.02); }
+.myjob-head h4 { margin: 0.4rem 0 0; color: #f8fafc; font-size: 1.05rem; }
+.myapp-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0 1.4rem; }
+.myjob-head-actions { display: flex; align-items: center; gap: 0.6rem; white-space: nowrap; }
+.myjob-count { color: #cbd5e1; font-weight: 700; white-space: nowrap; }
+.myjob-deadline { display: block; color: #fcd34d; font-size: 0.8rem; margin-top: 0.3rem; }
+.myjob-contractor { display: inline-block; color: #4ade80; font-size: 0.8rem; font-weight: 700; margin-top: 0.2rem; }
+.contractor-badge { color: #fde68a; font-weight: 800; font-size: 0.82rem; padding: 0.45em 0.6em; }
+.b2b-status-btn.contract { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.5); color: #fde68a; font-weight: 700; }
+.b2b-status-btn.contract:hover { background: rgba(251,191,36,0.25); }
+.myjob-caret { color: #94a3b8; margin-left: 0.3rem; }
+.myjob-apps { padding: 0 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.myjob-note { color: #94a3b8; font-size: 0.9rem; margin: 0.4rem 0; }
+.apply-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 1rem 1.1rem; }
+.apply-card-top { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.apply-card-top strong { color: #f8fafc; font-size: 1rem; }
+.apply-title { color: #a5b4fc; font-size: 0.85rem; }
+.apply-skills { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0; }
+.apply-skill { font-size: 0.74rem; color: #c7d2fe; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); padding: 0.15em 0.6em; border-radius: 999px; }
+.apply-msg { color: #d8e0ec; font-size: 0.92rem; line-height: 1.6; white-space: pre-wrap; margin: 0.5rem 0; }
+.apply-contact { color: #94a3b8; font-size: 0.85rem; margin: 0.4rem 0 0; }
+.apply-contact a { color: #818cf8; }
+.apply-actions-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.8rem; }
+.apply-name-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: #f8fafc; font-size: 1rem; font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,0.3);
+}
+.apply-name-btn:hover { color: #a5b4fc; text-decoration-color: #a5b4fc; }
+.applicant-section { margin-bottom: 1.1rem; }
+.applicant-section h4 { color: #cbd5e1; font-size: 0.86rem; margin: 0 0 0.5rem; }
+.applicant-section p { color: #d8e0ec; line-height: 1.7; margin: 0; white-space: pre-wrap; }
+.applicant-info { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.applicant-info li { color: #d8e0ec; font-size: 0.9rem; }
+.applicant-info li span { display: inline-block; width: 64px; color: #94a3b8; }
+.applicant-info a { color: #818cf8; word-break: break-all; }
+
+/* 분쟁 상세 */
+.dispute-detail-block { margin-bottom: 1.2rem; }
+.dispute-detail-block h5 { color: #cbd5e1; font-size: 0.86rem; margin: 0 0 0.5rem; }
+.dispute-detail-block .post-content { color: #d8e0ec; }
+.dispute-feature { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; }
+.dispute-feature strong { color: #f8fafc; }
+
 /* 전체 너비에서 테이블이 컨테이너를 가득 채우도록 */
 .admin-page .admin-table {
   min-width: 100%;

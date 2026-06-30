@@ -3,7 +3,7 @@ import profilePlaceholder from '../assets/profile-placeholder.png'; // 프로필
 import Logo from './Logo'; // 조합 로고 컴포넌트
 import CoinIcon from './CoinIcon'; // 금색 코인 아이콘
 
-function Header({ isLoggedIn, isAdmin, isMember, coins = 0, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
+function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -115,12 +115,15 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, unreadCount = 0, onI
             {/* 로그인 후: 프로필 메뉴(드롭다운) — 내정보 / 관리자(권한자) / 로그아웃 */}
             <div className="profile-menu">
               <button type="button" className="profile-trigger" aria-label="프로필 메뉴">
-                <img src={profilePlaceholder} alt="Profile" className="header-profile-image" />
+                <img src={avatarUrl || profilePlaceholder} alt="Profile" className="header-profile-image" />
               </button>
               <ul className="profile-dropdown">
                 <li onClick={() => handleMenuItemClick('profile')}>내정보</li>
+                <li onClick={() => handleMenuItemClick('myapplications')}>내 지원 관리</li>
+                <li onClick={() => handleMenuItemClick('myjobs')}>내 공고 관리</li>
                 {isAdmin && <li onClick={() => handleMenuItemClick('admin')}>관리자</li>}
                 {isAdmin && <li onClick={() => handleMenuItemClick('b2brequests')}>B2B 의뢰</li>}
+                {isAdmin && <li onClick={() => handleMenuItemClick('disputes')}>분쟁 관리</li>}
                 <li
                   onClick={() => {
                     onLogoutClick();

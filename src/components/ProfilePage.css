@@ -570,10 +570,32 @@
   display: block;
 }
 .profile-edit-main {
-  max-width: 820px;
-  margin: 0 auto;
+  max-width: 100%;
   width: 100%;
 }
+
+/* 프로필 이미지 업로더 */
+.pf-avatar-edit {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin: 0 0 1.6rem;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+}
+.pf-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  flex-shrink: 0;
+}
+.pf-avatar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.pf-avatar-actions .pf-btn { cursor: pointer; }
+.pf-avatar-hint { width: 100%; margin: 0.3rem 0 0; color: #94a3b8; font-size: 0.82rem; }
 .profile-edit-head {
   display: flex;
   align-items: center;

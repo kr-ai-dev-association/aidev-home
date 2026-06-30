@@ -71,6 +71,10 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 .b2b-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.5rem; }
+.apply-profile-note { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.28); border-radius: 10px; padding: 0.7em 0.9em; color: #cbd5e1; font-size: 0.86rem; margin: 0 0 1rem; }
+.apply-profile-note strong { color: #e2e8f0; }
+.dispute-linked { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 0.6em 0.9em; color: #cbd5e1; font-size: 0.86rem; margin-bottom: 1rem; }
+.dispute-linked strong { color: #e2e8f0; }
 
 .b2b-done { text-align: center; padding: 1rem 0; }
 .b2b-done-icon { font-size: 3rem; }

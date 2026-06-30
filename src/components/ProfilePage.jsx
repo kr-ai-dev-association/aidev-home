@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CoinIcon from './CoinIcon';
 import './ProfilePage.css';
 import { supabase } from '../lib/supabase';
@@ -22,11 +22,30 @@ const getYouTubeThumbnail = (url) => {
 
 const emptyProject = () => ({ title: '', description: '', skills: [], youtubeUrl: '', githubUrl: '' });
 
-function ProfilePage({ user, profile, onProfileUpdated }) {
+// viewUserId 가 주어지면 '다른 조합원 프로필' 읽기 전용 보기 모드로 동작한다.
+// (지원자 프로필 페이지 — 본인 편집 UI는 모두 숨김)
+function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewProfileFallback = null, onBack }) {
+  const readOnly = !!viewUserId;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [fetchedProfile, setFetchedProfile] = useState(null);
+  const [loadingView, setLoadingView] = useState(readOnly);
+
+  // 읽기 전용 모드: 대상 조합원의 최신 프로필을 id로 조회 (RLS 차단 시 스냅샷으로 폴백)
+  useEffect(() => {
+    if (!viewUserId) return;
+    let alive = true;
+    setLoadingView(true);
+    supabase.from('profiles').select('*').eq('id', viewUserId).maybeSingle()
+      .then(({ data }) => { if (alive) { setFetchedProfile(data || null); setLoadingView(false); } })
+      .catch(() => { if (alive) setLoadingView(false); });
+    return () => { alive = false; };
+  }, [viewUserId]);
+
   const [form, setForm] = useState(() => ({
     name: profile?.name || '',
+    avatar_url: profile?.avatar_url || '',
     main_title: profile?.main_title || '',
     status: profile?.status || '',
     rate: profile?.rate || '',
@@ -40,7 +59,25 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
     projects: Array.isArray(profile?.projects) ? profile.projects : [],
   }));
 
-  if (!profile) {
+  // 읽기 전용(타인 프로필) 모드 가드
+  if (readOnly) {
+    const subject = fetchedProfile || viewProfileFallback;
+    if (loadingView && !subject) {
+      return (
+        <div className="profile-page-container content-area-container">
+          <p style={{ color: '#94a3b8', padding: '2rem' }}>프로필을 불러오는 중...</p>
+        </div>
+      );
+    }
+    if (!subject) {
+      return (
+        <div className="profile-page-container content-area-container">
+          {onBack && <button className="back-button back-top" onClick={onBack}>← 돌아가기</button>}
+          <p style={{ color: '#94a3b8', padding: '2rem' }}>프로필 정보를 찾을 수 없습니다.</p>
+        </div>
+      );
+    }
+  } else if (!profile) {
     return (
       <div className="profile-page-container content-area-container">
         <p style={{ color: '#94a3b8', padding: '2rem' }}>로그인 후 이용할 수 있습니다.</p>
@@ -50,6 +87,18 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
 
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const uploadAvatar = async (file) => {
+    if (!file) return;
+    setUploadingAvatar(true);
+    const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    const path = `avatars/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('job-images').upload(path, file, { upsert: true });
+    setUploadingAvatar(false);
+    if (error) { alert(`이미지 업로드 오류: ${error.message}`); return; }
+    const url = supabase.storage.from('job-images').getPublicUrl(path).data.publicUrl;
+    update('avatar_url', url);
+  };
+
   const updateProject = (i, k, v) =>
     setForm((f) => ({ ...f, projects: f.projects.map((p, idx) => (idx === i ? { ...p, [k]: v } : p)) }));
   const addProject = () => setForm((f) => ({ ...f, projects: [...f.projects, emptyProject()] }));
@@ -58,6 +107,7 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
   const startEdit = () => {
     setForm({
       name: profile.name || '',
+      avatar_url: profile.avatar_url || '',
       main_title: profile.main_title || '',
       status: profile.status || '',
       rate: profile.rate || '',
@@ -77,6 +127,7 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
     setSaving(true);
     const updates = {
       name: form.name.trim(),
+      avatar_url: form.avatar_url || null,
       main_title: form.main_title.trim() || null,
       status: form.status.trim() || null,
       rate: form.rate.trim() || null,
@@ -112,8 +163,8 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
     setEditing(false);
   };
 
-  // 보기용 데이터 (저장된 프로필 기준)
-  const v = profile;
+  // 보기용 데이터 (읽기 전용이면 조회한 대상 프로필, 아니면 본인 프로필)
+  const v = readOnly ? (fetchedProfile || viewProfileFallback || {}) : profile;
   const skills = Array.isArray(v.skills) ? v.skills : [];
   const projects = (Array.isArray(v.projects) ? v.projects : []).map((p) => ({
     ...p,
@@ -129,7 +180,22 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
             <h1 className="main-title">프로필 편집</h1>
             <div className="profile-edit-actions">
               <button className="pf-btn ghost" onClick={() => setEditing(false)} disabled={saving}>취소</button>
-              <button className="pf-btn primary" onClick={handleSave} disabled={saving}>{saving ? '저장 중...' : '저장'}</button>
+              <button className="pf-btn primary" onClick={handleSave} disabled={saving || uploadingAvatar}>{saving ? '저장 중...' : '저장'}</button>
+            </div>
+          </div>
+
+          <div className="pf-avatar-edit">
+            <img src={form.avatar_url || profilePlaceholder} alt="프로필 이미지" className="pf-avatar-preview" />
+            <div className="pf-avatar-actions">
+              <label className="pf-btn ghost">
+                {uploadingAvatar ? '업로드 중...' : '📷 이미지 변경'}
+                <input type="file" accept="image/*" hidden disabled={uploadingAvatar}
+                  onChange={(e) => uploadAvatar(e.target.files?.[0])} />
+              </label>
+              {form.avatar_url && (
+                <button type="button" className="pf-btn ghost" onClick={() => update('avatar_url', '')}>제거</button>
+              )}
+              <p className="pf-avatar-hint">정사각형 이미지를 권장합니다. (JPG·PNG)</p>
             </div>
           </div>
 
@@ -210,27 +276,36 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
   // ===== 보기 모드 =====
   return (
     <div className="profile-page-container content-area-container">
+      {readOnly && onBack && (
+        <button className="back-button back-top profile-fullwidth-back" onClick={onBack}>← 지원자 목록으로</button>
+      )}
       <aside className="profile-sidebar">
-        <div className="profile-header-share">
-          <button className="share-button" aria-label="프로필 공유"><span className="share-icon"></span></button>
-        </div>
+        {!readOnly && (
+          <div className="profile-header-share">
+            <button className="share-button" aria-label="프로필 공유"><span className="share-icon"></span></button>
+          </div>
+        )}
         <div className="profile-avatar-wrapper">
-          <img src={profilePlaceholder} alt="프로필 아바타" className="profile-avatar" />
+          <img src={v.avatar_url || profilePlaceholder} alt="프로필 아바타" className="profile-avatar" />
           {v.status && (
             <div className="profile-status"><span className="status-dot available"></span> {v.status}</div>
           )}
         </div>
         <h2 className="profile-name">{v.name || '이름 미설정'}</h2>
-        <button className="contact-button" onClick={startEdit}>
-          <span className="send-icon"></span> 프로필 편집
-        </button>
+        {!readOnly && (
+          <button className="contact-button" onClick={startEdit}>
+            <span className="send-icon"></span> 프로필 편집
+          </button>
+        )}
 
-        {/* 보유 코인 현황 */}
-        <div className="profile-coins" title="보유 coin">
-          <CoinIcon size={22} className="coin-icon" />
-          <span className="coin-amount">{Number(profile.coins ?? 0).toLocaleString()}</span>
-          <span className="coin-unit">coin</span>
-        </div>
+        {/* 보유 코인 현황 (본인만) */}
+        {!readOnly && (
+          <div className="profile-coins" title="보유 coin">
+            <CoinIcon size={22} className="coin-icon" />
+            <span className="coin-amount">{Number(profile.coins ?? 0).toLocaleString()}</span>
+            <span className="coin-unit">coin</span>
+          </div>
+        )}
 
         {v.rate && (
           <div className="profile-section">
@@ -278,7 +353,7 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
       </aside>
 
       <main className="profile-main-content">
-        <h1 className="main-title">{v.main_title || v.name || '나의 정보'}</h1>
+        <h1 className="main-title">{v.main_title || v.name || (readOnly ? '지원자 프로필' : '나의 정보')}</h1>
 
         <nav className="profile-tabs">
           <button className="tab-button active">프로젝트</button>
@@ -286,15 +361,21 @@ function ProfilePage({ user, profile, onProfileUpdated }) {
           <button className="tab-button">추천</button>
         </nav>
 
-        <div className="add-project-section">
-          <div className="add-project-card" onClick={startEdit} role="button" tabIndex={0}>
-            <div className="add-icon">+</div>
-            <div className="add-text">
-              <p><strong>프로젝트 추가</strong></p>
-              <p>프로필을 편집해 최고의 기술과 경험을 보여주세요.</p>
+        {!readOnly && (
+          <div className="add-project-section">
+            <div className="add-project-card" onClick={startEdit} role="button" tabIndex={0}>
+              <div className="add-icon">+</div>
+              <div className="add-text">
+                <p><strong>프로젝트 추가</strong></p>
+                <p>프로필을 편집해 최고의 기술과 경험을 보여주세요.</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {readOnly && projects.length === 0 && (
+          <p className="pf-empty" style={{ color: '#94a3b8' }}>등록된 프로젝트가 없습니다.</p>
+        )}
 
         <div className="projects-list">
           {projects.map((project, index) => (

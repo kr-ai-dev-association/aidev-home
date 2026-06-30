@@ -14,9 +14,15 @@
 }
 .rte .ql-editor {
   min-height: 160px;
+  color: #e6edf3;
+  line-height: 1.7;
 }
+.rte .ql-editor h1,
+.rte .ql-editor h2,
+.rte .ql-editor h3 { color: #f3f6fb; }
+.rte .ql-editor strong, .rte .ql-editor b { color: #ffffff; }
 .rte .ql-editor.ql-blank::before {
-  color: #64748b;
+  color: #7c8aa3;
   font-style: normal;
 }
 

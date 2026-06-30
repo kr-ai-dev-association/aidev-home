@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import JobDetailPage from './JobDetailPage';
 import JobForm from './JobForm';
 import { BOARD_TYPES, CORP_ONLY, badgeStyle, cardInfo } from '../lib/jobFields';
+import { fetchMyScrapIds, addScrap, removeScrap } from '../lib/scraps';
 
 const TABS = ['전체', ...BOARD_TYPES];
 
@@ -21,18 +22,34 @@ function jobSnippet(html) {
   return t;
 }
 
-function JobCard({ job, onClick }) {
+function JobCard({ job, onClick, scrapped, onToggleScrap }) {
   const info = cardInfo(job);
   const st = badgeStyle(info.badge);
   const text = jobSnippet(job.description);
   const tech = info.tech || [];
   return (
     <div className={`job-card${job.closed ? ' job-card-closed' : ''}`} onClick={() => onClick(job)}>
+      {onToggleScrap && (
+        <button
+          type="button"
+          className={`scrap-btn${scrapped ? ' on' : ''}`}
+          title={scrapped ? '스크랩 해제' : '스크랩'}
+          aria-label={scrapped ? '스크랩 해제' : '스크랩'}
+          onClick={(e) => { e.stopPropagation(); onToggleScrap(job); }}
+        >
+          {scrapped ? '🔖' : '🏷️'}
+        </button>
+      )}
       <div className="job-details">
         <div className="job-title-row">
-          <span className={`job-status ${job.closed ? 'closed' : 'open'}`}>
-            {job.closed ? '🔒 CLOSED' : '🟢 OPEN'}
-          </span>
+          {/* 외주는 OPEN/CLOSED, 채용·프로젝트 구인은 마감 시에만 '마감' 배지 */}
+          {job.board_type === '외주 프로젝트' ? (
+            <span className={`job-status ${job.closed ? 'closed' : 'open'}`}>
+              {job.closed ? '🔒 CLOSED' : '🟢 OPEN'}
+            </span>
+          ) : job.closed ? (
+            <span className="job-status closed">🔒 마감</span>
+          ) : null}
           <h3 className="job-title">{job.title}</h3>
           <div className="job-type" style={{ backgroundColor: st.bg, color: st.color }}>{info.badge}</div>
         </div>
@@ -53,7 +70,7 @@ function JobCard({ job, onClick }) {
   );
 }
 
-function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpenConversation, initialJobId, onJobConsumed, onOpenSearch, onProfileChanged }) {
+function EmploymentPage({ isLoggedIn, isAdmin, isMember, onNavigate, user, profile, onOpenConversation, initialJobId, onJobConsumed, onOpenSearch, onProfileChanged }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('전체');
@@ -61,12 +78,39 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
   const [view, setView] = useState('list'); // 'list' | 'form' | 'manage'
   const [editing, setEditing] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [scrapIds, setScrapIds] = useState(() => new Set());
+
+  // 내 스크랩 목록 로드
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!user?.id) { setScrapIds(new Set()); return; }
+      const ids = await fetchMyScrapIds(user.id);
+      if (active) setScrapIds(new Set(ids));
+    })();
+    return () => { active = false; };
+  }, [user]);
+
+  const toggleScrap = async (job) => {
+    if (!user?.id) { alert('스크랩은 로그인 후 이용할 수 있습니다.'); return; }
+    const has = scrapIds.has(job.id);
+    setScrapIds((prev) => { const n = new Set(prev); if (has) n.delete(job.id); else n.add(job.id); return n; }); // 낙관적 갱신
+    const { error } = has ? await removeScrap(user.id, job.id) : await addScrap(user.id, job.id);
+    if (error) {
+      setScrapIds((prev) => { const n = new Set(prev); if (has) n.add(job.id); else n.delete(job.id); return n; }); // 롤백
+      alert(`스크랩 오류: ${error.message}`);
+    }
+  };
 
   const isCorporate = profile?.account_type === 'corporate';
   const canPostCorp = isCorporate || isAdmin; // 채용공고/프로젝트 구인 작성 가능 여부
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
+    // 자동 정리(서버 함수): 기한 지난 미마감 외주 + 마감 1개월 경과 채용·프로젝트 구인
+    try { await supabase.rpc('purge_expired_jobs'); } catch { /* 미배포 시 외주 정리만 폴백 */
+      try { await supabase.rpc('purge_expired_outsource_jobs'); } catch { /* noop */ }
+    }
     const { data } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
     setJobs(data || []);
     setLoading(false);
@@ -143,10 +187,19 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
   // 공고 마감/마감취소 (작성자·관리자)
   const toggleClose = async (job) => {
     const next = !job.closed;
-    if (next && !window.confirm('이 공고를 마감하시겠습니까? 목록에는 CLOSED로 계속 표시됩니다.')) return;
-    const { error } = await supabase.from('jobs').update({ closed: next }).eq('id', job.id);
+    // 외주 프로젝트는 계약자 지정으로만 마감 가능 (직접 마감 차단)
+    if (next && job.board_type === '외주 프로젝트') {
+      alert('외주 프로젝트는 ‘내 공고 관리’에서 지원자 중 계약자를 지정해야 마감됩니다.\n계약 없이 종료하려면 공고를 삭제해 주세요.');
+      return;
+    }
+    if (next && !window.confirm('이 공고를 마감하시겠습니까?\n목록에는 마감으로 계속 표시되며, 채용·프로젝트 구인은 마감 1개월 후 자동 삭제됩니다.\n기간을 수정하면 다시 재개시할 수 있습니다.')) return;
+    // 마감 시 closed_at 기록(1개월 자동삭제 기준) / 재오픈 시 해제, 외주는 계약자도 해제
+    const patch = next
+      ? { closed: true, closed_at: new Date().toISOString() }
+      : { closed: false, closed_at: null, ...(job.board_type === '외주 프로젝트' ? { contractor_id: null } : {}) };
+    const { error } = await supabase.from('jobs').update(patch).eq('id', job.id);
     if (error) { alert(`상태 변경 오류: ${error.message}`); return; }
-    setSelectedJob((j) => (j && j.id === job.id ? { ...j, closed: next } : j));
+    setSelectedJob((j) => (j && j.id === job.id ? { ...j, ...patch } : j));
     fetchJobs();
   };
 
@@ -164,6 +217,12 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
         onToggleClose={toggleClose}
         canMessage={isLoggedIn && selectedJob.author_id !== user?.id}
         onOpenConversation={onOpenConversation}
+        scrapped={scrapIds.has(selectedJob.id)}
+        onToggleScrap={isLoggedIn ? toggleScrap : undefined}
+        isMember={isMember}
+        isAdmin={isAdmin}
+        user={user}
+        profile={profile}
       />
     );
   }
@@ -203,6 +262,20 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
 
   return (
     <div className="employment-page-container content-area-container">
+      <div className="emp-fee-banner">
+        <div className="emp-fee-glow" aria-hidden="true" />
+        <div className="emp-fee-icon-chip" aria-hidden="true">🤝</div>
+        <div className="emp-fee-content">
+          <div className="emp-fee-headline">
+            <span className="emp-fee-badge">중계 수수료 0%</span>
+            <h3>조합원을 위한, 수수료 없는 매칭</h3>
+          </div>
+          <p>
+            조합은 조합원 간의 <strong>채용·프로젝트 구인·외주 업무</strong>에 대해 <strong>어떠한 중계 수수료도 받지 않습니다.</strong>
+            모든 플랫폼 기능은 <strong>조합원의 회비</strong>와 <strong>조합의 수익 사업</strong>으로 운영됩니다.
+          </p>
+        </div>
+      </div>
       <div className="employment-header">
         <div className="employment-tabs">
           {TABS.map((t) => (
@@ -246,7 +319,15 @@ function EmploymentPage({ isLoggedIn, isAdmin, onNavigate, user, profile, onOpen
               {view === 'manage' ? '등록한 공고가 없습니다.' : '등록된 공고가 없습니다. 첫 공고를 등록해보세요!'}
             </p>
           ) : (
-            list.map((job) => <JobCard key={job.id} job={job} onClick={handleJobClick} />)
+            list.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                onClick={handleJobClick}
+                scrapped={scrapIds.has(job.id)}
+                onToggleScrap={isLoggedIn ? toggleScrap : undefined}
+              />
+            ))
           )}
         </div>
 

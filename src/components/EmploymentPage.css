@@ -9,6 +9,80 @@
   min-height: calc(100vh - var(--header-height) - var(--footer-height)); /* 헤더/푸터 제외한 최소 높이 */
 }
 
+.emp-fee-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background:
+    linear-gradient(135deg, rgba(34,211,238,0.10), rgba(99,102,241,0.10)),
+    #0f1626;
+  border: 1px solid rgba(103,232,249,0.28);
+  border-radius: 16px;
+  padding: 1.3rem 1.5rem;
+  margin-bottom: 1.4rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+/* 우측 상단 은은한 발광 장식 */
+.emp-fee-glow {
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(99,102,241,0.22), transparent 65%);
+  pointer-events: none;
+}
+/* 아이콘 칩 (원형 그라데이션) */
+.emp-fee-icon-chip {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(34,211,238,0.9), rgba(99,102,241,0.9));
+  box-shadow: 0 6px 18px rgba(34,211,238,0.28);
+}
+.emp-fee-content { position: relative; min-width: 0; }
+.emp-fee-headline {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+/* 강조 뱃지 */
+.emp-fee-badge {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #06141c;
+  background: linear-gradient(135deg, #67e8f9, #a5b4fc);
+  border-radius: 999px;
+  padding: 0.28em 0.75em;
+  white-space: nowrap;
+}
+.emp-fee-headline h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.3;
+}
+.emp-fee-banner p { margin: 0; color: #aeb9cc; font-size: 0.92rem; line-height: 1.65; }
+.emp-fee-banner strong { color: #67e8f9; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .emp-fee-banner { gap: 0.9rem; padding: 1.1rem 1.1rem; }
+  .emp-fee-icon-chip { width: 44px; height: 44px; font-size: 1.35rem; }
+  .emp-fee-headline h3 { font-size: 1rem; }
+}
+
 .employment-header {
   background-color: #111726;
   border-radius: 8px;
@@ -128,6 +202,7 @@
 }
 
 .job-card {
+  position: relative;
   background-color: #111726;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -138,6 +213,29 @@
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
+
+/* 스크랩(북마크) 버튼 */
+.scrap-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  border-radius: 9px;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.scrap-btn:hover { background: rgba(99, 102, 241, 0.28); transform: scale(1.05); }
+.scrap-btn.on { background: rgba(253, 230, 138, 0.18); border-color: rgba(253, 230, 138, 0.55); }
+.nt-btn.scrap-on { color: #fde68a; border-color: rgba(253, 230, 138, 0.55); }
 
 .job-card:hover {
   transform: translateY(-3px);
@@ -455,7 +553,7 @@
   outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
 }
 /* 공고 OPEN/CLOSED 상태 배지 */
-.job-title-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.job-title-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding-right: 2.8rem; }
 .detail-badge-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
 .job-status {
   flex-shrink: 0;
@@ -518,6 +616,30 @@
 .jf-toggle input { margin-top: 0.25rem; width: 18px; height: 18px; accent-color: #6366f1; flex-shrink: 0; }
 .jf-toggle strong { display: block; color: #e2e8f0; font-size: 0.95rem; }
 .jf-toggle em { display: block; color: #94a3b8; font-size: 0.83rem; font-style: normal; margin-top: 0.2rem; line-height: 1.5; }
+
+/* 검수·분쟁 처리 안내 (강조 박스) */
+.jf-notice {
+  background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(99,102,241,0.1));
+  border: 1px solid rgba(251,191,36,0.45);
+  border-left: 4px solid #fbbf24;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin: 0 0 1.4rem;
+}
+.jf-notice-title { font-weight: 800; color: #fde68a; font-size: 1rem; margin-bottom: 0.5rem; }
+.jf-notice-list { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.jf-notice-list li { color: #e2e8f0; font-size: 0.9rem; line-height: 1.6; }
+.jf-notice-list strong { color: #fff; }
+
+/* 첨부 (PDF/ZIP/GitHub) */
+.jf-attach-list { list-style: none; margin: 0.4rem 0 0.7rem; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.jf-attach-item { display: flex; align-items: center; gap: 0.6rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 0.5em 0.8em; }
+.jf-attach-kind { font-size: 0.78rem; font-weight: 700; color: #c7d2fe; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); padding: 0.15em 0.55em; border-radius: 999px; flex-shrink: 0; }
+.jf-attach-name { color: #818cf8; word-break: break-all; flex: 1; font-size: 0.88rem; }
+.jf-attach-size { color: #94a3b8; font-size: 0.78rem; flex-shrink: 0; }
+.jf-attach-del { background: none; border: none; color: #fca5a5; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; }
+.jf-attach-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.jf-attach-used { color: #94a3b8; font-size: 0.82rem; margin-left: auto; }
 .jf-upload {
   display: inline-block; cursor: pointer; font-size: 0.85rem; font-weight: 600;
   color: #a5b4fc; border: 1px dashed rgba(165,180,252,0.5); border-radius: 8px; padding: 0.5em 1em; width: fit-content;

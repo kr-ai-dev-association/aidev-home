@@ -10,11 +10,28 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .md-editor-wrap .w-md-editor-text,
+.md-editor-wrap .w-md-editor-text-input,
+.md-editor-wrap .w-md-editor-text-pre > code,
 .md-editor-wrap textarea {
   font-size: 0.95rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #e6edf3 !important;
+  -webkit-text-fill-color: #e6edf3;
 }
+/* 마크다운 토큰(구문 강조) 가독성 */
+.md-editor-wrap .w-md-editor-text-pre .token.title,
+.md-editor-wrap .w-md-editor-text-pre .token.bold { color: #93a4ff !important; }
+.md-editor-wrap .w-md-editor-text-pre .token.code,
+.md-editor-wrap .w-md-editor-text-pre .token.url { color: #67e8f9 !important; }
+.md-editor-wrap .w-md-editor-text-pre .token.list { color: #fcd34d !important; }
 .md-editor-wrap .w-md-editor-preview { background: #0b101d; }
+/* 에디터 우측 라이브 프리뷰도 리더와 동일 고대비 */
+.md-editor-wrap .w-md-editor-preview .wmde-markdown,
+.md-editor-wrap .w-md-editor-preview .wmde-markdown p,
+.md-editor-wrap .w-md-editor-preview .wmde-markdown li { color: #e6edf3; }
+.md-editor-wrap .w-md-editor-preview .wmde-markdown h1,
+.md-editor-wrap .w-md-editor-preview .wmde-markdown h2,
+.md-editor-wrap .w-md-editor-preview .wmde-markdown h3 { color: #f3f6fb; }
 
 /* 리더(출력) — 다크 테마 고대비 색상 (github-markdown CSS 변수 오버라이드) */
 .md-view {

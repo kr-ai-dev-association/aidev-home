@@ -17,6 +17,9 @@ import CommunityPage from './components/CommunityPage'; // CommunityPage 컴포�
 import InboxPage from './components/InboxPage'; // 메시지함(알림/메시지)
 import VotePage from './components/VotePage'; // 투표(의제)
 import B2BRequestsPage from './components/B2BRequestsPage'; // 조합 B2B 의뢰 관리(관리자)
+import MyJobsPage from './components/MyJobsPage'; // 내 공고 관리(지원 현황)
+import MyApplicationsPage from './components/MyApplicationsPage'; // 내 지원 관리(스크랩·지원 현황)
+import DisputesPage from './components/DisputesPage'; // 분쟁 관리(관리자)
 import B2BRequestModal from './components/B2BRequestModal'; // 조합 B2B 의뢰 입력 모달
 import SearchOverlay from './components/SearchOverlay'; // 통합 검색
 import { fetchUnreadCounts } from './lib/inbox';
@@ -47,6 +50,8 @@ function App() {
   const [inboxConvId, setInboxConvId] = useState(null); // 메시지함에서 열 대화 id
   const [communityTopicId, setCommunityTopicId] = useState(initRoute.topicId || null); // 알림/딥링크로 열 주제 id
   const [employmentJobId, setEmploymentJobId] = useState(initRoute.jobId || null); // 검색/딥링크로 열 공고 id
+  const [viewUserId, setViewUserId] = useState(null); // 조회할 타인(지원자) 프로필 user id
+  const [viewUserFallback, setViewUserFallback] = useState(null); // 프로필 RLS 차단 시 폴백 스냅샷
   const [searchOpen, setSearchOpen] = useState(false); // 통합 검색 오버레이
   const [searchKind, setSearchKind] = useState('all'); // 'all' | 'job' | 'community'
   const [searchQuery, setSearchQuery] = useState(''); // 초기 검색어
@@ -139,6 +144,14 @@ function App() {
   const openTopic = (topicId) => {
     setCommunityTopicId(topicId);
     setCurrentPage('community');
+    setScrollToSection(null);
+  };
+  // 지원자 등 타인 프로필 페이지 열기 (fallback: 지원 스냅샷)
+  const openUserProfile = (userId, fallback = null) => {
+    if (!userId) return;
+    setViewUserId(userId);
+    setViewUserFallback(fallback);
+    setCurrentPage('userprofile');
     setScrollToSection(null);
   };
   // 검색에서 공고 열기
@@ -282,6 +295,38 @@ function App() {
       case 'b2brequests':
         content = <B2BRequestsPage isAdmin={isAdmin} />;
         break;
+      case 'myjobs':
+        content = (
+          <MyJobsPage
+            user={session?.user}
+            isLoggedIn={isLoggedIn}
+            onOpenConversation={openInbox}
+            onNavigate={handleNavigate}
+            onViewProfile={openUserProfile}
+          />
+        );
+        break;
+      case 'myapplications':
+        content = (
+          <MyApplicationsPage
+            user={session?.user}
+            isLoggedIn={isLoggedIn}
+            onOpenJob={openJob}
+          />
+        );
+        break;
+      case 'userprofile':
+        content = (
+          <ProfilePage
+            viewUserId={viewUserId}
+            viewProfileFallback={viewUserFallback}
+            onBack={() => handleNavigate('myjobs')}
+          />
+        );
+        break;
+      case 'disputes':
+        content = <DisputesPage isAdmin={isAdmin} onOpenConversation={openInbox} />;
+        break;
       case 'vote':
         content = (
           <VotePage
@@ -300,6 +345,7 @@ function App() {
             initialConversationId={inboxConvId}
             onUnreadChange={refreshUnread}
             onOpenTopic={openTopic}
+            onNavigate={handleNavigate}
           />
         );
         break;
@@ -308,6 +354,7 @@ function App() {
           <EmploymentPage
             isLoggedIn={isLoggedIn}
             isAdmin={isAdmin}
+            isMember={isMember}
             onNavigate={handleNavigate}
             user={session?.user}
             profile={profile}
@@ -356,6 +403,7 @@ function App() {
         isAdmin={isAdmin}
         isMember={isMember}
         coins={profile?.coins ?? 0}
+        avatarUrl={profile?.avatar_url}
         unreadCount={unread}
         onInboxClick={() => openInbox(null)}
         onSearchClick={() => openSearch('all')}

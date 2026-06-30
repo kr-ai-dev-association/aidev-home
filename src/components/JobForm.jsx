@@ -18,6 +18,7 @@ const toEditable = (val, type) => {
   if (type === 'tags') return Array.isArray(val) ? val.join(', ') : (val || '');
   if (type === 'features') return Array.isArray(val) ? val : [];
   if (type === 'images') return Array.isArray(val) ? val : [];
+  if (type === 'attachments') return Array.isArray(val) ? val : [];
   return val || '';
 };
 const fromEditable = (raw, type) => {
@@ -25,8 +26,11 @@ const fromEditable = (raw, type) => {
   if (type === 'tags') return String(raw || '').split(',').map((s) => s.trim()).filter(Boolean);
   if (type === 'features') return (raw || []).filter((f) => f && f.name && f.name.trim());
   if (type === 'images') return raw || [];
+  if (type === 'attachments') return (raw || []).filter((a) => a && a.url);
   return String(raw || '').trim();
 };
+
+const MAX_ATTACH_BYTES = 10 * 1024 * 1024; // 통합 10MB 미만
 
 function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
   const isEdit = !!initial;
@@ -44,6 +48,13 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     return obj;
   });
   const [platformApply, setPlatformApply] = useState(!!initial?.platform_apply);
+  const [deadline, setDeadline] = useState(() => {
+    if (!initial?.deadline) return '';
+    const dt = new Date(initial.deadline);
+    if (Number.isNaN(dt.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -116,6 +127,35 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
 
   const removeImage = (key, idx) => setField(key, (details[key] || []).filter((_, i) => i !== idx));
 
+  // 첨부 (PDF/ZIP/GitHub) — 통합 10MB 미만
+  const attachTotalBytes = (list) => (list || []).reduce((sum, a) => sum + (a.size || 0), 0);
+  const addAttachmentFile = async (key, kind, file) => {
+    if (!file) return;
+    const okType = kind === 'pdf'
+      ? (file.type === 'application/pdf' || /\.pdf$/i.test(file.name))
+      : (/zip/i.test(file.type) || /\.zip$/i.test(file.name));
+    if (!okType) { alert(kind === 'pdf' ? 'PDF 파일만 첨부할 수 있습니다.' : 'ZIP 파일만 첨부할 수 있습니다.'); return; }
+    const cur = details[key] || [];
+    if (attachTotalBytes(cur) + file.size >= MAX_ATTACH_BYTES) {
+      alert('첨부 파일 통합 용량은 10MB 미만이어야 합니다.');
+      return;
+    }
+    setUploading(true);
+    const ext = kind === 'pdf' ? 'pdf' : 'zip';
+    const path = `attachments/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false, contentType: file.type || (kind === 'pdf' ? 'application/pdf' : 'application/zip') });
+    setUploading(false);
+    if (error) { alert(`업로드 오류: ${error.message}`); return; }
+    const url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    setField(key, [...cur, { kind, name: file.name, url, size: file.size }]);
+  };
+  const addAttachmentLink = (key, url) => {
+    const u = (url || '').trim();
+    if (!URLRE.test(u)) { alert('http(s):// 로 시작하는 링크를 입력하세요. (예: GitHub 저장소)'); return; }
+    setField(key, [...(details[key] || []), { kind: 'link', name: u, url: u, size: 0 }]);
+  };
+  const removeAttachment = (key, idx) => setField(key, (details[key] || []).filter((_, i) => i !== idx));
+
   // 기능 요구사항 (features)
   const addFeature = (key) => setField(key, [...(details[key] || []), { name: '', detail: '', image: '' }]);
   const updateFeature = (key, idx, prop, val) =>
@@ -139,7 +179,11 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
     const detailsOut = {};
     fields.forEach((f) => { detailsOut[f.key] = fromEditable(details[f.key], f.type); });
 
-    const payload = { board_type: boardType, title: title.trim(), description, contact: contact.trim() || null, details: detailsOut, platform_apply: platformApply };
+    const payload = {
+      board_type: boardType, title: title.trim(), description, contact: contact.trim() || null,
+      details: detailsOut, platform_apply: platformApply,
+      deadline: boardType === '외주 프로젝트' && deadline ? new Date(deadline).toISOString() : null,
+    };
     let error;
     if (isEdit) {
       ({ error } = await supabase.from('jobs').update(payload).eq('id', initial.id));
@@ -154,6 +198,17 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
   return (
     <form className="job-form" onSubmit={handleSubmit}>
       <h2 className="job-form-title">{isEdit ? '공고 수정' : '공고 등록'}</h2>
+
+      {boardType === '외주 프로젝트' && (
+        <div className="jf-notice">
+          <div className="jf-notice-title">📋 외주 프로젝트 검수·분쟁 처리 안내</div>
+          <ul className="jf-notice-list">
+            <li>프로젝트 완료 여부는 <strong>등록하신 ‘기능 요구사항’</strong>을 기준으로 판단합니다.</li>
+            <li>의뢰자·수행자·조합원 간 분쟁이 발생하면, <strong>조합 평가팀</strong>이 완성 결과물의 <strong>소스 코드를 직접 구동</strong>하여 사용자와 동일한 환경에서 <strong>E2E(End-to-End) 테스트</strong>로 모든 기능을 검증합니다.</li>
+            <li>공정한 검수를 위해 <strong>상세한 기능 요구사항·프로토타입·스크린샷</strong>을 반드시 업로드해 주세요.</li>
+          </ul>
+        </div>
+      )}
 
       <div className="jf-field">
         <label>구분</label>
@@ -182,7 +237,7 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       </div>
 
       <div className="jf-grid">
-        {fields.filter((f) => f.type !== 'features' && f.type !== 'images').map((f) => (
+        {fields.filter((f) => !['features', 'images', 'attachments'].includes(f.type)).map((f) => (
           <div className={`jf-field ${f.type === 'list' ? 'jf-wide' : ''}`} key={f.key}>
             <label>{f.label}{f.required && <span className="jf-req"> *</span>}</label>
             {f.type === 'select' ? (
@@ -250,6 +305,44 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
         </div>
       ))}
 
+      {/* 문서·소스 첨부 (PDF / ZIP / GitHub) */}
+      {fields.filter((f) => f.type === 'attachments').map((f) => {
+        const list = details[f.key] || [];
+        const usedMB = (attachTotalBytes(list) / (1024 * 1024)).toFixed(1);
+        return (
+          <div className="jf-field" key={f.key}>
+            <label>{f.label}</label>
+            <p className="jf-hint">기능 요구사항을 뒷받침할 기획서·명세서(PDF), 프로토타입 소스(ZIP), 또는 GitHub 저장소 링크를 첨부하세요. 통합 용량 10MB 미만.</p>
+            {list.length > 0 && (
+              <ul className="jf-attach-list">
+                {list.map((a, idx) => (
+                  <li className="jf-attach-item" key={idx}>
+                    <span className="jf-attach-kind">{a.kind === 'pdf' ? '📄 PDF' : a.kind === 'zip' ? '🗜️ ZIP' : '🔗 LINK'}</span>
+                    <a href={a.url} target="_blank" rel="noreferrer" className="jf-attach-name">{a.name}</a>
+                    {a.size ? <span className="jf-attach-size">{(a.size / (1024 * 1024)).toFixed(1)}MB</span> : null}
+                    <button type="button" className="jf-attach-del" onClick={() => removeAttachment(f.key, idx)}>✕</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="jf-attach-actions">
+              <label className="jf-upload">
+                📄 문서(PDF) 추가
+                <input type="file" accept="application/pdf,.pdf" hidden onChange={(e) => { addAttachmentFile(f.key, 'pdf', e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
+              <label className="jf-upload">
+                🗜️ 소스(ZIP) 추가
+                <input type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden onChange={(e) => { addAttachmentFile(f.key, 'zip', e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
+              <button type="button" className="jf-upload" onClick={() => { const u = window.prompt('GitHub 저장소 또는 문서 링크 (https://...)'); if (u) addAttachmentLink(f.key, u); }}>
+                🔗 GitHub/링크 추가
+              </button>
+              <span className="jf-attach-used">사용 {usedMB} / 10MB</span>
+            </div>
+          </div>
+        );
+      })}
+
       {/* 스크린샷 */}
       {fields.filter((f) => f.type === 'images').map((f) => (
         <div className="jf-field" key={f.key}>
@@ -288,6 +381,14 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
           <em>켜면 공고에 ‘지원하기’ 버튼이 표시되고, 지원자의 지원 내용·프로필이 ‘내 공고 관리’에 정리됩니다. (문의하기는 항상 제공)</em>
         </span>
       </label>
+
+      {boardType === '외주 프로젝트' && (
+        <div className="jf-field">
+          <label>마감 기한 (날짜·시간)</label>
+          <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+          <p className="jf-hint">⚠️ 마감 기한이 지나면 공고가 <strong>자동 삭제</strong>됩니다. 마감은 <strong>지원자 중 계약자를 지정</strong>해야 가능하며(‘내 공고 관리’), 연장하려면 이 공고를 수정해 기한을 변경하세요.</p>
+        </div>
+      )}
 
       {!isEdit && (
         <p className="jf-coin-hint">💰 공고를 등록하면 <strong>10 coin</strong>이 차감됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
