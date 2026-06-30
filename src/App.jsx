@@ -12,6 +12,7 @@ import AgentBuildPage from './components/AgentBuildPage'; // 에이전트 구축
 import CoursesPage from './components/CoursesPage'; // 강의(바이브코딩대학 AX 챔피언 프로그램) 페이지
 import ProfilePage from './components/ProfilePage'; // ProfilePage 컴포넌트 임포트
 import AdminDashboardPage from './components/AdminDashboardPage'; // 관리자 대시보드
+import AdminHubPage from './components/AdminHubPage'; // 관리자 대시보드 허브(통합 진입)
 import EmploymentPage from './components/EmploymentPage'; // EmploymentPage 컴포넌트 임포트
 import CommunityPage from './components/CommunityPage'; // CommunityPage 컴포넌트 임포트
 import FAQPage from './components/FAQPage'; // 자주 묻는 질문(FAQ) 페이지
@@ -92,6 +93,16 @@ function App() {
       setProfile(data);
       setNeedsProfile(false);
       setPendingNotice(false);
+      // 등급 배지(성실/모범/우등) 자동 평가 — 본인, 비동기
+      if (data.is_member) {
+        supabase.rpc('evaluate_member_tier', { target: user.id })
+          .then(({ data: tier }) => {
+            if (tier && tier !== data.tier_badge) {
+              setProfile((prev) => (prev ? { ...prev, tier_badge: tier } : prev));
+            }
+          })
+          .catch(() => { /* 컬럼/함수 미적용 시 무시 */ });
+      }
     } else {
       setProfile(null);
       setNeedsProfile(true); // 신규 회원 → 추가 정보 입력
@@ -296,11 +307,14 @@ function App() {
       case 'profile':
         content = <ProfilePage user={session?.user} profile={profile} onProfileUpdated={setProfile} />;
         break;
+      case 'admin-hub':
+        content = <AdminHubPage isAdmin={isAdmin} onNavigate={handleNavigate} />;
+        break;
       case 'admin':
-        content = <AdminDashboardPage isAdmin={isAdmin} currentUserEmail={session?.user?.email} />;
+        content = <AdminDashboardPage isAdmin={isAdmin} currentUserEmail={session?.user?.email} onBack={() => handleNavigate('admin-hub')} />;
         break;
       case 'b2brequests':
-        content = <B2BRequestsPage isAdmin={isAdmin} />;
+        content = <B2BRequestsPage isAdmin={isAdmin} onBack={() => handleNavigate('admin-hub')} />;
         break;
       case 'myjobs':
         content = (
@@ -332,7 +346,7 @@ function App() {
         );
         break;
       case 'disputes':
-        content = <DisputesPage isAdmin={isAdmin} onOpenConversation={openInbox} />;
+        content = <DisputesPage isAdmin={isAdmin} onOpenConversation={openInbox} onBack={() => handleNavigate('admin-hub')} />;
         break;
       case 'mediation':
         content = (
@@ -345,7 +359,7 @@ function App() {
         );
         break;
       case 'mediations-admin':
-        content = <MediationsAdminPage isAdmin={isAdmin} onOpenConversation={openInbox} />;
+        content = <MediationsAdminPage isAdmin={isAdmin} onOpenConversation={openInbox} onBack={() => handleNavigate('admin-hub')} />;
         break;
       case 'disputeservice':
         content = <DisputeServicePage onNavigate={handleNavigate} isLoggedIn={isLoggedIn} />;

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import CoinIcon from './CoinIcon';
+import RichTextEditor from './RichTextEditor';
+import BadgeIcon from './BadgeIcon';
+import { sanitize } from '../lib/html';
+import { TIER_BADGES, EXPERT_FIELDS, expertField, fetchExpertBadges } from '../lib/badges';
 import './ProfilePage.css';
 import { supabase } from '../lib/supabase';
 import profilePlaceholder from '../assets/profile-placeholder.png';
@@ -31,6 +35,20 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [fetchedProfile, setFetchedProfile] = useState(null);
   const [loadingView, setLoadingView] = useState(readOnly);
+  const [activeTab, setActiveTab] = useState('projects'); // 프로젝트 | 서비스 | badges
+  const [editingService, setEditingService] = useState(false);
+  const [serviceDraft, setServiceDraft] = useState('');
+  const [savingService, setSavingService] = useState(false);
+  const [expertBadges, setExpertBadges] = useState([]); // 전문가 배지(분야) 목록
+
+  // 표시 대상의 전문가 배지 조회
+  const subjectId = readOnly ? (fetchedProfile?.id || viewUserId) : profile?.id;
+  useEffect(() => {
+    if (!subjectId) { setExpertBadges([]); return; }
+    let alive = true;
+    fetchExpertBadges(subjectId).then((b) => { if (alive) setExpertBadges(b); });
+    return () => { alive = false; };
+  }, [subjectId]);
 
   // 읽기 전용 모드: 대상 조합원의 최신 프로필을 id로 조회 (RLS 차단 시 스냅샷으로 폴백)
   useEffect(() => {
@@ -161,6 +179,25 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
     }
     onProfileUpdated?.(data);
     setEditing(false);
+  };
+
+  // 서비스 탭: 자유 HTML 에디터로 제공 서비스 소개 작성
+  const startServiceEdit = () => {
+    setServiceDraft(profile?.services || '');
+    setEditingService(true);
+  };
+  const saveService = async () => {
+    setSavingService(true);
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ services: serviceDraft || null })
+      .eq('id', user.id)
+      .select()
+      .single();
+    setSavingService(false);
+    if (error) { alert(`저장 오류: ${error.message}`); return; }
+    onProfileUpdated?.(data);
+    setEditingService(false);
   };
 
   // 보기용 데이터 (읽기 전용이면 조회한 대상 프로필, 아니면 본인 프로필)
@@ -356,11 +393,86 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
         <h1 className="main-title">{v.main_title || v.name || (readOnly ? '지원자 프로필' : '나의 정보')}</h1>
 
         <nav className="profile-tabs">
-          <button className="tab-button active">프로젝트</button>
-          <button className="tab-button">서비스</button>
-          <button className="tab-button">추천</button>
+          <button className={`tab-button ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}>프로젝트</button>
+          <button className={`tab-button ${activeTab === 'services' ? 'active' : ''}`} onClick={() => setActiveTab('services')}>서비스</button>
+          <button className={`tab-button ${activeTab === 'badges' ? 'active' : ''}`} onClick={() => setActiveTab('badges')}>추천</button>
         </nav>
 
+        {/* ===== 추천 탭: 조합 관리자가 부여하는 배지 ===== */}
+        {activeTab === 'badges' && (
+          <div className="badge-tab">
+            <p className="badge-tab-desc">조합 관리자가 부여하는 인증 배지입니다. 등급 배지(성실·모범·우등)는 활동에 따라 자동 수여되며, 전문가 배지는 분야별로 관리자가 지정합니다.</p>
+
+            {/* 등급 배지 */}
+            {v.tier_badge && TIER_BADGES[v.tier_badge] ? (
+              <div className="badge-row tier">
+                <BadgeIcon color={TIER_BADGES[v.tier_badge].color} emoji={TIER_BADGES[v.tier_badge].emoji} size={60} title={TIER_BADGES[v.tier_badge].label} />
+                <div className="badge-row-text">
+                  <h4 style={{ color: TIER_BADGES[v.tier_badge].color }}>{TIER_BADGES[v.tier_badge].label}</h4>
+                  <p>{TIER_BADGES[v.tier_badge].desc}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="pf-empty" style={{ color: '#94a3b8' }}>아직 획득한 등급 배지가 없습니다.</p>
+            )}
+
+            {/* 전문가 배지 (복수) */}
+            {expertBadges.length > 0 && (
+              <div className="badge-section">
+                <h4 className="badge-section-title">🎓 전문가 조합원</h4>
+                {expertBadges.map((b) => {
+                  const f = expertField(b.field);
+                  if (!f) return null;
+                  return (
+                    <div className="badge-row" key={b.field}>
+                      <BadgeIcon color={f.color} emoji={f.emoji} size={56} title={f.label} />
+                      <div className="badge-row-text">
+                        <h4 style={{ color: f.color }}>{f.label} 전문가</h4>
+                        <p>관리자가 인증한 {f.label} 분야 전문가입니다.</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== 서비스 탭: 프리랜서·자영업자 제공 서비스 안내 (자유 HTML) ===== */}
+        {activeTab === 'services' && (
+          <div className="service-tab">
+            {!readOnly && !editingService && (
+              <div className="service-edit-bar">
+                <button className="pf-btn primary" onClick={startServiceEdit}>
+                  {v.services ? '✏️ 서비스 편집' : '+ 서비스 작성'}
+                </button>
+              </div>
+            )}
+            {!readOnly && editingService ? (
+              <div className="service-editor">
+                <p className="service-editor-hint">제공하는 서비스를 자유롭게 작성하세요. 제목·목록·이미지·링크·유튜브 등 서식을 지원합니다.</p>
+                <RichTextEditor
+                  value={serviceDraft}
+                  onChange={setServiceDraft}
+                  placeholder="예) 제공 서비스, 작업 범위, 가격/패키지, 진행 절차, 포트폴리오 링크 등"
+                />
+                <div className="profile-edit-actions" style={{ marginTop: '1rem' }}>
+                  <button className="pf-btn ghost" onClick={() => setEditingService(false)} disabled={savingService}>취소</button>
+                  <button className="pf-btn primary" onClick={saveService} disabled={savingService}>{savingService ? '저장 중...' : '저장'}</button>
+                </div>
+              </div>
+            ) : v.services ? (
+              <div className="service-content" dangerouslySetInnerHTML={{ __html: sanitize(v.services) }} />
+            ) : (
+              <p className="pf-empty" style={{ color: '#94a3b8' }}>
+                {readOnly ? '등록된 서비스가 없습니다.' : '아직 등록된 서비스가 없습니다. 프리랜서·자영업자라면 제공하는 서비스를 소개해보세요.'}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ===== 프로젝트 탭 ===== */}
+        {activeTab === 'projects' && (<>
         {!readOnly && (
           <div className="add-project-section">
             <div className="add-project-card" onClick={startEdit} role="button" tabIndex={0}>
@@ -411,6 +523,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
             </div>
           ))}
         </div>
+        </>)}
       </main>
     </div>
   );

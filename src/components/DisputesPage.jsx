@@ -17,7 +17,7 @@ function fmt(iso) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function DisputesPage({ isAdmin, onOpenConversation }) {
+function DisputesPage({ isAdmin, onOpenConversation, onBack }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
@@ -82,7 +82,8 @@ function DisputesPage({ isAdmin, onOpenConversation }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
-          <h3>분쟁 관리</h3>
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
+          <h3>외주 분쟁 관리</h3>
           <p className="section-lead">외주 프로젝트 분쟁을 확인하고 조정 절차를 개시합니다. 접수 {counts.open}건 · 조정 중 {counts.mediating}건</p>
 
           {loading ? (

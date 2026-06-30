@@ -537,6 +537,7 @@ ul, ol {
 .job-detail-page-container.content-area-container,
 .vote-page.content-area-container,
 .profile-page-container.content-area-container,
+.faq-page .content-area-container,
 .admin-page .content-area-container {
   max-width: 100%;
   padding: 0 clamp(1rem, 3vw, 2.5rem);
@@ -3182,7 +3183,7 @@ ul, ol {
 .home-landing.faq-page .faq-page-section { text-align: center; }
 
 .home-landing.faq-page .faq-page-head {
-  max-width: 760px;
+  max-width: 100%;
   margin: 0 auto 2.4rem;
 }
 
@@ -3193,7 +3194,7 @@ ul, ol {
 }
 
 .home-landing.faq-page .faq-group {
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto 1.8rem;
   text-align: left;
 }
@@ -3204,9 +3205,10 @@ ul, ol {
   padding-left: 12px;
   font-size: 1.15rem;
   margin: 0 0 0.9rem;
+  text-align: left;
 }
 
-.home-landing.faq-page .faq-list { margin-bottom: 0; }
+.home-landing.faq-page .faq-list { max-width: 100%; margin: 0; }
 
 .home-landing.faq-page .faq-page-cta {
   margin-top: 2.4rem;

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import BadgeIcon from './BadgeIcon';
+import { EXPERT_FIELDS, expertField, fetchExpertBadges } from '../lib/badges';
 
 const SUPER_ADMIN_EMAIL = 'tony@banya.ai';
 
@@ -10,12 +12,47 @@ function formatDate(iso) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function AdminDashboardPage({ isAdmin, currentUserEmail }) {
+function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [indexing, setIndexing] = useState(false);
+  const [reeval, setReeval] = useState(false);
+  const [badgeMember, setBadgeMember] = useState(null); // 배지 수여 모달 대상
+  const [badgeList, setBadgeList] = useState([]);        // 대상의 전문가 배지
+  const [badgeBusy, setBadgeBusy] = useState(false);
+
+  // 등급 배지 전체 재평가 (성실/모범/우등 자동 수여)
+  const reevaluateTiers = async () => {
+    setReeval(true);
+    const { error } = await supabase.rpc('evaluate_all_member_tiers');
+    setReeval(false);
+    if (error) { alert(`재평가 오류: ${error.message}`); return; }
+    alert('등급 배지 재평가가 완료되었습니다.');
+  };
+
+  // 전문가 배지 수여 모달 열기
+  const openBadgeModal = async (row) => {
+    setBadgeMember(row);
+    setBadgeList(await fetchExpertBadges(row.id));
+  };
+  const awardBadge = async (field) => {
+    if (!badgeMember || badgeList.some((b) => b.field === field)) return;
+    setBadgeBusy(true);
+    const { error } = await supabase.from('expert_badges').insert({ user_id: badgeMember.id, field });
+    setBadgeBusy(false);
+    if (error) { alert(`수여 오류: ${error.message}`); return; }
+    setBadgeList(await fetchExpertBadges(badgeMember.id));
+  };
+  const revokeBadge = async (field) => {
+    if (!badgeMember) return;
+    setBadgeBusy(true);
+    const { error } = await supabase.from('expert_badges').delete().eq('user_id', badgeMember.id).eq('field', field);
+    setBadgeBusy(false);
+    if (error) { alert(`회수 오류: ${error.message}`); return; }
+    setBadgeList(await fetchExpertBadges(badgeMember.id));
+  };
 
   const reindexSearch = async () => {
     setIndexing(true);
@@ -30,7 +67,12 @@ function AdminDashboardPage({ isAdmin, currentUserEmail }) {
       }
       alert(`검색 색인 완료: ${total}건 임베딩`);
     } catch (e) {
-      alert(`색인 오류: ${e.message || e}`);
+      const msg = String(e?.message || e);
+      if (/Failed to send a request|NOT_FOUND|not be found|Failed to fetch/i.test(msg)) {
+        alert("검색 함수(search Edge Function)가 배포되지 않았습니다.\n\n터미널에서 다음으로 배포한 뒤 다시 시도하세요:\nsupabase functions deploy search --project-ref <프로젝트>");
+      } else {
+        alert(`색인 오류: ${msg}`);
+      }
     }
     setIndexing(false);
   };
@@ -119,11 +161,15 @@ function AdminDashboardPage({ isAdmin, currentUserEmail }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
           <h3>회원가입 현황 대시보드</h3>
           <p className="section-lead">전체 조합원 정보를 조회하고 관리자 권한을 부여할 수 있습니다.</p>
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem', display: 'flex', gap: '0.6rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="admin-action-btn grant" onClick={reindexSearch} disabled={indexing}>
               {indexing ? '색인 중...' : '🧠 검색 의미색인 갱신'}
+            </button>
+            <button className="admin-action-btn grant" onClick={reevaluateTiers} disabled={reeval}>
+              {reeval ? '재평가 중...' : '🏅 등급 배지 재평가'}
             </button>
           </div>
 
@@ -158,6 +204,7 @@ function AdminDashboardPage({ isAdmin, currentUserEmail }) {
                     <th>승인</th>
                     <th>정회원</th>
                     <th>권한</th>
+                    <th>배지</th>
                     <th>관리</th>
                   </tr>
                 </thead>
@@ -218,6 +265,11 @@ function AdminDashboardPage({ isAdmin, currentUserEmail }) {
                           )}
                         </td>
                         <td>
+                          <button type="button" className="admin-action-btn grant" onClick={() => openBadgeModal(r)}>
+                            🎖️ 배지
+                          </button>
+                        </td>
+                        <td>
                           {isSuper ? (
                             <span className="admin-lock">—</span>
                           ) : (
@@ -240,6 +292,39 @@ function AdminDashboardPage({ isAdmin, currentUserEmail }) {
           )}
         </section>
       </div>
+
+      {/* 전문가 배지 수여 모달 */}
+      {badgeMember && (
+        <div className="b2b-overlay" onClick={() => setBadgeMember(null)}>
+          <div className="b2b-modal badge-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="b2b-close" onClick={() => setBadgeMember(null)} aria-label="닫기">✕</button>
+            <div className="b2b-head">
+              <span className="b2b-badge">전문가 배지 수여</span>
+              <h3>{badgeMember.name || '회원'}</h3>
+              <p>분야를 클릭해 배지를 수여하거나, 수여된 배지를 다시 클릭해 회수합니다. (복수 수여 가능)</p>
+            </div>
+            <div className="badge-grid">
+              {EXPERT_FIELDS.map((f) => {
+                const owned = badgeList.some((b) => b.field === f.key);
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    className={`badge-pick ${owned ? 'owned' : ''}`}
+                    disabled={badgeBusy}
+                    onClick={() => (owned ? revokeBadge(f.key) : awardBadge(f.key))}
+                    title={owned ? '클릭해 회수' : '클릭해 수여'}
+                  >
+                    <BadgeIcon color={f.color} emoji={f.emoji} size={40} title={f.label} />
+                    <span className="badge-pick-label">{f.label}</span>
+                    {owned && <span className="badge-pick-check">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

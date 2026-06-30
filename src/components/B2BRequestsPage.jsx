@@ -13,7 +13,7 @@ function fmt(iso) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function B2BRequestsPage({ isAdmin }) {
+function B2BRequestsPage({ isAdmin, onBack }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,6 +65,7 @@ function B2BRequestsPage({ isAdmin }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
           <h3>조합 B2B 의뢰 관리</h3>
           <p className="section-lead">강의 견적 문의·에이전트 평가 신청 등 B2B 의뢰를 확인하고 처리 상태를 관리합니다.</p>
 

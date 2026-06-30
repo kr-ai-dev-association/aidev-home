@@ -94,3 +94,16 @@
   color: #c7d2fe; border-radius: 9px; padding: 0.5em 1em; font-weight: 600; cursor: pointer;
 }
 .vote-result-link:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 수퍼관리자 의제 수정 */
+.vote-card-head { flex-wrap: wrap; }
+.vote-edit-btn {
+  margin-left: auto; background: none; border: 1px solid rgba(99,102,241,0.45);
+  color: #a5b4fc; border-radius: 8px; padding: 0.35rem 0.7rem; cursor: pointer; font-size: 0.82rem;
+  white-space: nowrap; transition: all 0.15s;
+}
+.vote-edit-btn:hover { background: rgba(99,102,241,0.18); color: #fff; }
+.vote-edit-note {
+  background: rgba(253,230,138,0.1); border: 1px solid rgba(253,230,138,0.3); color: #fde68a;
+  border-radius: 9px; padding: 0.7rem 0.9rem; font-size: 0.86rem; line-height: 1.6; margin: 0 0 1rem;
+}

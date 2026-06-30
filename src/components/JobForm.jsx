@@ -391,7 +391,11 @@ function JobForm({ initial, canPostCorp, user, profile, onSaved, onCancel }) {
       )}
 
       {!isEdit && (
-        <p className="jf-coin-hint">💰 공고를 등록하면 <strong>10 coin</strong>이 차감됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
+        boardType === '외주 프로젝트' ? (
+          <p className="jf-coin-hint">🎁 외주 프로젝트는 <strong>첫 등록 시(최초 1회)</strong>, 이후엔 <strong>계약 체결(마감) 시 100 coin</strong>이 적립됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
+        ) : (
+          <p className="jf-coin-hint">💰 공고를 등록하면 <strong>10 coin</strong>이 차감됩니다. (보유: {Number(profile?.coins ?? 0).toLocaleString()} coin)</p>
+        )
       )}
       <div className="jf-actions">
         <button type="button" className="nt-btn ghost" onClick={onCancel} disabled={submitting}>취소</button>

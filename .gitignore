@@ -39,3 +39,6 @@ e2e/.auth
 
 # Supabase CLI 로컬 메타데이터
 supabase/.temp/
+
+# SQL 마이그레이션은 저장소에 노출하지 않음(보안). Supabase 에만 적용.
+*.sql

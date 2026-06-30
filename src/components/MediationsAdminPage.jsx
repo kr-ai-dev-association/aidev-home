@@ -6,7 +6,7 @@ import {
   MEDIATION_STATUS, MEDIATION_STAGE_ACTIONS, ASSIGNEE_ROLES, medStatus, fmtDate,
 } from '../lib/mediation';
 
-function MediationsAdminPage({ isAdmin, onOpenConversation }) {
+function MediationsAdminPage({ isAdmin, onOpenConversation, onBack }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
@@ -83,6 +83,7 @@ function MediationsAdminPage({ isAdmin, onOpenConversation }) {
     <div className="home-landing admin-page">
       <div className="home-page-container content-area-container">
         <section className="section-services">
+          {onBack && <button type="button" className="admin-back-btn" onClick={onBack}>← 관리자 대시보드</button>}
           <h3>분쟁 조정 의뢰 관리</h3>
           <p className="section-lead">노동·계약 분쟁 조정 의뢰를 확인하고 변호사·변리사·전문가를 배정해 단계별로 조정합니다. 진행 중 {counts.open}건 · 완료 {counts.done}건</p>
 

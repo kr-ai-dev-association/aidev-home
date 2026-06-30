@@ -124,10 +124,7 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
                 <li onClick={() => handleMenuItemClick('mediation', 'request')}>분쟁 조정 의뢰</li>
                 <li onClick={() => handleMenuItemClick('myapplications')}>내 지원 관리</li>
                 <li onClick={() => handleMenuItemClick('myjobs')}>내 공고 관리</li>
-                {isAdmin && <li onClick={() => handleMenuItemClick('admin')}>회원현황</li>}
-                {isAdmin && <li onClick={() => handleMenuItemClick('b2brequests')}>B2B 의뢰</li>}
-                {isAdmin && <li onClick={() => handleMenuItemClick('disputes')}>외주 분쟁 관리</li>}
-                {isAdmin && <li onClick={() => handleMenuItemClick('mediations-admin')}>조정 의뢰 관리</li>}
+                {isAdmin && <li onClick={() => handleMenuItemClick('admin-hub')}>관리자</li>}
                 <li
                   onClick={() => {
                     onLogoutClick();

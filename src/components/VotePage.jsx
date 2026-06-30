@@ -60,6 +60,14 @@ function Infographic({ tally }) {
   );
 }
 
+// ISO → datetime-local input 값(로컬 시간, "YYYY-MM-DDTHH:mm")
+function toLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
   const [votes, setVotes] = useState([]);
   const [tallies, setTallies] = useState({});
@@ -67,6 +75,7 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
   const [form, setForm] = useState({ title: '', content: '', deadline: '' });
+  const [editingId, setEditingId] = useState(null); // 수정 중인 의제 id(수퍼관리자)
   const [submitting, setSubmitting] = useState(false);
   const [castingId, setCastingId] = useState(null);
 
@@ -97,20 +106,42 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const createVote = async (e) => {
+  const openCompose = () => {
+    setComposing((c) => {
+      const next = !c;
+      if (next) { setEditingId(null); setForm({ title: '', content: '', deadline: '' }); }
+      return next;
+    });
+  };
+
+  const startEdit = (v) => {
+    setEditingId(v.id);
+    setForm({ title: v.title || '', content: v.content || '', deadline: toLocalInput(v.deadline) });
+    setComposing(true);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setComposing(false);
+    setEditingId(null);
+    setForm({ title: '', content: '', deadline: '' });
+  };
+
+  const submitVote = async (e) => {
     e.preventDefault();
     if (!form.title.trim() || isEmptyHtml(form.content) || !form.deadline || submitting) return;
     setSubmitting(true);
-    const { error } = await supabase.from('votes').insert({
+    const payload = {
       title: form.title.trim(),
       content: form.content,
       deadline: new Date(form.deadline).toISOString(),
-      created_by: user.id,
-    });
+    };
+    const { error } = editingId
+      ? await supabase.from('votes').update(payload).eq('id', editingId)
+      : await supabase.from('votes').insert({ ...payload, created_by: user.id });
     setSubmitting(false);
-    if (error) { alert(`의제 생성 오류: ${error.message}`); return; }
-    setComposing(false);
-    setForm({ title: '', content: '', deadline: '' });
+    if (error) { alert(`의제 ${editingId ? '수정' : '생성'} 오류: ${error.message}`); return; }
+    cancelEdit();
     load();
   };
 
@@ -137,6 +168,9 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
             <span className="vote-status closed">종료{v.published ? ' · 공지됨' : ''}</span>
           ) : (
             <Countdown deadline={v.deadline} />
+          )}
+          {isSuperAdmin && (
+            <button type="button" className="vote-edit-btn" onClick={() => startEdit(v)} title="의제 수정">✏️ 수정</button>
           )}
         </div>
         {v.content && <div className="vote-content" dangerouslySetInnerHTML={{ __html: sanitize(v.content) }} />}
@@ -184,14 +218,15 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
       <div className="vote-page-header">
         <h1 className="vote-page-title">조합원 투표</h1>
         {isSuperAdmin && (
-          <button className="nt-btn primary" onClick={() => setComposing((c) => !c)}>
-            {composing ? '닫기' : '+ 의제 만들기'}
+          <button className="nt-btn primary" onClick={openCompose}>
+            {composing && !editingId ? '닫기' : '+ 의제 만들기'}
           </button>
         )}
       </div>
 
       {composing && isSuperAdmin && (
-        <form className="vote-form" onSubmit={createVote}>
+        <form className="vote-form" onSubmit={submitVote}>
+          <h2 className="vote-section-title">{editingId ? '의제 수정' : '새 의제 작성'}</h2>
           <div className="vf-field">
             <label>제목</label>
             <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="의제 제목" />
@@ -204,11 +239,12 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
             <label>마감 기한 (날짜·시간)</label>
             <input type="datetime-local" value={form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))} />
           </div>
+          {editingId && <p className="vote-edit-note">⚠️ 이미 투표가 진행 중일 수 있습니다. 의제 내용 변경 시 투표자에게 영향을 줄 수 있으니 신중히 수정해 주세요. 마감 기한을 미래로 변경하면 종료된 투표도 다시 진행 상태가 됩니다.</p>}
           <div className="vf-actions">
-            <button type="button" className="nt-btn ghost" onClick={() => setComposing(false)} disabled={submitting}>취소</button>
+            <button type="button" className="nt-btn ghost" onClick={cancelEdit} disabled={submitting}>취소</button>
             <button type="submit" className="nt-btn primary"
               disabled={submitting || !form.title.trim() || isEmptyHtml(form.content) || !form.deadline}>
-              {submitting ? '등록 중...' : '의제 등록'}
+              {submitting ? (editingId ? '수정 중...' : '등록 중...') : (editingId ? '의제 수정 저장' : '의제 등록')}
             </button>
           </div>
         </form>
