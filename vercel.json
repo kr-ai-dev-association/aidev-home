@@ -6,6 +6,7 @@
   "installCommand": "npm install",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/community/topic/:id", "destination": "/api/topic-og?id=:id" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

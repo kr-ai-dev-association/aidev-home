@@ -201,5 +201,10 @@ export default {
     targetFb: 'Facebook',
     targetLi: 'LinkedIn',
     targetRd: 'Reddit',
+    targetKakao: '카카오톡',
+    targetSlack: '슬랙',
+    targetInsta: 'Instagram',
+    unfurlGuide: '링크가 복사되었습니다. {target} 대화창에 붙여넣으면 썸네일 미리보기가 표시됩니다.',
+    instaGuide: '링크가 복사되었습니다. Instagram은 게시물 내 링크 미리보기를 지원하지 않아, 프로필·스토리에 활용하세요.',
   },
 };

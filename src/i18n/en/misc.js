@@ -201,5 +201,10 @@ Other matters follow the Personal Information Protection Act, the Network Act, a
     targetFb: 'Facebook',
     targetLi: 'LinkedIn',
     targetRd: 'Reddit',
+    targetKakao: 'KakaoTalk',
+    targetSlack: 'Slack',
+    targetInsta: 'Instagram',
+    unfurlGuide: 'Link copied. Paste it into {target} to show a thumbnail preview.',
+    instaGuide: 'Link copied. Instagram does not support link previews in posts — use it in your profile or story.',
   },
 };
