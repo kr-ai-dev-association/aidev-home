@@ -25,7 +25,7 @@ function formatDateTime(iso, t) {
   });
 }
 
-function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenConversation, onProfileChanged, onViewProfile }) {
+function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user, profile, onNavigate, onOpenTopic, onOpenConversation, onProfileChanged, onViewProfile }) {
   const { t } = useI18n();
   // 작성자 이름 → 프로필 페이지 링크 (onViewProfile 제공 시)
   const Author = ({ id, name, className }) => (
@@ -404,8 +404,21 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
         <div className="recent-topics-section">
           <h3>{t('community.recentTopics')}</h3>
           <ul className="recent-topics-list">
-            {recent.map((item) => (
-              <li key={item.id}><span className="topic-bullet">💬</span> {item.title}</li>
+            {recent.filter((item) => item.id !== topicId).map((item) => (
+              <li key={item.id}>
+                <a
+                  href={`/community/topic/${item.id}`}
+                  className="recent-topic-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onOpenTopic) onOpenTopic(item.id);
+                    else if (onNavigate) onNavigate('community');
+                  }}
+                >
+                  <span className="topic-bullet">💬</span>
+                  <span className="recent-topic-title">{item.title}</span>
+                </a>
+              </li>
             ))}
           </ul>
         </div>

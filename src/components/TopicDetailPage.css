@@ -331,6 +331,22 @@
   text-align: left;
 }
 
+/* 최근 주제 항목 — 클릭 시 해당 게시글로 이동 */
+.recent-topics-list li a.recent-topic-link {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.recent-topics-list li a.recent-topic-link:hover .recent-topic-title {
+  color: #e2e8f0;
+  text-decoration: underline;
+}
+
 .topic-bullet {
   margin-right: 0.5em;
   color: #6366f1;

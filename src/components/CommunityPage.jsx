@@ -175,6 +175,7 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
         user={user}
         profile={profile}
         onNavigate={onNavigate}
+        onOpenTopic={handleTopicClick}
         onOpenConversation={onOpenConversation}
         onProfileChanged={onProfileChanged}
         onViewProfile={onViewProfile}
