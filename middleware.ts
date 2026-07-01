@@ -4,8 +4,11 @@ export const config = {
   matcher: ['/community/topic/:id*', '/employment/job/:id*'],
 };
 
+// 주의: 'kakaotalk' 전체가 아니라 스크랩 봇 토큰 'kakaotalk-scrap' 만 매칭한다.
+// 카카오톡 인앱 브라우저 UA 는 'KAKAOTALK 10.x' 형태라, 'kakaotalk' 로 잡으면
+// 링크를 여는 실제 사용자까지 봇 프리렌더(SPA 없는 SEO 스텁)를 받아 본문이 안 뜬다.
 const BOT_RE =
-  /(facebookexternalhit|facebot|twitterbot|slackbot|slack-imgproxy|linkedinbot|redditbot|kakaotalk|telegrambot|whatsapp|discordbot|googlebot|bingbot|applebot|duckduckbot|baiduspider|yandex|petalbot|pinterest|skypeuripreview|embedly|nuzzel|vkshare|w3c_validator|gptbot|oai-searchbot|chatgpt|claudebot|claude-web|anthropic|perplexitybot|google-extended|ccbot|bytespider|amazonbot|cohere-ai|diffbot)/i;
+  /(facebookexternalhit|facebot|twitterbot|slackbot|slack-imgproxy|linkedinbot|redditbot|kakaotalk-scrap|telegrambot|whatsapp|discordbot|googlebot|bingbot|applebot|duckduckbot|baiduspider|yandex|petalbot|pinterest|skypeuripreview|embedly|nuzzel|vkshare|w3c_validator|gptbot|oai-searchbot|chatgpt|claudebot|claude-web|anthropic|perplexitybot|google-extended|ccbot|bytespider|amazonbot|cohere-ai|diffbot)/i;
 
 const SITE = '한국인공지능개발자 협동조합';
 
