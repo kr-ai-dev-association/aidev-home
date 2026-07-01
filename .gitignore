@@ -45,3 +45,6 @@ supabase/.temp/
 
 # 별도 저장소(자체 .git) — aidev-home 커밋에 포함하지 않음
 gdoc-fixer/
+
+# 별도 레포 (독립 관리)
+tech-blog/
