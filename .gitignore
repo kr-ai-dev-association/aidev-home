@@ -42,3 +42,6 @@ supabase/.temp/
 
 # SQL 마이그레이션은 저장소에 노출하지 않음(보안). Supabase 에만 적용.
 *.sql
+
+# 별도 저장소(자체 .git) — aidev-home 커밋에 포함하지 않음
+gdoc-fixer/

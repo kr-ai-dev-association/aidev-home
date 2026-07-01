@@ -653,3 +653,50 @@ button.author-link {
 }
 button.author-link:hover { text-decoration: underline; color: #67e8f9; }
 .comment-author.author-link:hover { color: #67e8f9; }
+
+/* 게시글 수정(작성자/관리자) */
+.post-edit {
+  margin-left: auto;
+  background: none; border: 1px solid rgba(99, 102, 241, 0.45); color: #a5b4fc;
+  border-radius: 6px; padding: 0.35rem 0.7rem; cursor: pointer; font-size: 0.82rem; white-space: nowrap;
+}
+.post-edit:hover { background: rgba(99, 102, 241, 0.18); color: #fff; }
+.post-edit + .post-delete { margin-left: 0.5rem; }
+.post-edit-form { display: flex; flex-direction: column; gap: 0.8rem; }
+.post-edit-title {
+  width: 100%; background: #0d1424; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 8px;
+  color: #e6edf3; padding: 0.7rem 0.9rem; font-size: 1.05rem; font-weight: 600; box-sizing: border-box;
+}
+.post-edit-title:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
+.post-edit-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+/* HTML 소스 편집 textarea */
+.post-edit-html {
+  width: 100%; box-sizing: border-box; min-height: 320px; resize: vertical;
+  background: #0d1424; border: 1px solid rgba(255,255,255,0.14); border-radius: 8px;
+  color: #e6edf3; padding: 0.8rem 0.9rem; font-size: 0.9rem; line-height: 1.6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.post-edit-html:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
+.post-edit-hint { color: #94a3b8; font-size: 0.82rem; margin: 0.1rem 0 0; }
+
+/* 편집 방식 선택 바 */
+.post-edit-modebar { display: flex; gap: 0.5rem; }
+.pe-mode {
+  background: #0d1424; border: 1px solid rgba(255,255,255,0.16); color: #cbd5e1;
+  border-radius: 8px; padding: 0.45rem 0.9rem; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+}
+.pe-mode.active { background: linear-gradient(135deg,#6366f1,#22d3ee); color: #08111f; border-color: transparent; }
+
+/* 리치 에디터 전환 경고 모달 */
+.pe-warn-overlay {
+  position: fixed; inset: 0; z-index: 1000; background: rgba(2,6,16,0.7);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.pe-warn-modal {
+  background: #111726; border: 1px solid rgba(253,230,138,0.35); border-radius: 14px;
+  padding: 1.4rem 1.5rem; max-width: 420px; width: 100%;
+}
+.pe-warn-title { font-weight: 800; color: #fde68a; font-size: 1.05rem; margin-bottom: 0.6rem; }
+.pe-warn-modal p { color: #e2e8f0; line-height: 1.7; font-size: 0.92rem; margin: 0 0 1.2rem; }
+.pe-warn-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }

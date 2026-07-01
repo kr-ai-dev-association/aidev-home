@@ -6,12 +6,19 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 const FROM = '한국인공지능개발자 협동조합 <no-reply@prototypebench.org>'; // 운영: prototypebench.org 도메인 검증 필요
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
     const { dispute_id } = await req.json();
-    if (!dispute_id) return new Response('dispute_id required', { status: 400 });
+    if (!dispute_id) return new Response('dispute_id required', { status: 400, headers: cors });
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -22,14 +29,14 @@ Deno.serve(async (req) => {
     const jwt = (req.headers.get('Authorization') || '').replace('Bearer ', '');
     const { data: u } = await admin.auth.getUser(jwt);
     const caller = u?.user;
-    if (!caller) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'content-type': 'application/json' } });
+    if (!caller) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { ...cors, 'content-type': 'application/json' } });
     const { data: cp } = await admin.from('profiles').select('is_admin').eq('id', caller.id).single();
     if (!(cp?.is_admin || caller.email === 'tony@banya.ai')) {
-      return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { 'content-type': 'application/json' } });
+      return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { ...cors, 'content-type': 'application/json' } });
     }
 
     const { data: d } = await admin.from('disputes').select('*').eq('id', dispute_id).single();
-    if (!d) return new Response('not found', { status: 404 });
+    if (!d) return new Response('not found', { status: 404, headers: cors });
 
     // 당사자 이메일 조회
     const ids = [d.client_id, d.contractor_id].filter(Boolean);
@@ -55,7 +62,7 @@ Deno.serve(async (req) => {
 
     if (!RESEND_API_KEY || emails.length === 0) {
       return new Response(JSON.stringify({ ok: false, reason: 'no RESEND_API_KEY or no recipients', emails }), {
-        headers: { 'content-type': 'application/json' },
+        headers: { ...cors, 'content-type': 'application/json' },
       });
     }
 
@@ -65,8 +72,8 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ from: FROM, to: emails, subject, text: body }),
     });
     const out = await res.json();
-    return new Response(JSON.stringify({ ok: res.ok, out }), { headers: { 'content-type': 'application/json' } });
+    return new Response(JSON.stringify({ ok: res.ok, out }), { headers: { ...cors, 'content-type': 'application/json' } });
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: String(e) }), { status: 500, headers: { 'content-type': 'application/json' } });
+    return new Response(JSON.stringify({ ok: false, error: String(e) }), { status: 500, headers: { ...cors, 'content-type': 'application/json' } });
   }
 });

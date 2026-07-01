@@ -111,6 +111,8 @@ export default {
     orgName: '한국인공지능개발자 협동조합',
     address: '주소 : 서울시 강남구 삼성로 86길 16 덕산빌딩 5층',
     email: '이메일 : tonymustbegreat@gmail.com',
+    privacy: '개인정보 처리방침',
+    terms: '이용약관',
   },
   authPage: {
     loginTitle: '로그인',
@@ -153,6 +155,10 @@ export default {
     submit: '회원가입',
     googleVerb: 'Google로 {verb}',
     githubVerb: 'GitHub로 {verb}',
+    inAppTitle: '인앱 브라우저에서는 구글 로그인이 제한됩니다',
+    inAppDesc: '카카오톡·인스타그램 등 앱 내부 브라우저에서는 보안 정책상 구글 로그인이 차단됩니다. 메뉴(⋮)에서 ‘다른 브라우저로 열기’(Chrome·Safari)를 선택해 다시 접속해 주세요.',
+    inAppCopy: '🔗 주소 복사',
+    inAppCopied: '✓ 복사됨 — 브라우저에 붙여넣기',
     authError: '인증 오류: {msg}',
     saveError: '가입 정보 저장 오류: {msg}',
     privacyText: `[개인정보 수집·이용 동의]

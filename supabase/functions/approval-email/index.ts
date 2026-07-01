@@ -1,8 +1,7 @@
-// 조합 B2B 의뢰(평가 신청 / 견적 의뢰) 접수 알림 이메일 (Supabase Edge Function)
-//   배포: supabase functions deploy b2b-email
-//   시크릿: RESEND_API_KEY (기존 공유)
-//   호출: 의뢰 제출 시 프런트에서 supabase.functions.invoke('b2b-email', { body: { b2b_request_id } })
-//   수신자: 조합 담당자 (tonymustbegreat@gmail.com)
+// 가입/정회원 승인 안내 이메일 (Supabase Edge Function)
+//   배포: supabase functions deploy approval-email
+//   호출: 관리자가 승인 시 프런트에서 supabase.functions.invoke('approval-email', { body: { target_id, kind } })
+//   kind: 'approved'(법인 가입 승인) | 'member'(정회원 승인)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -13,58 +12,56 @@ const cors = {
 };
 
 const FROM = '한국인공지능개발자 협동조합 <no-reply@prototypebench.org>';
-const TO = 'tonymustbegreat@gmail.com'; // 조합 B2B 담당자 수신 주소
+const SITE = 'https://dev.prototypebench.org';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
-    const { b2b_request_id } = await req.json();
-    if (!b2b_request_id) return new Response('b2b_request_id required', { status: 400, headers: cors });
+    const { target_id, kind } = await req.json();
+    if (!target_id) return new Response('target_id required', { status: 400, headers: cors });
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    // 호출자 검증 — 로그인 사용자 본인의 의뢰만 (스팸 방지)
+    // 호출자 검증 — 관리자만
     const jwt = (req.headers.get('Authorization') || '').replace('Bearer ', '');
     const { data: u } = await admin.auth.getUser(jwt);
     const caller = u?.user;
     if (!caller) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { ...cors, 'content-type': 'application/json' } });
-
-    const { data: r } = await admin.from('b2b_requests').select('*').eq('id', b2b_request_id).single();
-    if (!r) return new Response('not found', { status: 404, headers: cors });
-
     const { data: cp } = await admin.from('profiles').select('is_admin').eq('id', caller.id).single();
-    if (!(r.requester_id === caller.id || cp?.is_admin || caller.email === 'tony@banya.ai')) {
+    if (!(cp?.is_admin || caller.email === 'tony@banya.ai')) {
       return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { ...cors, 'content-type': 'application/json' } });
     }
 
-    const subject = `[조합 B2B] ${r.type} — ${r.company}`;
-    const body = [
-      `새 B2B 의뢰가 접수되었습니다.`,
-      ``,
-      `· 유형: ${r.type}`,
-      `· 회사/기관: ${r.company}`,
-      `· 담당자: ${r.contact_name}`,
-      `· 이메일: ${r.email}`,
-      `· 연락처: ${r.phone || '-'}`,
-      `· 신청자(조합원): ${r.requester_name || '-'}`,
-      ``,
-      `─ 의뢰 내용 ─`,
-      r.message,
-      ``,
-      `관리자 페이지(관리자 → B2B 의뢰)에서 처리 상태를 관리할 수 있습니다.`,
-    ].join('\n');
-
-    if (!RESEND_API_KEY) {
-      return new Response(JSON.stringify({ ok: false, reason: 'no RESEND_API_KEY' }), { headers: { ...cors, 'content-type': 'application/json' } });
+    const { data: p } = await admin.from('profiles').select('name, email').eq('id', target_id).single();
+    if (!p) return new Response('not found', { status: 404, headers: cors });
+    if (!RESEND_API_KEY || !p.email) {
+      return new Response(JSON.stringify({ ok: false, reason: 'no RESEND_API_KEY or no email' }), { headers: { ...cors, 'content-type': 'application/json' } });
     }
+
+    const isMember = kind === 'member';
+    const subject = isMember
+      ? `[한국인공지능개발자 협동조합] 정회원 승인 안내`
+      : `[한국인공지능개발자 협동조합] 가입 승인 안내`;
+    const body = [
+      `${p.name || ''}님, 안녕하세요. 한국인공지능개발자 협동조합입니다.`,
+      ``,
+      isMember
+        ? `회원님이 정회원으로 승인되었습니다. 이제 투표 참여, 외주 프로젝트 상세 열람 등 정회원 전용 기능을 이용하실 수 있습니다.`
+        : `회원님의 가입이 승인되었습니다. 이제 로그인하여 조합 플랫폼의 모든 기능을 이용하실 수 있습니다.`,
+      ``,
+      `▶ 플랫폼 바로가기: ${SITE}`,
+      ``,
+      `감사합니다.`,
+      `— 한국인공지능개발자 협동조합`,
+    ].join('\n');
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: [TO], reply_to: r.email || undefined, subject, text: body }),
+      body: JSON.stringify({ from: FROM, to: [p.email], subject, text: body }),
     });
     const out = await res.json();
     return new Response(JSON.stringify({ ok: res.ok, out }), { headers: { ...cors, 'content-type': 'application/json' } });

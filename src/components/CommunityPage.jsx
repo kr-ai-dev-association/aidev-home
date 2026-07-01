@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './CommunityPage.css';
 import '../App.css';
 import { supabase } from '../lib/supabase';
@@ -7,7 +7,7 @@ import RichTextEditor from './RichTextEditor';
 import { isEmptyHtml } from '../lib/html';
 import { useI18n } from '../i18n/I18nProvider';
 
-const CATEGORIES = ['일반 토론', '바이브코딩', 'AI/LLM', '취업·커리어', '질문/답변'];
+const CATEGORIES = ['일반 토론', '바이브코딩', 'AI/LLM', '취업·커리어', '질문/답변', '건의사항'];
 const ADMIN_CATEGORY = '공지사항';
 
 // 상대 시간 표시
@@ -22,7 +22,7 @@ function timeAgo(iso, t) {
   return t('community.timeYearsAgo', { n: Math.floor(diff / 31536000) });
 }
 
-function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, initialCategory, onCategoryConsumed, onOpenConversation, onOpenSearch, onProfileChanged, onViewProfile }) {
+function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initialTopicId, onTopicConsumed, resetSignal, initialCategory, onCategoryConsumed, onOpenConversation, onOpenSearch, onProfileChanged, onViewProfile }) {
   const { t } = useI18n();
   // 관리자는 '공지사항' 카테고리 추가 노출
   const categoryOptions = isAdmin ? [ADMIN_CATEGORY, ...CATEGORIES] : CATEGORIES;
@@ -65,6 +65,14 @@ function CommunityPage({ isLoggedIn, isAdmin, onNavigate, user, profile, initial
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTopicId]);
+
+  // 헤더 '커뮤니티' 메뉴 재클릭 등 → 상세에서 리스트로 복귀 (첫 마운트는 딥링크 보존 위해 스킵)
+  const resetInit = useRef(true);
+  useEffect(() => {
+    if (resetInit.current) { resetInit.current = false; return; }
+    setSelectedTopicId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
 
   // 홈 '최신 소식·공지사항 더보기' 등에서 카테고리 필터로 진입 (예: 공지사항)
   useEffect(() => {

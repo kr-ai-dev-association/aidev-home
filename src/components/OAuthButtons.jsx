@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../i18n/I18nProvider';
 import googleIcon from '../assets/google-icon.png';
+
+// 인앱(앱 내장) 브라우저 감지 — 구글은 이런 환경에서 OAuth(disallowed_useragent) 차단
+function isInAppBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /KAKAOTALK|KAKAOSTORY|Instagram|FBAN|FBAV|FB_IAB|Line\/|NAVER\(inapp|DaumApps|; wv\)|Band|Snapchat|everytimeApp/i.test(ua);
+}
 
 // Google / GitHub OAuth 버튼 (Supabase signInWithOAuth)
 // verb: '로그인' | '회원가입'
 function OAuthButtons({ verb = '로그인' }) {
   const { t } = useI18n();
+  const [inApp] = useState(isInAppBrowser);
+  const [copied, setCopied] = useState(false);
+
   const signIn = async (provider) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -17,8 +27,27 @@ function OAuthButtons({ verb = '로그인' }) {
     if (error) alert(t('authPage.authError', { msg: error.message }));
   };
 
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      window.prompt(t('authPage.inAppCopy'), window.location.href);
+    }
+  };
+
   return (
     <div className="social-login-buttons">
+      {inApp && (
+        <div className="inapp-warn" role="alert">
+          <div className="inapp-warn-title">⚠️ {t('authPage.inAppTitle')}</div>
+          <p>{t('authPage.inAppDesc')}</p>
+          <button type="button" className="inapp-copy-btn" onClick={copyUrl}>
+            {copied ? t('authPage.inAppCopied') : t('authPage.inAppCopy')}
+          </button>
+        </div>
+      )}
       <button type="button" className="google-auth-button" onClick={() => signIn('google')}>
         <img src={googleIcon} alt="" aria-hidden="true" />
         {t('authPage.googleVerb', { verb })}

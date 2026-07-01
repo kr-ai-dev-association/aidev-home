@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'; // useState와 useEffect 임포트
-import profilePlaceholder from '../assets/profile-placeholder.png'; // 프로필 이미지 임포트
 import Logo from './Logo'; // 조합 로고 컴포넌트
 import CoinIcon from './CoinIcon'; // 금색 코인 아이콘
+import Avatar from './Avatar'; // 프로필 아바타(수퍼관리자 왕관/관리자 오버레이)
 import { useI18n } from '../i18n/I18nProvider'; // 다국어(i18n)
 
-function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
+function Header({ isLoggedIn, isAdmin, isMember, isSuperAdmin = false, coins = 0, avatarUrl, unreadCount = 0, onInboxClick, onSearchClick, onLoginClick, onSignupClick, onLogoutClick, onNavigate }) {
   const { t, lang, setLang } = useI18n();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -90,8 +90,8 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
         <div className="utility-menu">
           {!isLoggedIn ? (
             <>
-              <button onClick={onLoginClick} className="header-button">{t('auth.login')}</button>
-              <button onClick={onSignupClick} className="header-button">{t('auth.signup')}</button>
+              <button onClick={() => { onLoginClick(); if (isMobile) setIsMobileMenuOpen(false); }} className="header-button">{t('auth.login')}</button>
+              <button onClick={() => { onSignupClick(); if (isMobile) setIsMobileMenuOpen(false); }} className="header-button">{t('auth.signup')}</button>
             </>
           ) : (
             <>
@@ -119,14 +119,14 @@ function Header({ isLoggedIn, isAdmin, isMember, coins = 0, avatarUrl, unreadCou
             {/* 로그인 후: 프로필 메뉴(드롭다운) — 내정보 / 관리자(권한자) / 로그아웃 */}
             <div className="profile-menu">
               <button type="button" className="profile-trigger" aria-label="프로필 메뉴">
-                <img src={avatarUrl || profilePlaceholder} alt="Profile" className="header-profile-image" />
+                <Avatar src={avatarUrl} isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} size={40} className="header-profile-image" alt="Profile" />
               </button>
               <ul className="profile-dropdown">
-                <li onClick={() => handleMenuItemClick('profile')}>{t('profile.myinfo')}</li>
-                <li onClick={() => handleMenuItemClick('coincharge')}><span className="menu-icon" aria-hidden="true">🪙</span> {t('profile.coinCharge')}</li>
-                <li onClick={() => handleMenuItemClick('mediation', 'request')}>{t('profile.mediation')}</li>
-                <li onClick={() => handleMenuItemClick('myapplications')}>{t('profile.myApplications')}</li>
-                <li onClick={() => handleMenuItemClick('myjobs')}>{t('profile.myJobs')}</li>
+                <li onClick={() => handleMenuItemClick('profile')}><span className="menu-icon" aria-hidden="true">👤</span> {t('profile.myinfo')}</li>
+                <li onClick={() => handleMenuItemClick('coincharge')}><span className="menu-icon" aria-hidden="true"><CoinIcon size={15} /></span> {t('profile.coinCharge')}</li>
+                <li onClick={() => handleMenuItemClick('mediation', 'request')}><span className="menu-icon" aria-hidden="true">⚖️</span> {t('profile.mediation')}</li>
+                <li onClick={() => handleMenuItemClick('myapplications')}><span className="menu-icon" aria-hidden="true">📄</span> {t('profile.myApplications')}</li>
+                <li onClick={() => handleMenuItemClick('myjobs')}><span className="menu-icon" aria-hidden="true">📋</span> {t('profile.myJobs')}</li>
                 {isAdmin && <li onClick={() => handleMenuItemClick('admin-hub')}><span className="menu-icon" aria-hidden="true">⚙️</span> {t('profile.admin')}</li>}
                 <li
                   onClick={() => {

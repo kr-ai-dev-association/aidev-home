@@ -78,8 +78,10 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
       setNotifs((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
       onUnreadChange && onUnreadChange();
     }
-    if ((n.type === 'comment' || n.type === 'notice') && n.data?.topic_id && onOpenTopic) {
+    if ((n.type === 'comment' || n.type === 'notice' || n.type === 'suggestion' || n.type === 'welcome') && n.data?.topic_id && onOpenTopic) {
       onOpenTopic(n.data.topic_id);
+    } else if (n.type === 'signup_admin' && onNavigate) {
+      onNavigate('admin'); // 법인 가입 승인대기 알림(관리자) → 회원현황
     } else if (n.type === 'application' && onNavigate) {
       onNavigate('myjobs'); // 지원 알림 → 내 공고 관리
     } else if (n.type === 'dispute' && onNavigate) {
@@ -88,6 +90,8 @@ function InboxPage({ user, initialConversationId, onUnreadChange, onOpenTopic, o
       onNavigate('mediation', 'status'); // 조정 진행 알림(의뢰자) → 나의 조정 현황
     } else if (n.type === 'mediation_admin' && onNavigate) {
       onNavigate('mediations-admin'); // 조정 접수 알림(관리자) → 조정 의뢰 관리
+    } else if (n.type === 'vote' && onNavigate) {
+      onNavigate('vote'); // 투표 안건 알림 → 투표 페이지
     }
   };
 

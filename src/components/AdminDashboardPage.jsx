@@ -13,7 +13,7 @@ function formatDate(iso) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
+function AdminDashboardPage({ isAdmin, currentUserEmail, onBack, onViewProfile }) {
   const { t } = useI18n();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,6 +109,11 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
   const approveMember = async (row) => {
     setBusyId(row.id);
     const { error } = await supabase.rpc('set_approval', { target_id: row.id, status: 'approved' });
+    if (!error) {
+      // 승인 알림(인앱) + 이메일 — 미적용/미배포 시 graceful
+      try { await supabase.rpc('notify_approval', { p_target: row.id, p_kind: 'approved' }); } catch { /* noop */ }
+      try { await supabase.functions.invoke('approval-email', { body: { target_id: row.id, kind: 'approved' } }); } catch { /* noop */ }
+    }
     setBusyId(null);
     if (error) {
       alert(t('admin.approveError', { msg: error.message }));
@@ -121,6 +126,11 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
     const next = !row.is_member;
     setBusyId(row.id);
     const { error } = await supabase.rpc('set_member', { target_id: row.id, value: next });
+    if (!error && next) {
+      // 정회원 승인(부여) 시에만 알림·메일 발송
+      try { await supabase.rpc('notify_approval', { p_target: row.id, p_kind: 'member' }); } catch { /* noop */ }
+      try { await supabase.functions.invoke('approval-email', { body: { target_id: row.id, kind: 'member' } }); } catch { /* noop */ }
+    }
     setBusyId(null);
     if (error) {
       alert(t('admin.memberChangeError', { msg: error.message }));
@@ -219,7 +229,13 @@ function AdminDashboardPage({ isAdmin, currentUserEmail, onBack }) {
                         : r.category || '-';
                     return (
                       <tr key={r.id}>
-                        <td className="cell-name">{r.name || '-'}</td>
+                        <td className="cell-name">
+                          {onViewProfile ? (
+                            <button type="button" className="admin-name-btn" onClick={() => onViewProfile(r.id, { name: r.name, email: r.email })} title="프로필 보기">
+                              {r.name || '-'}
+                            </button>
+                          ) : (r.name || '-')}
+                        </td>
                         <td>
                           <span className={`type-pill ${r.account_type}`}>
                             {r.account_type === 'corporate' ? t('admin.typeCorporate') : t('admin.typeIndividual')}

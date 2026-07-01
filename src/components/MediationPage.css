@@ -1,6 +1,6 @@
 /* 분쟁 조정 의뢰 — 폼·타임라인·진행바 */
 
-.med-form { max-width: 860px; }
+.med-form { max-width: 100%; }
 .med-field { margin-bottom: 1.3rem; }
 .med-field > label { display: block; font-weight: 700; color: #e6edf3; margin-bottom: 0.5rem; font-size: 0.95rem; }
 .med-field .req { color: #fca5a5; }

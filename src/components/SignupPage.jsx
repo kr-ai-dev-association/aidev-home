@@ -55,6 +55,10 @@ function SignupPage({ onTogglePage, detailsMode = false, user = null, onProfileS
       phone: form.phone.trim(),
       privacy_agreed: form.agreed,
     }).select().single();
+    if (!error && data) {
+      // 환영 메일 + (법인이면) 관리자 승인대기 메일 — 미배포 시 graceful, 인앱 알림은 DB 트리거가 발송
+      try { await supabase.functions.invoke('signup-email', { body: { user_id: user.id } }); } catch { /* noop */ }
+    }
     setSubmitting(false);
     if (error) {
       alert(t('authPage.saveError', { msg: error.message }));

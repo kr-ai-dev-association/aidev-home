@@ -72,7 +72,7 @@ function toLocalInput(iso) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
+function VotePage({ user, profile, isMember, isSuperAdmin, isLoggedIn, onNavigate, onOpenTopic }) {
   const { t } = useI18n();
   const [votes, setVotes] = useState([]);
   const [tallies, setTallies] = useState({});
@@ -141,9 +141,17 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
       content: form.content,
       deadline: new Date(form.deadline).toISOString(),
     };
-    const { error } = editingId
-      ? await supabase.from('votes').update(payload).eq('id', editingId)
-      : await supabase.from('votes').insert({ ...payload, created_by: user.id });
+    let error, newVote;
+    if (editingId) {
+      ({ error } = await supabase.from('votes').update(payload).eq('id', editingId));
+    } else {
+      const res = await supabase.from('votes').insert({ ...payload, created_by: user.id }).select().single();
+      error = res.error; newVote = res.data;
+    }
+    if (!editingId && !error && newVote) {
+      // 전 정회원에게 안내 이메일(미배포/도메인 미검증 시 graceful) — 인앱 알림은 DB 트리거가 발송
+      try { await supabase.functions.invoke('vote-email', { body: { vote_id: newVote.id } }); } catch { /* noop */ }
+    }
     setSubmitting(false);
     if (error) { alert(editingId ? t('vote.updateError', { message: error.message }) : t('vote.createError', { message: error.message })); return; }
     cancelEdit();
@@ -210,6 +218,18 @@ function VotePage({ user, profile, isMember, isSuperAdmin, onOpenTopic }) {
   };
 
   if (!isMember) {
+    // 비로그인 사용자(예: 이메일 투표 링크로 접속) → 로그인 유도
+    if (!isLoggedIn) {
+      return (
+        <div className="vote-page content-area-container">
+          <h1 className="vote-page-title">{t('vote.pageTitle')}</h1>
+          <p className="vote-empty">투표는 정회원 로그인 후 이용할 수 있습니다.</p>
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <button className="nt-btn primary" onClick={() => onNavigate && onNavigate('login')}>로그인</button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="vote-page content-area-container">
         <h1 className="vote-page-title">{t('vote.pageTitle')}</h1>

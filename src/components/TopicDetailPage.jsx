@@ -6,7 +6,7 @@ import RichTextEditor from './RichTextEditor';
 import { sanitize, isEmptyHtml } from '../lib/html';
 import { startConversation } from '../lib/inbox';
 import ShareButton from './ShareButton';
-import avatarPlaceholder from '../assets/profile-placeholder.png';
+import Avatar from './Avatar';
 import { useI18n } from '../i18n/I18nProvider';
 
 function formatDateTime(iso, t) {
@@ -50,8 +50,47 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
   const [submitting, setSubmitting] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState({});
   const [commentBusy, setCommentBusy] = useState(false);
+  const [authorMap, setAuthorMap] = useState({}); // author_id → {avatar_url, is_admin, email}
+  const [editingPostId, setEditingPostId] = useState(null); // 수정 중인 게시글 id
+  const [editTitle, setEditTitle] = useState(''); // 주제(공지) 제목 수정 — 첫 글일 때만
+  const [editContent, setEditContent] = useState(''); // 본문 수정
+  const [editMode, setEditMode] = useState('html'); // 'html'(소스) | 'rich'(리치 에디터)
+  const [showRichWarn, setShowRichWarn] = useState(false); // 리치 에디터 전환 경고 모달
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const authorName = profile?.name || user?.email?.split('@')[0] || t('community.defaultAuthor');
+
+  // 본문(공지 등) 내 내부 링크 a[data-nav] 클릭 → SPA 페이지 이동
+  const handleContentNav = (e) => {
+    const a = e.target.closest && e.target.closest('a[data-nav]');
+    if (a) { e.preventDefault(); onNavigate && onNavigate(a.getAttribute('data-nav')); }
+  };
+
+  // 게시글 수정 (작성자/관리자)
+  const startEditPost = (post, isFirst) => {
+    setEditingPostId(post.id);
+    setEditContent(post.content || '');
+    setEditTitle(isFirst ? (topic?.title || '') : '');
+    setEditMode('html'); // 기본은 안전한 HTML 소스 편집
+    setShowRichWarn(false);
+  };
+  const cancelEditPost = () => { setEditingPostId(null); setEditContent(''); setEditTitle(''); setEditMode('html'); setShowRichWarn(false); };
+  const saveEditPost = async (post, isFirst) => {
+    if (isEmptyHtml(editContent) || (isFirst && !editTitle.trim())) return;
+    setSavingEdit(true);
+    // 본문을 Base64 로 감싸 Edge Function 경유(Cloudflare WAF의 HTML 본문 차단 우회)
+    const content_b64 = btoa(unescape(encodeURIComponent(editContent)));
+    const { data, error } = await supabase.functions.invoke('save-post', {
+      body: { post_id: post.id, title: isFirst ? editTitle.trim() : undefined, content_b64 },
+    });
+    setSavingEdit(false);
+    if (error || (data && data.ok === false)) {
+      alert(`수정 오류: ${error?.message || data?.error || '저장에 실패했습니다.'}`);
+      return;
+    }
+    cancelEditPost();
+    fetchAll();
+  };
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -65,15 +104,25 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
     setRecent(r || []);
     // 게시글들의 답글 일괄 조회
     const postIds = (p || []).map((x) => x.id);
+    let cData = [];
     if (postIds.length) {
       const { data: c } = await supabase
         .from('comments')
         .select('*')
         .in('post_id', postIds)
         .order('created_at', { ascending: true });
-      setComments(c || []);
+      cData = c || [];
+      setComments(cData);
     } else {
       setComments([]);
+    }
+    // 작성자 아바타·권한 로드 (게시글/답글 작성자)
+    const authorIds = [...new Set([...(p || []).map((x) => x.author_id), ...cData.map((x) => x.author_id)].filter(Boolean))];
+    if (authorIds.length) {
+      const { data: profs } = await supabase.from('profiles').select('id, avatar_url, is_admin, email').in('id', authorIds);
+      setAuthorMap(Object.fromEntries((profs || []).map((pr) => [pr.id, pr])));
+    } else {
+      setAuthorMap({});
     }
     setLoading(false);
   }, [topicId]);
@@ -206,7 +255,14 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
           {posts.map((post, idx) => (
             <div key={post.id} className="post-card">
               <div className="post-author-info">
-                <img src={avatarPlaceholder} alt={t('community.avatarAlt', { name: post.author_name })} className="author-avatar" />
+                <Avatar
+                  src={authorMap[post.author_id]?.avatar_url}
+                  isSuperAdmin={authorMap[post.author_id]?.email === 'tony@banya.ai'}
+                  isAdmin={authorMap[post.author_id]?.is_admin}
+                  size={60}
+                  className="author-avatar"
+                  alt={t('community.avatarAlt', { name: post.author_name })}
+                />
                 <Author id={post.author_id} name={post.author_name} className="author-name" />
                 <p className="author-role">{idx === 0 ? t('community.roleAuthor') : t('community.roleParticipant')}</p>
                 {isLoggedIn && post.author_id !== user?.id && (
@@ -217,13 +273,72 @@ function TopicDetailPage({ topicId, onBackToListings, isLoggedIn, isAdmin, user,
                 <div className="post-header">
                   <span className="post-date">{formatDateTime(post.created_at, t)}</span>
                   <span className="post-number">#{idx + 1}</span>
-                  {(isAdmin || post.author_id === user?.id) && (
-                    <button className="post-delete" onClick={() => deletePost(post, idx === 0)}>
-                      {idx === 0 ? t('community.deleteTopic') : t('community.deletePost')}
-                    </button>
+                  {(isAdmin || post.author_id === user?.id) && editingPostId !== post.id && (
+                    <>
+                      <button className="post-edit" onClick={() => startEditPost(post, idx === 0)}>✏️ 수정</button>
+                      <button className="post-delete" onClick={() => deletePost(post, idx === 0)}>
+                        {idx === 0 ? t('community.deleteTopic') : t('community.deletePost')}
+                      </button>
+                    </>
                   )}
                 </div>
-                <div className="post-content" dangerouslySetInnerHTML={{ __html: sanitize(post.content) }} />
+                {editingPostId === post.id ? (
+                  <div className="post-edit-form">
+                    {idx === 0 && (
+                      <input
+                        className="post-edit-title"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder={t('community.labelTitle')}
+                      />
+                    )}
+                    {/* 편집 방식 선택 */}
+                    <div className="post-edit-modebar">
+                      <button type="button" className={`pe-mode ${editMode === 'html' ? 'active' : ''}`} onClick={() => setEditMode('html')}>&lt;/&gt; HTML 소스</button>
+                      <button type="button" className={`pe-mode ${editMode === 'rich' ? 'active' : ''}`} onClick={() => { if (editMode !== 'rich') setShowRichWarn(true); }}>✎ 리치 에디터</button>
+                    </div>
+                    {editMode === 'rich' ? (
+                      <RichTextEditor value={editContent} onChange={setEditContent} placeholder={t('community.labelContent')} />
+                    ) : (
+                      <>
+                        <textarea
+                          className="post-edit-html"
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          rows={18}
+                          spellCheck={false}
+                          placeholder={t('community.labelContent')}
+                        />
+                        <p className="post-edit-hint">HTML 소스로 편집됩니다. 레이아웃(표·인포그래픽 등)이 있는 글은 태그·스타일을 유지한 채 수정하세요.</p>
+                      </>
+                    )}
+                    <div className="post-edit-actions">
+                      <button type="button" className="nt-btn ghost" onClick={cancelEditPost} disabled={savingEdit}>{t('community.cancel')}</button>
+                      <button
+                        type="button"
+                        className="nt-btn primary"
+                        onClick={() => saveEditPost(post, idx === 0)}
+                        disabled={savingEdit || isEmptyHtml(editContent) || (idx === 0 && !editTitle.trim())}
+                      >{savingEdit ? t('community.submitting') : '저장'}</button>
+                    </div>
+
+                    {/* 리치 에디터 전환 경고 모달 */}
+                    {showRichWarn && (
+                      <div className="pe-warn-overlay" onClick={() => setShowRichWarn(false)}>
+                        <div className="pe-warn-modal" onClick={(e) => e.stopPropagation()}>
+                          <div className="pe-warn-title">⚠️ 리치 에디터로 전환</div>
+                          <p>표·인포그래픽 등 복잡한 레이아웃이 있는 글은 리치 에디터로 전환하면 <strong>레이아웃이 망가질 수 있습니다.</strong><br />단순 텍스트 글에만 사용하시길 권장합니다. 계속하시겠습니까?</p>
+                          <div className="pe-warn-actions">
+                            <button type="button" className="nt-btn ghost" onClick={() => setShowRichWarn(false)}>취소</button>
+                            <button type="button" className="nt-btn primary" onClick={() => { setEditMode('rich'); setShowRichWarn(false); }}>확인</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="post-content" onClick={handleContentNav} dangerouslySetInnerHTML={{ __html: sanitize(post.content) }} />
+                )}
 
                 {/* 답글 */}
                 <div className="comment-section">

@@ -137,6 +137,7 @@
 .community-topics-list .topic-header .header-item.last-updated-col {
   flex: 1.5; /* 최근 업데이트 컬럼 너비 조정 */
   text-align: right;
+  padding-right: 1.5rem; /* 우측 경계 여백 */
   white-space: nowrap; /* 줄바꿈 방지 */
   overflow: hidden; /* 넘치는 내용 숨김 */
   text-overflow: ellipsis; /* 넘치는 내용에 ... 표시 */
@@ -222,6 +223,7 @@
 .last-updated-col {
   flex: 1.5; /* 최근 업데이트 컬럼 너비 조정 */
   text-align: right;
+  padding-right: 1.5rem; /* 우측 경계 여백 */
   font-size: 0.9em;
   color: #94a3b8;
 }
@@ -546,3 +548,49 @@
 .topic-card.pinned .topic-icon::before { content: '📌'; }
 .topic-card.pinned .topic-icon { font-size: 0; }
 .topic-card.pinned .topic-icon::before { font-size: 1.2rem; }
+
+/* === 모바일: 커뮤니티 리스트 카드 세로 스택(조밀함 해소) === */
+@media (max-width: 680px) {
+  /* 데스크톱 테이블 헤더 숨김 */
+  .community-topics-list .topic-header { display: none !important; }
+  .community-topics-list { padding: 0.5rem 0.9rem 1rem; }
+
+  .topic-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "icon details details"
+      "foot foot    posts";
+    align-items: start;
+    column-gap: 0.6rem;
+    row-gap: 0.4rem;
+    padding: 0.95rem 0.2rem;
+  }
+  .topic-icon-col { grid-area: icon; width: auto; font-size: 1.2em; padding-top: 0.1rem; }
+  .topic-details-col { grid-area: details; flex: none; padding-right: 0; min-width: 0; }
+  .topic-title { font-size: 1rem; line-height: 1.45; margin-bottom: 0.4rem; word-break: break-word; }
+
+  .topic-pagination { display: block; margin: 0 0 0.1rem; }
+  .topic-pagination .page-number { display: inline-block; margin: 0 0.35rem 0.35rem 0; white-space: nowrap; }
+
+  .topic-meta { font-size: 0.8em; margin-top: 0.25rem; line-height: 1.5; }
+
+  /* 하단 메타 바: 최근활동(좌) · 게시글 수(우) */
+  .last-updated-col {
+    grid-area: foot;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.15rem 0.5rem;
+    text-align: left; font-size: 0.78em; margin-top: 0.2rem;
+    padding-top: 0.55rem; padding-right: 0; border-top: 1px dashed #232b3d;
+  }
+  .last-updated-col .last-updated-time { margin: 0; }
+  .last-updated-col .last-updated-time::after { content: '·'; margin-left: 0.5rem; color: #475569; }
+  .last-updated-col .last-updated-author { color: #6366f1; }
+
+  .posts-col {
+    grid-area: posts; align-self: stretch; display: flex; align-items: center; justify-content: flex-end;
+    font-size: 0.82em; white-space: nowrap; padding-top: 0.55rem; border-top: 1px dashed #232b3d;
+  }
+  .posts-col::before { content: '💬 '; margin-right: 0.15rem; }
+
+  .topic-card.pinned { padding-left: 0.6rem; }
+}

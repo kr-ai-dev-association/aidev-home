@@ -111,6 +111,8 @@ export default {
     orgName: 'Korea AI Developers Cooperative',
     address: 'Address: 5F Deoksan Bldg, 16 Samseong-ro 86-gil, Gangnam-gu, Seoul',
     email: 'Email: tonymustbegreat@gmail.com',
+    privacy: 'Privacy Policy',
+    terms: 'Terms of Service',
   },
   authPage: {
     loginTitle: 'Log in',
@@ -153,6 +155,10 @@ export default {
     submit: 'Sign up',
     googleVerb: '{verb} with Google',
     githubVerb: '{verb} with GitHub',
+    inAppTitle: 'Google sign-in is restricted in in-app browsers',
+    inAppDesc: 'In-app browsers (KakaoTalk, Instagram, etc.) block Google sign-in for security reasons. Open this page in Chrome or Safari (menu ⋮ → Open in browser) and try again.',
+    inAppCopy: '🔗 Copy link',
+    inAppCopied: '✓ Copied — paste into your browser',
     authError: 'Authentication error: {msg}',
     saveError: 'Error saving registration info: {msg}',
     privacyText: `[Consent to Collection & Use of Personal Information]

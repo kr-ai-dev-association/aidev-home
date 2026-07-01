@@ -7,7 +7,7 @@ import { TIER_BADGES, EXPERT_FIELDS, expertField, fetchExpertBadges } from '../l
 import { useI18n } from '../i18n/I18nProvider';
 import './ProfilePage.css';
 import { supabase } from '../lib/supabase';
-import profilePlaceholder from '../assets/profile-placeholder.png';
+import Avatar from './Avatar';
 import youtubeIcon from '../assets/youtube_icon.png';
 import linkedInIcon from '../assets/LinkedIn_icon.png';
 import instagramIcon from '../assets/Instagram_icon.png';
@@ -204,6 +204,9 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
 
   // 보기용 데이터 (읽기 전용이면 조회한 대상 프로필, 아니면 본인 프로필)
   const v = readOnly ? (fetchedProfile || viewProfileFallback || {}) : profile;
+  // 대상의 수퍼관리자/관리자 여부 (수퍼관리자=왕관 아바타 강제, 관리자=왕관 오버레이)
+  const subjIsSuper = (v?.email || (!readOnly && user?.email)) === 'tony@banya.ai';
+  const subjIsAdmin = !!v?.is_admin;
   const skills = Array.isArray(v.skills) ? v.skills : [];
   const projects = (Array.isArray(v.projects) ? v.projects : []).map((p) => ({
     ...p,
@@ -224,7 +227,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
           </div>
 
           <div className="pf-avatar-edit">
-            <img src={form.avatar_url || profilePlaceholder} alt={t('profilePage.avatarAlt')} className="pf-avatar-preview" />
+            <Avatar src={form.avatar_url} isSuperAdmin={subjIsSuper} isAdmin={subjIsAdmin} size={96} className="pf-avatar-preview" alt={t('profilePage.avatarAlt')} />
             <div className="pf-avatar-actions">
               <label className="pf-btn ghost">
                 {uploadingAvatar ? t('profilePage.uploading') : t('profilePage.changeImage')}
@@ -325,7 +328,7 @@ function ProfilePage({ user, profile, onProfileUpdated, viewUserId = null, viewP
           </div>
         )}
         <div className="profile-avatar-wrapper">
-          <img src={v.avatar_url || profilePlaceholder} alt={t('profilePage.avatarWrapperAlt')} className="profile-avatar" />
+          <Avatar src={v.avatar_url} isSuperAdmin={subjIsSuper} isAdmin={subjIsAdmin} size={120} className="profile-avatar" alt={t('profilePage.avatarWrapperAlt')} />
           {v.status && (
             <div className="profile-status"><span className="status-dot available"></span> {v.status}</div>
           )}

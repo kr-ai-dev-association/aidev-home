@@ -265,6 +265,9 @@
 }
 
 .profile-dropdown li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   padding: 0.6rem 0.9rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -273,6 +276,16 @@
   white-space: nowrap;
   cursor: pointer;
 }
+.profile-dropdown .menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.profile-dropdown .menu-icon svg { display: block; }
 
 .profile-dropdown li:hover {
   background: rgba(99, 102, 241, 0.18);
@@ -1222,13 +1235,14 @@ ul, ol {
     padding: 1.5rem 1rem;
   }
   .footer-content {
-    flex-direction: column; /* 모바일에서는 세로 정렬 유지 */
+    flex-direction: column; /* 모바일에서는 세로 정렬 */
     gap: 0.5rem;
-    align-items: flex-start; /* 모바일에서도 좌측 정렬 유지 */
+    align-items: center; /* 모바일에서 가운데 정렬 */
+    text-align: center;
   }
   .footer-info p {
     font-size: 0.9em;
-    text-align: left; /* 모바일에서도 좌측 정렬 유지 */
+    text-align: center; /* 모바일에서 가운데 정렬 */
   }
 
   /* Responsive adjustments for AboutPage */
@@ -1334,7 +1348,7 @@ ul, ol {
   }
   .footer-info p {
     font-size: 0.85em;
-    text-align: left; /* 모바일에서도 좌측 정렬 유지 */
+    text-align: center; /* 모바일에서 가운데 정렬 */
   }
 
   /* Responsive adjustments for AboutPage */
@@ -3254,3 +3268,32 @@ ul, ol {
 @import './components/CommunityPage.css';
 /* JobDetailPage.css import */
 @import './components/JobDetailPage.css';
+/* 푸터 법적 고지 링크 */
+.footer-links { margin-top: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; flex-wrap: wrap; }
+.footer-links button { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.85rem; padding: 0; }
+.footer-links button:hover { color: #67e8f9; text-decoration: underline; }
+.footer-sep { color: #475569; }
+
+/* 인앱 브라우저 로그인 제한 안내 */
+.inapp-warn {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.inapp-warn-title { font-weight: 800; color: #fca5a5; font-size: 0.92rem; margin-bottom: 0.35rem; }
+.inapp-warn p { margin: 0 0 0.7rem; color: #e2e8f0; font-size: 0.85rem; line-height: 1.6; }
+.inapp-copy-btn {
+  background: linear-gradient(135deg, #6366f1, #22d3ee); color: #08111f; border: none;
+  border-radius: 8px; padding: 0.5rem 0.9rem; font-weight: 800; font-size: 0.85rem; cursor: pointer; width: 100%;
+}
+.inapp-copy-btn:hover { filter: brightness(1.08); }
+
+/* 회원현황 대시보드 이름 → 프로필 링크 */
+.admin-name-btn {
+  background: none; border: none; padding: 0; margin: 0; font: inherit; cursor: pointer;
+  color: #a5b4fc; font-weight: 600; text-align: left;
+}
+.admin-name-btn:hover { color: #67e8f9; text-decoration: underline; }
