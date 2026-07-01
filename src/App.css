@@ -982,6 +982,15 @@ ul, ol {
     padding: 1rem;
   }
 
+  /* 모바일 메뉴 열림: 헤더를 뷰포트 높이로 제한하고 내부 스크롤을 준다.
+     (배경 body 스크롤은 JS에서 잠금 → 로그인 등 하단 항목까지 스크롤로 접근 가능) */
+  .main-header.mobile-menu-open {
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .header-left {
     flex-direction: column; /* 로고와 네비게이션을 세로로 정렬 */
     align-items: flex-start;
@@ -1044,7 +1053,7 @@ ul, ol {
   }
 
   .main-nav-mobile-open {
-    max-height: 720px; /* 메뉴 항목 + 유틸리티(로그인/회원가입)까지 펼쳐질 수 있도록 */
+    max-height: 2000px; /* 항목이 많아도 잘리지 않도록 충분히 크게(헤더가 내부 스크롤 처리) */
     opacity: 1;
     padding-top: 0.5rem; /* 메뉴 열릴 때 상단 패딩 추가 */
     padding-bottom: 0.25rem;

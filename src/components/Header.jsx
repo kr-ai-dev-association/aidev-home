@@ -27,6 +27,22 @@ function Header({ isLoggedIn, isAdmin, isMember, isSuperAdmin = false, coins = 0
     };
   }, []); // 빈 배열은 이 효과가 마운트 시 한 번 실행되고 언마운트 시 정리됨을 의미
 
+  // 모바일 메뉴가 열리면 배경 스크롤을 잠가 메뉴 내부 스크롤만 동작하도록 한다.
+  // (일부 모바일 브라우저는 body 만으로 부족해 html(documentElement)까지 함께 잠근다.)
+  useEffect(() => {
+    const lock = isMobile && isMobileMenuOpen;
+    if (lock) {
+      const prevBody = document.body.style.overflow;
+      const prevHtml = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevBody;
+        document.documentElement.style.overflow = prevHtml;
+      };
+    }
+  }, [isMobile, isMobileMenuOpen]);
+
   const handleLogoClick = () => {
     onNavigate('home', null); // 항상 홈 페이지로 이동하며 스크롤 타겟 초기화 (상단으로 이동)
     if (isMobileMenuOpen) { // 모바일 메뉴가 열려있었다면 닫기
@@ -47,7 +63,7 @@ function Header({ isLoggedIn, isAdmin, isMember, isSuperAdmin = false, coins = 0
   };
 
   return (
-    <header className="main-header">
+    <header className={`main-header ${isMobile && isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
       <div className="header-left">
         <h1 className="logo" onClick={handleLogoClick} aria-label="한국인공지능개발자 협동조합 홈으로">
           <Logo />
