@@ -158,6 +158,14 @@ function VotePage({ user, profile, isMember, isSuperAdmin, isLoggedIn, onNavigat
     load();
   };
 
+  const removeVote = async (v) => {
+    if (!window.confirm(t('vote.deleteConfirm', { title: v.title }))) return;
+    const { error } = await supabase.rpc('delete_vote', { p_vote_id: v.id });
+    if (error) { alert(t('vote.deleteError', { message: error.message })); return; }
+    if (editingId === v.id) cancelEdit();
+    load();
+  };
+
   const cast = async (voteId, choice) => {
     if (castingId) return;
     setCastingId(voteId);
@@ -184,6 +192,9 @@ function VotePage({ user, profile, isMember, isSuperAdmin, isLoggedIn, onNavigat
           )}
           {isSuperAdmin && (
             <button type="button" className="vote-edit-btn" onClick={() => startEdit(v)} title={t('vote.editAgendaTip')}>{t('vote.editAgenda')}</button>
+          )}
+          {isSuperAdmin && (
+            <button type="button" className="vote-delete-btn" onClick={() => removeVote(v)} title={t('vote.deleteAgendaTip')}>{t('vote.deleteAgenda')}</button>
           )}
         </div>
         {v.content && <div className="vote-content" dangerouslySetInnerHTML={{ __html: sanitize(v.content) }} />}

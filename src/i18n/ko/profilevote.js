@@ -97,6 +97,10 @@ export default {
     anonNote: '※ 모든 투표는 익명으로 집계됩니다.',
 
     editAgenda: '✏️ 수정',
+    deleteAgenda: '🗑 삭제',
+    deleteAgendaTip: '의제 삭제',
+    deleteConfirm: '"{title}" 의제를 삭제하시겠습니까? 관련 투표 기록도 모두 삭제되며 되돌릴 수 없습니다.',
+    deleteError: '의제 삭제 오류: {message}',
     editAgendaTitle: '의제 수정',
     closed: '종료',
     closedPublished: ' · 공지됨',

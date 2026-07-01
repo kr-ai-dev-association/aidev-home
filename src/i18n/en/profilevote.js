@@ -97,6 +97,10 @@ export default {
     anonNote: '※ All votes are tallied anonymously.',
 
     editAgenda: '✏️ Edit',
+    deleteAgenda: '🗑 Delete',
+    deleteAgendaTip: 'Delete agenda',
+    deleteConfirm: 'Delete the agenda "{title}"? All related vote records will also be deleted and this cannot be undone.',
+    deleteError: 'Agenda deletion error: {message}',
     editAgendaTitle: 'Edit agenda',
     closed: 'Closed',
     closedPublished: ' · Announced',
