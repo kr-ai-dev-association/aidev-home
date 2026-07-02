@@ -1,7 +1,7 @@
 import { next } from '@vercel/edge';
 
 export const config = {
-  matcher: ['/community/topic/:id*', '/employment/job/:id*'],
+  matcher: ['/', '/community/topic/:id*', '/employment/job/:id*'],
 };
 
 // 주의: 'kakaotalk' 전체가 아니라 스크랩 봇 토큰 'kakaotalk-scrap' 만 매칭한다.
@@ -101,6 +101,64 @@ export default async function middleware(request: Request): Promise<Response> {
 
   const origin = url.origin;
   const ogBase = `${origin}/api/og`;
+
+  // 홈("/") — 브랜드/조직 정보를 서버렌더로 제공 (SPA 미실행 크롤러가 브랜드를 즉시 인식)
+  if (url.pathname === '/') {
+    const title = '한국인공지능개발자 협동조합';
+    const desc =
+      '한국인공지능개발자 협동조합(인공지능개발자협동조합) 공식 플랫폼 — 바이브코딩 생태계 확산과 현업 AI 개발자 권익 보호를 위한 취업·커뮤니티·강의·에이전트 평가 서비스.';
+    const image = `${ogBase}?title=${encodeURIComponent(title)}`;
+    const jsonld = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: title,
+        alternateName: ['인공지능개발자협동조합', 'AI 개발자 협동조합'],
+        url: `${origin}/`,
+        logo: `${origin}/favicon-512.png`,
+        description: desc,
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: title,
+        url: `${origin}/`,
+      },
+    ];
+    const html = `<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)} | 인공지능개발자협동조합</title>
+<meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${origin}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${SITE}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${origin}/">
+<meta property="og:image" content="${esc(image)}">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">${JSON.stringify(jsonld)}</script>
+</head><body>
+<main>
+<h1>${esc(title)}</h1>
+<p>${esc(desc)}</p>
+<nav><ul>
+<li><a href="${origin}/about">협회 소개</a></li>
+<li><a href="${origin}/community">커뮤니티</a></li>
+<li><a href="${origin}/employment">취업</a></li>
+<li><a href="${origin}/courses">강의</a></li>
+<li><a href="${origin}/agenteval">에이전트 평가</a></li>
+</ul></nav>
+</main>
+</body></html>`;
+    return new Response(html, {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300, s-maxage=600' },
+    });
+  }
 
   // /community/topic/:id
   let m = url.pathname.match(/^\/community\/topic\/([0-9a-f-]{36})/i);
